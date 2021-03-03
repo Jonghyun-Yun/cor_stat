@@ -1,0 +1,5654 @@
+#+TITLE: Cost Overrun Codes
+# #+SUBTITLE: (Press ~?~ for help; ~n~ and ~p~ for next and previous slide)
+#+AUTHOR: Jonghyun Yun
+#+EMAIL: jonghyun.yun@gmail.com
+
+# https://orgmode.org/manual/Export-Settings.html#Export-Settings
+#+OPTIONS: H:4 num:nil toc:nil pri:t ::t |:t f:t <:t -:t \n:nil ':t ^:{}
+#+OPTIONS: d:nil todo:t tags:not-in-toc tex:t
+
+#+STARTUP: overview inlineimages logdone
+
+# comment out for reveal.js
+# #+SETUPFILE: ~/setup/my-theme-readtheorg.setup
+
+# #+PROPERTY: header-args :eval never-export
+#+PROPERTY: header-args:R :exports both :noweb yes
+#+property: header-args:matlab :session *MATLAB* :exports results :results output :noweb yes
+
+* OrgMode                                                          :noexport:
+#+INFOJS_OPT: view:nil toc:t ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+
+** Reveal
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+# slide/none/fade/convex/concave/zoom
+#+REVEAL_TRANS: slide
+# solarized/black/white/league/sky/beige/simple/serif/blood/night/moon
+#+REVEAL_THEME: solarized
+#+REVEAL_HLEVEL: 2
+#+REVEAL_PLUGINS: (highlight search zoom)
+#+REVEAL_EXTRA_CSS: ./reveal_firago.css
+
+#+OPTIONS: reveal_history:t reveal_fragmentinurl:t
+#+OPTIONS: reveal_mousewheel:t reveal_inter_presentation_links:t
+#+OPTIONS: reveal_width:1400 reveal_height:1000
+#+REVEAL_TITLE_SLIDE: <h2 class="title">%t</h2><h4 class="subtitle">%s</h4><h3 class="author">%a</h3><h3 class="date">%d</h3>
+
+** Hugo
+#+HUGO_BASE_DIR: ~/website
+#+HUGO_AUTO_SET_LASTMOD: t
+#+HUGO_DATE_FORMAT: %Y-%m-%dT%T%z
+#+HUGO_FRONT_MATTER_FORMAT: toml
+
+#+HUGO_SECTION:
+#+HUGO_BUNDLE:
+#+HUGO_CATEGORIES:
+
+#+HUGO_EXPORT_RMARKDOWN:
+
+** HTML
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:t
+
+# #+HTML_MATHJAX: align: left indent: 5em tagside: right
+# #+HTML_MATHJAX: scale: 85 font: Asana-Math
+# MATHJAX font: MathJax TeX (default) Asana-Math Neo-Euler Latin-Modern Gyre-Pagella Gyre-Termes
+# #+OPTIONS: tex:dvipng tex:dvisvgm # use LaTeX to generate images for equations
+
+#+HTML_HEAD:  <!-- Global site tag (gtag.js) - Google Analytics -->
+#+HTML_HEAD:<script async src="https://www.googletagmanager.com/gtag/js?id=UA-128966866-1"></script>
+#+HTML_HEAD:<script>
+#+HTML_HEAD:  window.dataLayer = window.dataLayer || [];
+#+HTML_HEAD:  function gtag(){dataLayer.push(arguments);}
+#+HTML_HEAD:  gtag('js', new Date());
+#+HTML_HEAD:
+#+HTML_HEAD:  gtag('config', 'UA-128966866-1');
+#+HTML_HEAD:</script>
+
+# #+HTML_LINK_HOME: http://wweb.uta.edu/faculty/yunj/index.html
+# #+HTML_LINK_UP: http://wweb.uta.edu/faculty/yunj/index.html
+
+# https://scripter.co/latex-in-html/
+#+macro: latex @@html:<span class="latex">L<sup>a</sup>T<sub>e</sub>X</span>@@
+
+#+BEGIN_SRC emacs-lisp :eval no :results silent :exports none :tangle no
+(setq org-html-htmlize-output-type 'css)
+(setq org-html-htmlize-output-type 'inline-css)
+#+END_SRC
+
+#+begin_src emacs-lisp ::eval no results silent :exports none :tangle no
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+(add-hook 'org-mode-hook 'org-display-inline-images)
+#+end_src
+* LaTeX Header                                                     :noexport:
+#+LATEX_CLASS: no-article
+#+LATEX_CLASS_OPTIONS: [letterpaper,11pt]
+
+#+LATEX_COMPILER: xelatex
+
+#+LATEX_HEADER: %% Margins
+#+LATEX_HEADER: \usepackage{geometry}
+#+LATEX_HEADER: \geometry{verbose,margin=1.5in}
+#+LATEX_HEADER: \setlength\parindent{0pt}
+#+LATEX_HEADER: \linespread{1.1}
+
+#+LATEX_HEADER: %% Typesetting
+#+LATEX_HEADER: \usepackage[stretch=10,babel=true]{microtype} % better typesetting. works w/ pdftex, not latex.
+#+LATEX_HEADER: %% \usepackage[english]{babel} % manages hyphenation patterns
+#+LATEX_HEADER: %% \usepackage{polyglossia} \setdefaultlanguage{english} % babel replacement for XeLaTex.
+#+LATEX_HEADER: \usepackage{csquotes} % Context sensitive quotation facilities
+
+#+LaTeX_HEADER: %% Biblio
+#+LATEX_HEADER: \usepackage[natbib=true, sorting=ynt, backend=biber, minbibnames=3, maxbibnames=3, doi=false, isbn=false, style=authoryear]{biblatex}
+#+LATEX_HEADER: \addbibresource{~/Zotero/myref.bib}
+#+LATEX_HEADER: \AtEveryBibitem{\clearfield{note}}
+#+LATEX_HEADER: \AtEveryBibitem{\clearfield{month}}
+#+LATEX_HEADER: \AtEveryBibitem{\clearfield{day}}
+#+LATEX_HEADER: \AtEveryBibitem{\clearfield{eprint}}
+
+#+LATEX_HEADER: %% Math
+#+LATEX_HEADER: \usepackage{amsmath} % \declareMathOperator
+# #+LATEX_HEADER: \usepackage{mathabx} % \widebar
+# #+LATEX_HEADER: \usepackage{amssymb}
+# #+LATEX_HEADER: \usepackage{amsbsy}  %\boldsymbol %\pbm (faked bold)
+# #+LATEX_HEADER: \usepackage{wasysym}
+#+LATEX_HEADER: \usepackage[mathbf=sym]{unicode-math}
+#+LATEX_HEADER: %% \usepackage{cool} % for math operators & symbols e.g. partial diff
+#+LATEX_HEADER: \usepackage{mathtools} % for math aligning & spacing
+#+LATEX_HEADER: \usepackage{physics} % derivative, dx, operators
+#+LATEX_HEADER: \usepackage{cancel}
+#+LATEX_HEADER: \allowdisplaybreaks % Allow new page within align
+
+#+LATEX_HEADER: %% Font
+# #+LATEX_HEADER: \usepackage{lmodern}
+# #+LATEX_HEADER: \setmathfont{latinmodern-math.otf}
+#+LATEX_HEADER: \setmainfont{XITS}
+#+LATEX_HEADER: \setmathfont{XITS Math} % \boldsymbol works
+#+LATEX_HEADER: \setmathfont[range={\mathcal,\mathbfcal},StylisticSet=1]{XITS Math}
+
+#+LATEX_HEADER: \usepackage[unicode,colorlinks]{hyperref}
+# #+LATEX_HEADER: \PassOptionsToPackage{unicode,colorlinks=true}{hyperref}
+
+# #+LATEX_HEADER: \usepackage[unicode]{hyperref}
+# #+LATEX_HEADER: \PassOptionsToPackage{unicode}{hyperref}
+# #+LATEX_HEADER: \hypersetup{colorlinks = true}
+# #+LATEX_HEADER:     linkcolor={red!50!black},
+# #+LATEX_HEADER:     citecolor={blue!50!black},
+# #+LATEX_HEADER:     urlcolor={blue!80!black}}
+* Prelim analysis
+
+#+BEGIN_SRC python
+import pandas as pd
+data = pd.io.stata.read_stata('01_Socio-Geographic Factor Impacts.dta')
+data.to_csv('01_Socio-Geographic Factor Impacts.csv')
+#+END_SRC
+
+#+BEGIN_SRC R
+library('magrittr')
+library(dplyr)
+dpro <- readr::read_csv(file = "04_Raw_ConstFDOT.csv", col_names = T) %>% data.frame()
+names(dpro) = make.names(names(dpro))
+
+dpro = dpro %>% filter(Work.Type == "3R") %>%
+   filter(Project.Work.Type.Description %in% c( "Reconstruction", "Resurfacing", "Widening & Resurfacing" )) %>%
+   filter(Status %in% c("FINAL PAYMENT AUTHORIZED","FINAL PAYMENT MADE")) %>%
+   filter(Longitude < 1000000)
+
+## dpro = dpro %>% filter(Longitude < 1000000)
+
+dsoc = readr::read_csv(file = "01_Socio-Geographic Factor Impacts.csv", col_names = T)
+gis = readr::read_csv(file = "GIS.csv", col_names = t)
+names(gis) = make.names(names(gis))
+#+END_SRC
+
+#+RESULTS:
+: Error: '04_Raw_ConstFDOT.csv' does not exist in current working directory ('/Users/yunj/OneDrive/workspace/cor-code').
+: Error: Problem with `filter()` input `..1`.
+: [31m✖[39m object 'Work.Type' not found
+: [34mℹ[39m Input `..1` is `Work.Type == "3R"`.
+: [90mRun `rlang::last_error()` to see where the error occurred.[39m
+: Error: '01_Socio-Geographic Factor Impacts.csv' does not exist in current working directory ('/Users/yunj/OneDrive/workspace/cor-code').
+: Error: 'GIS.csv' does not exist in current working directory ('/Users/yunj/OneDrive/workspace/cor-code').
+: Error in make.names(names(gis)) : object 'gis' not found
+
+
+#+BEGIN_SRC R
+library('magrittr')
+library(dplyr)
+dd <- readr::read_csv(file = "data/Final_3R.csv", col_names = T) %>% data.frame()
+names(dd) = make.names(names(dd))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+
+[36m──[39m [1m[1mColumn specification[1m[22m [36m─────────────────────────────────────────────[39m
+cols(
+  .default = col_double(),
+  Contract_ID = [31mcol_character()[39m,
+  Cost_Overruns_Rate = [31mcol_character()[39m,
+  Schedule_Overrun_Rate = [31mcol_character()[39m,
+  TRAVELTIME = [31mcol_character()[39m,
+  Original_Contract_Amount = [32mcol_number()[39m,
+  Project_Type_Description = [31mcol_character()[39m,
+  County = [31mcol_character()[39m,
+  Contract_ID_X = [31mcol_character()[39m,
+  Contract_ID_Y = [31mcol_character()[39m,
+  Urban_Rural = [31mcol_character()[39m,
+  Primary_County_Description = [31mcol_character()[39m,
+  Work_Mix_Description = [31mcol_character()[39m,
+  Project_Work_Type_Description = [31mcol_character()[39m,
+  Status = [31mcol_character()[39m
+)
+[36mℹ[39m Use [30m[47m[30m[47m`spec()`[47m[30m[49m[39m for the full column specifications.
+
+Warning message:
+Duplicated column names deduplicated: 'District' =
+'District_1' [30]
+#+end_example
+
+#+BEGIN_SRC R
+## FIX: long and lat are switched.
+dd = dd %>%
+  mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
+  mutate(travel_time = as.numeric(TRAVELTIME)) %>%
+  mutate(SOR = (Current_Contract_Days - Original_Contract_Days) / Original_Contract_Days) %>%
+  mutate(psize = as.numeric(cut(Original_Contract_Amount, c(0, 1000000, 5000000, Inf)))) %>%
+  mutate(lcor = log(Current_Contract_Amount / Original_Contract_Amount)) %>%
+  mutate(long = Latitude_GIS, lat = Longitude_GIS)
+dd = na.omit(dd)
+#+END_SRC
+
+#+RESULTS:
+: Warning messages:
+: 1: Problem with `mutate()` input `travel_time`.
+: [34mℹ[39m NAs introduced by coercion
+: [34mℹ[39m Input `travel_time` is `as.numeric(TRAVELTIME)`.
+: 2: In mask$eval_all_mutate(dots[[i]]) : NAs introduced by coercion
+
+#+BEGIN_SRC R
+mm = lm(lcor ~ travel_time + AADT + MIncome + PopDensity + log(Original_Contract_Amount) + Original_Contract_Days, data = dd)
+summary(mm)
+#+END_SRC
+
+#+BEGIN_SRC R
+df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
+w = 1/as.matrix(dist(df[,-1]))
+#+END_SRC
+
+#+BEGIN_SRC R
+library(ape)
+x = df[,1]
+diag(w) <- 0
+##Moran.I(x, w)
+##Moran.I(x, w, alt = "l")
+Moran.I(x, w, alt = "g")
+##Moran.I(x, w, scaled = TRUE) # usualy the same
+#+END_SRC
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+BEGIN_SRC R
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+
+gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA) + # get the state border back on top
+  geom_point(data = df, mapping = aes(x = longitude, y = latitude, group = NULL, colour = error, fill = error), size = 2, alpha = 0.5)+
+  scale_colour_gradient2() +
+  scale_fill_gradient2() +
+  theme_bw() +
+  ditch_the_axes
+#+END_SRC
+
+#+BEGIN_SRC R
+library(gstat)
+library(sp)
+library(nlme)
+
+coordinates(df)<-c('longitude','latitude')
+
+var.mod<-variogram(error ~ 1,data=df,alpha=c(0,45,90,135))
+plot(var.mod)
+#+END_SRC
+
+** FDOT 2020 data
+- [[file:PJT_Data_for_GIS_Join.csv]] & [[file:GIS_Join.csv]]
+  + no socio-economic factors
+  + no coordinates
+  + 128 distinct vendor (out of 368 cases)
+
+    Data is not ready for the analysis? or some variables have discarded during CSV conversion?
+
+#+BEGIN_SRC R
+library('magrittr')
+library(dplyr)
+dd <- readr::read_csv(file = "PJT_Data_for_GIS_Join.csv", col_names = T) %>% data.frame()
+#+END_SRC
+
+#+BEGIN_SRC R
+dpro = dpro %>% filter(Work.Type == "3R") %>%
+   filter(Project.Work.Type.Description %in% c( "Reconstruction", "Resurfacing", "Widening & Resurfacing" )) %>%
+   filter(Status %in% c("FINAL PAYMENT AUTHORIZED","FINAL PAYMENT MADE")) %>%
+   filter(Longitude < 1000000)
+
+## dpro = dpro %>% filter(Longitude < 1000000)
+
+dsoc = readr::read_csv(file = "01_Socio-Geographic Factor Impacts.csv", col_names = T)
+gis = readr::read_csv(file = "GIS.csv", col_names = T)
+names(gis) = make.names(names(gis))
+#+END_SRC
+
+
+#+BEGIN_SRC R
+library('magrittr')
+library(dplyr)
+dd <- readr::read_csv(file = "Final_3R.csv", col_names = T) %>% data.frame()
+names(dd) = make.names(names(dd))
+#+END_SRC
+
+#+BEGIN_SRC R
+## FIX: long and lat are switched.
+dd = dd %>%
+  mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
+  mutate(travel_time = as.numeric(TRAVELTIME)) %>%
+  mutate(SOR = (Current_Contract_Days - Original_Contract_Days) / Original_Contract_Days) %>%
+  mutate(psize = as.numeric(cut(Original_Contract_Amount, c(0, 1000000, 5000000, Inf)))) %>%
+  mutate(lcor = log(Current_Contract_Amount / Original_Contract_Amount)) %>%
+  mutate(long = Latitude_GIS, lat = Longitude_GIS)
+dd = na.omit(dd)
+#+END_SRC
+
+#+BEGIN_SRC R
+mm = lm(lcor ~ travel_time + AADT + MIncome + PopDensity + log(Original_Contract_Amount) + Original_Contract_Days, data = dd)
+summary(mm)
+#+END_SR
+
+#+BEGIN_SRC R
+df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
+w = 1/as.matrix(dist(df[,-1]))
+#+END_SRC
+
+#+BEGIN_SRC R
+library(ape)
+x = df[,1]
+diag(w) <- 0
+##Moran.I(x, w)
+##Moran.I(x, w, alt = "l")
+Moran.I(x, w, alt = "g")
+##Moran.I(x, w, scaled = TRUE) # usualy the same
+#+END_SRC
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+BEGIN_SRC R
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+
+gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA) + # get the state border back on top
+  geom_point(data = df, mapping = aes(x = longitude, y = latitude, group = NULL, colour = error, fill = error), size = 2, alpha = 0.5)+
+  scale_colour_gradient2() +
+  scale_fill_gradient2() +
+  theme_bw() +
+  ditch_the_axes
+#+END_SRC
+
+#+BEGIN_SRC R
+library(gstat)
+library(sp)
+library(nlme)
+
+coordinates(df)<-c('longitude','latitude')
+
+var.mod<-variogram(error ~ 1,data=df,alpha=c(0,45,90,135))
+plot(var.mod)
+#+END_SRC
+
+* FDOT_10mi_Coordinates
+#+BEGIN_SRC R 
+library('magrittr')
+library(dplyr)
+dpro <- readr::read_csv(file = "FDOT_10mi_Coordinates.csv", col_names = T) %>% data.frame()
+names(dpro) = make.names(names(dpro))
+dpro$railcross[is.na(dpro$railcross)] = 0
+dpro$bridge[is.na(dpro$bridge)] = 0
+dpro <- na.omit(dpro)
+#+END_SRC
+
+#+BEGIN_SRC R 
+## FIX: long and lat are switched.
+## dd = dd %>%
+##   mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
+##   mutate(travel_time = as.numeric(TRAVELTIME)) %>%
+##   mutate(SOR = (Current_Contract_Days - Original_Contract_Days) / Original_Contract_Days) %>%
+##   mutate(psize = as.numeric(cut(Original_Contract_Amount, c(0, 1000000, 5000000, Inf)))) %>%
+##   mutate(lcor = log(Current_Contract_Amount / Original_Contract_Amount)) %>%
+##   mutate(long = Latitude_GIS, lat = Longitude_GIS)
+## dd = na.omit(dd)
+
+dd = dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
+  mutate(mov_unemp = 0.6*unemp_2019 + 0.3*unemp_2018 + 0.1*unemp_2017 ) %>%
+  mutate(mov_avg_temp = 0.6*avg_temp_2019 + 0.3*avg_temp_2018 + 0.1*avg_temp_2017 ) %>%
+  mutate(mov_max_temp = 0.6*max_temp_2019 + 0.3*max_temp_2018 + 0.1*max_temp_2017 ) %>%
+  mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
+  mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
+#+END_SRC
+
+#+BEGIN_SRC R 
+cnames = names(dd)
+
+no_drop = !grepl("gdp_.", cnames) &
+ !grepl("prec_.", cnames) &
+ !grepl("max_temp_.", cnames) &
+ !grepl("avg_temp_.", cnames) &
+ !grepl("unemp_.", cnames)
+
+## df = dd[no_drop] %>% filter(pjt_type=="X3-Resurfacing")
+df = dd[no_drop]
+df$logy = log(df$modified_amounts) - log(df$orig_amounts)
+#+END_SRC
+
+#+begin_src R 
+df$access_con[df$access_con != 3] = 0
+df$pjt_type = as.factor(df$pjt_type)
+df$road_side = as.factor(df$road_side)
+df$funclass = as.factor(df$funclass)
+#+end_src
+
+#+BEGIN_SRC R
+mm = lm(logy ~ log(orig_amounts) + orig_days + aadt + aadt_truck + speedlimit + factor(access_con) + pav_cond + mov_unemp + mov_avg_temp + mov_max_temp + mov_prec + mov_gdp + poverty_below + pop_tot + comm_car_tot, data = df)
+summary(mm)
+#+END_SRC
+
+#+BEGIN_SRC R
+df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
+w = 1/as.matrix(dist(df[,-1]))
+#+END_SRC
+** GLM NET
+#+begin_src R 
+library(glmnet)
+dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts))
+x = model.matrix(~0+., dx)
+y = df$logy
+vn = colnames(x)
+#+end_src
+
+#+RESULTS:
+: Error: Can't subset columns that don't exist.
+: [31m✖[39m Column `pjt_id` doesn't exist.
+: [90mRun `rlang::last_error()` to see where the error occurred.[39m
+
+*** The LASSO
+
+We set $\alpha=1$ for the LASSO. The implementation of the LASSO in R is
+quite similar to those for the ridge.
+
+#+BEGIN_SRC R
+    cvlasso = cv.glmnet(X,y,alpha=1)
+    cvlasso$lambda.min
+    cvlasso$lambda.1se
+    plot(cvlasso)
+
+    lmlasso = glmnet(X, y, alpha=1)
+    vnat = coef(lmlasso)
+    vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+    plot(lmlasso, xvar = "lambda", xlim=c(-7,0))
+    axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+    abline(v = log(cvlasso$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+RESULTS:
+: [1] 0.002188715
+: [1] 0.2089234
+
+For the selected model, we have a *sparse* estimate of a coefficient vector. Which predictors are chosen by the model?
+
+#+BEGIN_SRC R
+lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se)
+coef(lmlasso)
+pred = predict(lmlasso,newx=X)
+plot(y, pred)
+#+END_SRC
+
+*** The elastic net
+
+#+BEGIN_SRC R
+aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
+lena = length(aseq)
+
+# perform CV for each alpha in the sequence
+cv = list()
+mcvm = numeric(lena)
+## randomly choose fold ID for each observation
+foldid=sample(1:10,size=length(y),replace=TRUE)
+for(k in 1:lena){
+  cv[[k]] = cv.glmnet(X,y,foldid=foldid,alpha=aseq[k])
+  mcvm[k] = min(cv[[k]]$cvm)
+}
+
+picka = which.min(mcvm)
+malpha = aseq[picka] # alpha for the best model
+malpha
+cv[[picka]]$lambda.1se
+#+END_SRC
+
+Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha)
+vnat = coef(lmenet)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
+
+plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se)
+coef(lmenet)
+pred = predict(lmenet,newx=X)
+#+END_SRC
+
+** classification models
+  :PROPERTIES:
+  :CUSTOM_ID: south-african-heart-disease
+  :END:
+
+The ridge, lasso, and elastic net penalty can be used along with the
+logistic regression to build a binary or multiclass classifier. To
+implement the logistic regression using the =glmnet= package, one needs
+to specify =family="binomial"= in the option (=family="multinomial"= for the multiclass logistic model).
+
+In the =glmnet= package, a design matrix =X= should consist of numeric
+values. =famhist= is a factor variable, so we code =famhist==1 if
+present; 0 otherwise.
+
+#+BEGIN_SRC R
+y = 1 * (y > 0)
+#+END_SRC
+
+We here present the R code example for the logistic regression with the
+lasso penalty. In the cross validation, we estimate the
+misclassification error by specifying =type.measure="class"=. Some other
+error measure can be used as well (eg. deviance, AUC, etc.).
+
+#+BEGIN_SRC R
+cvlasso = cv.glmnet(X,y,alpha=1,family="binomial",type.measure="class")
+cvlasso$lambda.min
+cvlasso$lambda.1se
+plot(cvlasso)
+
+lmlasso = glmnet(X, y, alpha=1, family="binomial")
+vn = colnames(X)
+vnat = coef(lmlasso)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+plot(lmlasso, xvar = "lambda", xlim=c(-7.3,-1.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cvlasso$lambda.1se),lty="dotted")
+
+#+END_SRC
+
+The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
+
+#+BEGIN_SRC R
+lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se, family="binomial")
+coef(lmlasso)
+pred = predict(lmlasso,newx=X)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+11 x 1 sparse Matrix of class "dgCMatrix"
+                             s0
+(Intercept)       -3.004456e-01
+orig_days          1.470035e-03
+orig_amounts       2.241635e-07
+aadt               3.087146e-06
+pop_16yrover       .
+comm_pubtransport -9.886135e-02
+comm_etc           .
+comm_out_state    -4.766975e-02
+ind_agri          -8.999643e-03
+inde_ed_meds      -7.785799e-04
+mov_gdp            .
+#+end_example
+
+*** The elastic net
+    :PROPERTIES:
+    :CUSTOM_ID: the-elastic-net
+    :END:
+
+#+BEGIN_SRC R
+set.seed(1)
+aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
+lena = length(aseq)
+
+# perform CV for each alpha in the sequence
+cv = list()
+mcvm = numeric(lena)
+## randomly choose fold ID for each observation
+foldid=sample(1:10,size=length(y),replace=TRUE)
+for(k in 1:lena){
+  cv[[k]] = cv.glmnet(X,y,foldid=foldid,alpha=aseq[k], Type.measure="class")
+  mcvm[k] = min(cv[[k]]$cvm)
+}
+
+picka = which.min(mcvm)
+malpha = aseq[picka] # alpha for the best model
+malpha
+cv[[picka]]$lambda.1se
+#+END_SRC
+
+#+RESULTS:
+: [1] 1
+: [1] 0.0965884
+
+Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, family="binomial")
+vnat = coef(lmenet)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
+
+plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se, family="binomial" )
+coef(lmenet)
+pred = 1*(predict(lmenet,newx=X) > 0)
+tab = table(pred,y)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+11 x 1 sparse Matrix of class "dgCMatrix"
+                             s0
+(Intercept)       -4.515512e-01
+orig_days          3.835292e-04
+orig_amounts       5.392529e-08
+aadt               .
+pop_16yrover       .
+comm_pubtransport  .
+comm_etc           .
+comm_out_state     .
+ind_agri           .
+inde_ed_meds       .
+mov_gdp            .
+#+end_example
+
+** XGBoost
+XGBoost can be trained more efficiently using its own matrix class.
+#+begin_src R
+smxtrain = sparse.model.matrix(~.+0,xtrain)
+## smxtest = sparse.model.matrix(~.+0,outx)
+
+dtrain = xgb.DMatrix(data = smxtrain, label = ytrain)
+## dtest = xgb.DMatrix(data = smxtest, label = outy)
+#+end_src
+
+#+RESULTS:
+
+- Tuned hyperparameters of XGBoost.
+#+BEGIN_SRC R
+#default parameters
+xgb_params <- list(objective = "binary:logistic",
+                   ## booster = "gbtree",
+                   booster = "dart",
+                   max_depth = c(10),
+                   min_child_weight = c(1),
+                   gamma = c(1),
+                   colsample_bytree = c(0.9),
+                   subsample = c(0.8),
+                   eta = c(0.1)
+                   # alpha = c(0),
+                   # lambda = c(0)
+                   )
+#+END_SRC
+
+#+RESULTS:
+
+XGBoost has a CV function accepting fold indices.
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :results none
+set.seed(1)
+xgbcv <- xgb.cv(params = xgb_params,
+                weight = weights,
+                data = dtrain,
+                nrounds = 300,
+                prediction = T,
+                folds = data_folds,
+                print_every_n = 10,
+                early_stopping_rounds = 20,
+                metrics = c("logloss")
+                )
+xgb = list(prob = xgbcv$pred,
+           logloss =  wlogloss(y = ytrain, p = xgbcv$pred, w=weights),
+           best_iter = xgbcv$best_ntreelimit)
+#+END_SRC
+
+#+RESULTS:
+
+The below is to save a model trained based on the full traing data.
+#+attr_ravel: eval=T
+#+BEGIN_SRC R
+##model training
+xgb_final = xgb.train (params = xgb_params, data = dtrain, nrounds = xgb$best_iter)
+xgb_imp = xgb.importance(model = xgb_final) # use Gain for importance
+# xgb.plot.importance(importance_matrix = xgb_imp[1:40])
+xgb.save(xgb_final, 'xgb_model')
+#+END_SRC
+
+#+RESULTS:
+: [1] TRUE
+
+*** test data
+To create a meat-feature of the super learner for the test data.
+#+begin_src R
+if (TEST_SET){
+xgb_final = xgb.load('xgb_model')
+smxtest = sparse.model.matrix(~.+0,xtest)
+dtest = xgb.DMatrix(data = smxtest)
+xgb_test_prob = predict(xgb_final, dtest)
+}
+#+end_src
+
+#+RESULTS:
+
+*** random forest using xgboost                                  :noexport:
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+#+begin_src R
+rf_params = list(
+  colsample_bynode= 0.8,
+  learning_rate= 1,
+  max_depth= 10,
+  num_parallel_tree= 500,
+  objective= 'binary:logistic',
+  subsample= 0.8
+)
+#+end_src
+
+#+RESULTS:
+
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :results none
+set.seed(1)
+rfcv <- xgb.cv(params = rf_params,
+               weight = ww,
+               data = dtrain,
+               nrounds = 100,
+               prediction = T,
+               folds = data_folds,
+               print_every_n = 10,
+               early_stopping_rounds = 20,
+               metrics = c("logloss")
+                )
+#+END_SRC
+
+#+BEGIN_SRC R
+rf = list(prob = rfcv$pred, logloss = wlogloss(yy,rfcv$pred,ww), best_iter = rfcv$best_ntreelimit)
+#+END_SRC
+
+#+RESULTS:
+: Error: object 'rfcv' not found
+
+*** XgBoost                                                      :noexport:
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+#+begin_src R
+#train = cbind(xtrain,cat_to_numeric)
+#fe_train = cbind(xtrain[,-cat_var], cat_to_numeric)
+
+#train = cbind(xtrain[,-c(num_code_cat,cat_var)],cat_to_numeric,ytrain)
+train = cbind(xtrain,ytrain)
+
+smxtrain = sparse.model.matrix(ytrain~.+0,train)
+
+dtrain <- xgb.DMatrix(data = smxtrain, label = ytrain)
+# dtest <- xgb.DMatrix(data = x_test, label = y_test)
+#+end_src
+
+#+RESULTS:
+
+Specify that we want to learn a binary classification. We can choose a
+performance metric for a learner. More parameters can be
+specified below.
+
+#+BEGIN_SRC R
+#default parameters
+params <- list(objective = "binary:logistic")
+#+END_SRC
+
+#+RESULTS:
+
+=xgb.cv()= can be used for parameter tuning. The below performs ~nfold~-fold CV with
+maximum ~nrounds~ training rounds. It evaluates =metrics= every =print_every_n= training round.
+If the model doesn't improve the specified performance metric for
+=early_stopping_round=, then training will be stopped. ~stratified = T~ means CV
+rearranges the data as to ensure each fold is a good representative of the whole
+training data.
+
+#+attr_ravel: eval=T
+#+BEGIN_SRC R
+set.seed(1)
+xgbcv <- xgb.cv(params = params,
+                weight=weights,
+                data = dtrain,
+                nrounds = 1000,
+                nfold = 5, showsd = T, stratified = T, print_every_n = 10,
+                early_stopping_rounds = 50, metrics = "auc")
+
+# best iteration
+xgbcv$best_iteration
+#+END_SRC
+
+with numeric, with sparse model matrix
+#+begin_example
+[1]	train-auc:0.916909+0.002401	test-auc:0.913668+0.003691
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951534+0.000342	test-auc:0.946484+0.001509
+[21]	train-auc:0.956962+0.000407	test-auc:0.950562+0.001299
+[31]	train-auc:0.960254+0.000401	test-auc:0.952290+0.001248
+[41]	train-auc:0.962633+0.000389	test-auc:0.953159+0.001217
+[51]	train-auc:0.964356+0.000401	test-auc:0.953669+0.001196
+[61]	train-auc:0.965816+0.000430	test-auc:0.953907+0.001179
+[71]	train-auc:0.967288+0.000394	test-auc:0.954066+0.001261
+[81]	train-auc:0.968585+0.000438	test-auc:0.953960+0.001233
+[91]	train-auc:0.969693+0.000415	test-auc:0.954035+0.001206
+[101]	train-auc:0.971003+0.000320	test-auc:0.953887+0.001215
+[111]	train-auc:0.971945+0.000409	test-auc:0.953817+0.001251
+[121]	train-auc:0.972951+0.000322	test-auc:0.953808+0.001233
+Stopping. Best iteration:
+[72]	train-auc:0.967388+0.000414	test-auc:0.954074+0.001294
+[1] 72
+#+end_example
+
+with cat and numeric, with sparse model matrix
+#+begin_example
+[1]	train-auc:0.916908+0.002416	test-auc:0.913685+0.003602
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951582+0.000336	test-auc:0.946578+0.001563
+[21]	train-auc:0.957363+0.000407	test-auc:0.950768+0.001380
+[31]	train-auc:0.960659+0.000514	test-auc:0.952485+0.001162
+[41]	train-auc:0.963076+0.000589	test-auc:0.953191+0.001268
+[51]	train-auc:0.965005+0.000296	test-auc:0.953765+0.001250
+[61]	train-auc:0.966371+0.000271	test-auc:0.954033+0.001209
+[71]	train-auc:0.967621+0.000340	test-auc:0.954191+0.001235
+[81]	train-auc:0.968619+0.000412	test-auc:0.954219+0.001271
+[91]	train-auc:0.969470+0.000405	test-auc:0.954314+0.001312
+[101]	train-auc:0.970657+0.000380	test-auc:0.954335+0.001286
+[111]	train-auc:0.971589+0.000402	test-auc:0.954322+0.001277
+[121]	train-auc:0.972480+0.000261	test-auc:0.954231+0.001199
+[131]	train-auc:0.973313+0.000328	test-auc:0.954232+0.001172
+[141]	train-auc:0.973989+0.000395	test-auc:0.954189+0.001173
+Stopping. Best iteration:
+[100]	train-auc:0.970548+0.000376	test-auc:0.954352+0.001275
+[1] 100
+#+end_example
+
+with cat and numeric, no sparse model matrix
+#+begin_example
+[1]	train-auc:0.914789+0.002711	test-auc:0.912481+0.002133
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951206+0.000255	test-auc:0.946283+0.001577
+[21]	train-auc:0.956617+0.000420	test-auc:0.949964+0.001346
+[31]	train-auc:0.960167+0.000496	test-auc:0.952053+0.001336
+[41]	train-auc:0.962918+0.000513	test-auc:0.953003+0.001348
+[51]	train-auc:0.964922+0.000377	test-auc:0.953628+0.001121
+[61]	train-auc:0.966165+0.000221	test-auc:0.953868+0.001130
+[71]	train-auc:0.967425+0.000223	test-auc:0.954152+0.001133
+[81]	train-auc:0.968568+0.000442	test-auc:0.954096+0.001238
+[91]	train-auc:0.969877+0.000392	test-auc:0.954146+0.001200
+[101]	train-auc:0.970704+0.000389	test-auc:0.954093+0.001252
+[111]	train-auc:0.971523+0.000245	test-auc:0.954071+0.001319
+[121]	train-auc:0.972482+0.000338	test-auc:0.953982+0.001263
+Stopping. Best iteration:
+[74]	train-auc:0.967774+0.000267	test-auc:0.954210+0.001197
+[1] 74
+#+end_example
+
+#+attr_ravel: eval=F
+#+BEGIN_SRC R
+  ##model training
+  mm <- xgb.train (params = params, data = dtrain, nrounds = 72)
+
+  xgb_imp <- xgb.importance (model = mm)
+  xgb.plot.importance(importance_matrix = xgb_imp[1:20])
+#+END_SRC
+
+#+RESULTS:
+: Error in check.booster.params(params, ...) : object 'params' not found
+: Error in xgb.importance(model = mm) : object 'mm' not found
+
+importance
+R> cname[c(4,17,10,19,5,39,13,1,20,18,30,9,23,3,6,2,8)]
+ [1] "detailed occupation recode"         "capital gains"
+ [3] "major occupation code"              "dividends from stocks"
+ [5] "education"                          "veterans benefits"
+ [7] "sex"                                "age"
+ [9] "tax filer stat"                     "capital losses"
+[11] "migration prev res in sunbelt"      "major industry code"
+[13] "detailed household and family stat" "detailed industry recode"
+[15] "wage per hour"                      "class of worker"
+[17] "marital stat"
+
+** ranger
+#+begin_src R
+source('cor_preprocess.R')
+#+end_src
+
+An R package ranger is used to train the random forest. An R pacakge caret is a
+wrapper of many R packages, which we will use for training. The below is caret's model training parameters.
+#+begin_src R
+library(caret)
+library(ranger)
+y = df$logy > 0
+xtrain = X
+ytrain = y
+weights = rep(1 / length(y), length(y))
+
+nfold = 4
+data_folds = caret::createFolds(ytrain, k=nfold)
+my_tr = trainControl(
+method = 'cv',
+number = nfold,
+classProbs = TRUE,
+savePredictions = "all",
+## ,summaryFunction = twoClassSummary # AUC
+## ,summaryFunction = prSummary # PR-AUC
+## ,summaryFunction = fSummary # F1
+summaryFunction = mnLogLoss,
+search = "random",
+verboseIter = TRUE,
+allowParallel = TRUE,
+indexOut = data_folds
+)
+#+end_src
+
+Unlike CatBoost or XGBoost, ranger doesn't have an internal handling mecahnism
+of missing values.
+#+begin_src R
+## imputation needs for ranger
+ixtrain = xtrain
+ixtrain[is.na(ixtrain)] = -99
+
+## above50k needs to be "positive"
+## caret considers 1st class as "positive" class
+fytrain = factor(-(ytrain - 1))
+levels(fytrain) = c("no_overrun", "overrun")
+#+end_src
+
+#+RESULTS:
+
+- Tuned hyperparameters of ranger.
+#+begin_src R
+ranger_grid <- expand.grid(
+  mtry = c(20),
+  splitrule = "gini",
+  min.node.size = c(10)
+)
+#+end_src
+
+#+RESULTS:
+
+The below is for CV and saving a final model.
+#+begin_src R
+set.seed(1)
+ranger_tune <- train(x = ixtrain, y = fytrain,
+                     method = "ranger",
+                     trControl = my_tr,
+                     tuneGrid = ranger_grid,
+                     weights = weights,
+                     preProc = NULL,
+                     importance = 'impurity',
+                     num.trees = 500
+                     )
+
+temp = ranger_tune$pred$above50k
+ranger_id = ranger_tune$pred$rowIndex
+ranger_prob = temp[order(ranger_id)]
+ranger_final = ranger_tune$finalModel
+ranger_imp = varImp(ranger_tune)$importance
+#+end_src
+
+#+begin_example
+Fold1: mtry=20, splitrule=gini, min.node.size=10
+Growing trees.. Progress: 29%. Estimated remaining time: 1 minute, 15 seconds.
+Growing trees.. Progress: 62%. Estimated remaining time: 37 seconds.
+Growing trees.. Progress: 95%. Estimated remaining time: 4 seconds.
+- Fold1: mtry=20, splitrule=gini, min.node.size=10
+
+Fold2: mtry=20, splitrule=gini, min.node.size=10
+Growing trees.. Progress: 31%. Estimated remaining time: 1 minute, 7 seconds.
+Growing trees.. Progress: 65%. Estimated remaining time: 33 seconds.
+Growing trees.. Progress: 99%. Estimated remaining time: 1 seconds.
+- Fold2: mtry=20, splitrule=gini, min.node.size=10
+
+Fold3: mtry=20, splitrule=gini, min.node.size=10
+Growing trees.. Progress: 31%. Estimated remaining time: 1 minute, 7 seconds.
+Growing trees.. Progress: 64%. Estimated remaining time: 34 seconds.
+Growing trees.. Progress: 98%. Estimated remaining time: 1 seconds.
+- Fold3: mtry=20, splitrule=gini, min.node.size=10
+
+Fold4: mtry=20, splitrule=gini, min.node.size=10
+Growing trees.. Progress: 31%. Estimated remaining time: 1 minute, 8 seconds.
+Growing trees.. Progress: 63%. Estimated remaining time: 37 seconds.
+Growing trees.. Progress: 95%. Estimated remaining time: 5 seconds.
+- Fold4: mtry=20, splitrule=gini, min.node.size=10
+Aggregating results
+Fitting final model on full training set
+Growing trees.. Progress: 21%. Estimated remaining time: 1 minute, 55 seconds.
+Growing trees.. Progress: 42%. Estimated remaining time: 1 minute, 25 seconds.
+Growing trees.. Progress: 63%. Estimated remaining time: 54 seconds.
+Growing trees.. Progress: 84%. Estimated remaining time: 23 seconds.
+Warning message:
+In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
+  The metric "Accuracy" was not in the result set. logLoss will be used instead.
+#+end_example
+
+#+begin_src R
+ranger_final = ranger(x = ixtrain, y = fytrain,
+                      num.trees = 500,mtry = 20,importance = "impurity",
+                      write.forest = TRUE,probability = TRUE,min.node.size = 10,
+                      class.weights = NULL,splitrule = "gini")
+
+#+end_src
+
+#+RESULTS:
+:
+: Error in ranger(x = ixtrain, y = fytrain, num.trees = 500, mtry = 20,  :
+:   Error: Number of class weights not equal to number of classes.
+
+#+begin_src R
+varimp = ranger_final$variable.importance
+sort(varimp,TRUE)[1:10]
+#+end_src
+#+begin_src R
+saveRDS(ranger_final, "ranger_final.rds")
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+caret_wlogloss(ranger_tune$pred)
+#+end_src
+
+#+RESULTS:
+: [1] 0.08391081
+
+#+begin_src R
+mean(ranger_tune$resample[,1]) # incorrect. not using weight
+#+end_src
+
+#+RESULTS:
+: [1] 0.09814152
+
+*** test data
+#+begin_src R
+if (TEST_SET){
+ranger_final = readRDS("ranger_final.rds")
+ixtest = xtest
+ixtest[is.na(ixtest)] = -99
+ranger_test_prob = predict(ranger_final, ixtest)$predictions[,1]
+}
+#+end_src
+
+#+RESULTS:
+
+To create a meat-feature of the super learner for the test data.
+** spatial
+#+BEGIN_SRC R
+library(ape)
+x = df[,1]
+diag(w) <- 0
+##Moran.I(x, w)
+##Moran.I(x, w, alt = "l")
+Moran.I(x, w, alt = "g")
+##Moran.I(x, w, scaled = TRUE) # usualy the same
+#+END_SRC
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+BEGIN_SRC R
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+
+gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA) + # get the state border back on top
+  geom_point(data = df, mapping = aes(x = longitude, y = latitude, group = NULL, colour = error, fill = error), size = 2, alpha = 0.5)+
+  scale_colour_gradient2() +
+  scale_fill_gradient2() +
+  theme_bw() +
+  ditch_the_axes
+#+END_SRC
+
+#+BEGIN_SRC R
+library(gstat)
+library(sp)
+library(nlme)
+
+coordinates(df)<-c('longitude','latitude')
+
+var.mod<-variogram(error ~ 1,data=df,alpha=c(0,45,90,135))
+plot(var.mod)
+#+END_SRC
+* Prerequisite
+:PROPERTIES:
+:header-args:R:          :tangle prerequisite.R
+:END:
+
+This section contains code for global =knitr= options and installing and/or loading required packages.
+The options are meaningful only if you render this document; otherwise ignore them.
+#+NAME: global_option,include=F
+#+BEGIN_SRC R
+  ## Need the knitr package to set chunk options
+  library(knitr)
+
+  ## Set knitr options for knitting code into the report:
+  ## Print out code (echo)
+  ## Save results so that code blocks aren't re-run unless code changes (cache),
+  ## or a relevant earlier code block changed (autodep), but don't re-run if the
+  ## only thing that changed was the comments (cache.comments)
+  ## Align plots center (fig.align)
+  ## Don't clutter R output with messages or warnings (message, warning)
+  ## This will leave error messages showing up in the knitted report
+  opts_chunk$set(echo=TRUE,
+                 cache=TRUE, autodep=TRUE, cache.comments=FALSE,
+                 fig.align="center",
+                 fig.width=12, fig.height=9,
+                 message=FALSE, warning=FALSE)
+#+END_SRC
+
+** CatBoost
+For installing ~CatBoost~, see https://catboost.ai/docs/installation/r-installation-binary-installation.html#r-installation-binary-installation.
+#+attr_ravel: eval=F
+#+begin_src R :eval no :tangle no
+devtools::install_url('https://github.com/catboost/catboost/releases/download/v0.24.4/catboost-R-Darwin-0.24.4.tgz', INSTALL_opts = c("--no-multiarch"))
+#+end_src
+
+** Required packages
+
+The below is a list of required packages. All of them (except ~CatBoost~) can be installed using =packages.install=.
+
+#+name:load
+#+attr_ravel: message=F, warning=F
+#+BEGIN_SRC R :results none
+require(glmnet)
+require(ALEPlot)
+## require(data.table)
+## require(readr)
+require(caret)
+require(xgboost)
+require(dplyr)
+require(Matrix)
+require(catboost)
+require(caret)
+require(stringr)
+require(MLmetrics)
+## require(fastICA)
+require(nnet)
+## require(plyr)
+require(ggplot2)
+require(WeightedROC)
+require(ranger)
+#+END_SRC
+
+This is global options, which are included in my =.Rprofile=.
+#+BEGIN_SRC R
+## Don't convert text strings to factors with base read functions
+options(stringsAsFactors = FALSE)
+## Dont' omit NA rows
+options(na.action='na.pass')
+#+END_SRC
+
+#+RESULTS:
+
+* Custom functions
+:PROPERTIES:
+:header-args:R:          :tangle custom_function.R
+:END:
+This section contains custom R functions.
+
+- =to_factor= is a function to convert a character vector to a factor vector whose levels are ordered by conditional proportions of =label=.
+- =find_continent= is a function to group contries by continents.
+- =plot_y=: to draw a scatter plot whose points are marked by label
+- =plot_prob=: to draw a scatter plot whose points are marked by prediction probablity
+- =mylogit=: to do the logit transformation
+- =plot_vimp=: to plot the variable importance
+#+begin_src R
+wlogloss = function(y, p, w = rep(1,length(y)) / length(y)){
+# return weighted log loss
+# y: actual y
+# p: prediction prob
+# w: case weight
+eps = 1e-15
+p = pmax(pmin(p, 1 - eps), eps)
+w = w / sum(w)
+out = - sum(w*(y*log(p)+(1-y)*log(1-p)))
+return(out)
+}
+
+order_level = function(x, label){
+tab = table(x,label)
+cp = tab / apply(tab,1,sum)
+ll = row.names(tab[order(cp[,2]),])
+return(ll)}
+
+to_factor = function(x, label = ytrain) {
+out = factor(x, levels = order_level(x,label))
+return(out)}
+
+find_continent = function(x) {
+if (x %in% c("Panama", "Guatemala", "Honduras", "Dominican-Republic", "El-Salvador", "Columbia", "Nicaragua", "Trinadad&Tobago", "Puerto-Rico", "Haiti", "Peru", "Ecuador", "Jamaica", "Cuba")){ out = "South.America"
+} else if (x %in% c("Japan", "Iran", "Laos", "India", "Outlying-U S (Guam USVI etc)", "Vietnam", "Taiwan", "China", "Cambodia", "Thailand", "South Korea", "Philippines", "Hong Kong")) {out = "Asia"
+} else if (x %in% c("Portugal", "Italy", "Yugoslavia", "Greece", "Poland", "Germany", "England", "Hungary", "Scotland", "France", "Ireland", "Holand-Netherlands")) {out = "Europe"
+} else if (x %in% c("United-States", "Canada", "Mexico")) {out = "North.America"
+} else out = NA
+return(out)
+}
+
+plot_y = function(x1, x2, point_size = 0.2, x1lab = NULL, x2lab = NULL, label = ytrain){
+dd = data.frame(x1,x2,label)
+    pp =
+      ggplot(data = dd,aes(x = x1,y = x2,label = label, color = as.factor(label))) +
+      geom_point(size = point_size,position = "jitter")  +  theme_bw() +
+      theme(
+        legend.position = "none",
+        axis.line = element_line(colour = "black"),
+        #panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #panel.border = element_blank()
+        panel.background = element_blank()) + labs(y= x2lab, x = x1lab)
+return(pp)}
+
+plot_prob = function(x1, x2, point_size = 0.2, x1lab = NULL, x2lab = NULL, prob){
+dd = data.frame(x1,x2,prob)
+    pp =
+      ggplot(data = dd,aes(x = x1,y = x2, color = prob)) +
+      geom_point(size = point_size, position = "jitter")  +  theme_bw() +
+      theme(
+        legend.position = "none",
+        axis.line = element_line(colour = "black"),
+        #panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #panel.border = element_blank()
+        panel.background = element_blank()) + labs(y= x2lab, x = x1lab)
+return(pp)}
+
+mylogit = function(x) {
+eps = 10^(-100)
+log(x + eps) / log(1 - x - eps)}
+#+end_src
+
+#+RESULTS:
+
+This is a function to calculate weighted log loss using caret's train object.
+#+begin_src R
+caret_wlogloss = function (data, pos = "cor", neg = "no_cor", cut = 0.5)
+{
+ff = data$Resample
+obs = 1*(data$obs == pos)
+prob = data[[pos]]
+pred = 1 * (prob > cut)
+if (is.null(data$weights)) {
+  ww = rep(1,length(pred))
+  } else ww = data$weights
+
+return(wlogloss(y=obs, p=prob, w=ww))}
+
+#+end_src
+
+#+RESULTS:
+
+This is a function to calculate weighted F1 score using caret's train object.
+#+begin_src R
+caret_wf1 = function(data, cut = 0.5) {
+ff = data$Resample
+obs = 1*(data$obs == "above50k")
+prob = data$above50k
+pred = 1 * (prob > cut)
+if (is.null(data$weights)) {
+  ww = rep(1,length(pred))
+  } else ww = data$weights
+
+ww = ww / sum(ww)
+TP = sum(1* ww * (pred == 1 & obs == 1))
+FP = sum(1* ww * (pred == 1 & obs == 0))
+TN = sum(1* ww * (pred == 0 & obs == 0))
+FN = sum(1* ww * (pred == 0 & obs == 1))
+
+precision = TP / (TP + FP)
+recall = TP / (TP + FN)
+f1 = 2 * precision * recall / (precision + recall)
+return(list(precision = precision, recall = recall, f1 = f1))
+}
+#+end_src
+
+#+RESULTS:
+
+- =ssbar=: to create a side by side barplot of a categorical variable for each cluster
+#+begin_src R
+ssbar = function(varn, cc){
+out = list()
+tf = wtd.table(cl, varn, weights = sweight) / gw
+wc = which(apply(tf,2,sum) < cc)
+Other = tf[,wc]
+Other = apply(Other,1,sum)
+if (length(wc) > 0) {
+tf = tf[,-wc]
+out$table = cbind(tf,Other)
+} else out$table = tf
+
+tf = as.data.frame(tf)
+of = data.frame(Var1 = 1:K, Var2 = rep("Other",K), Freq = Other)
+tf = rbind(tf, of)
+
+colnames(tf) = c("Cluster", "Category", "Conditional.Frequency")
+pp = ggplot(tf, aes(Cluster, Conditional.Frequency, fill=Category)) +
+  geom_bar(position="dodge",stat="identity")
+out$plot = pp
+return(out)}
+#+end_src
+
+#+RESULTS:
+
+
+#+begin_src R
+## row.names(vimp) should be variable names
+## vimp should be p by 1 (matrix, array, or data.frame)
+
+require(ggplot2)
+plot_vimp = function(vimp, cutoff = 1) {
+
+   tryCatch({
+      
+      if(dim(vimp)[1] < dim(vimp)[2]) vimp <- t(vimp)
+      
+    }, error = function(e)
+      {
+      stop('vimp should be a p by 1 matrix, array, or data.frame.')
+      }
+
+    )
+    
+  ## Get the relative importance
+  mval = max(vimp[,1])
+  vimp[,2] = ( vimp[,1]/mval ) * 100
+
+  cid = vimp[,2] > cutoff
+  rnimp = vimp[,2][cid]
+  imp.var = row.names(vimp)[cid]
+
+  imp.dat = data.frame(imp.var, rnimp)
+
+  ## barplot of relative importance
+  gg = ggplot(data=imp.dat, aes(x=reorder(imp.var,-rnimp), y=rnimp, fill=TRUE)) +
+    ylab("Relative variable importance") +
+    xlab("Important features") +
+    geom_bar(stat="identity") + coord_flip() +
+    scale_fill_discrete(guide=FALSE) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+          text = element_text(size=10),
+          ##panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          ##panel.border = element_blank()
+          panel.background = element_blank()
+          )
+  return(gg)
+}
+#+end_src
+
+#+RESULTS:
+
+* Preprocess
+:PROPERTIES:
+:header-args:R: :tangle preprocess.R
+:END:
+#+begin_src R :results none
+library('magrittr')
+library(dplyr)
+dpro <- readr::read_csv(file = "data/FDOT_10mi_Coordinates.csv", col_names = T)
+names(dpro) <- make.names(names(dpro))
+
+dgis <- readr::read_csv(file = "data/FDOT_10mi_Coordinates_coordinate_tab.csv", col_names = T)
+names(dgis) <- make.names(names(dgis))
+
+drural <- readr::read_csv(file = "data/FDOT_10mi_Coordinates_coordinate_rural.csv", col_names = T)
+names(drural) <- make.names(names(drural))
+
+if (identical(dpro$pjt_id, dgis$Contract_ID)) {
+  dpro$x = dgis$Longitude;
+  dpro$y = dgis$Latitude
+}
+
+dpro$railcross[is.na(dpro$railcross)] <- 0
+dpro$bridge[is.na(dpro$bridge)] <- 0
+dpro <- na.omit(dpro)
+
+## dd <- dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
+##   mutate(mov_unemp = 0.6*unemp_2019 + 0.3*unemp_2018 + 0.1*unemp_2017 ) %>%
+##   mutate(mov_avg_temp = 0.6*avg_temp_2019 + 0.3*avg_temp_2018 + 0.1*avg_temp_2017 ) %>%
+##   mutate(mov_max_temp = 0.6*max_temp_2019 + 0.3*max_temp_2018 + 0.1*max_temp_2017 ) %>%
+##   mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
+##   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
+
+coef <- exp(c(0,  -1/2,  -1))
+coef <- coef / sum(coef)
+
+dd <- dpro %>%
+  mutate(unemp = coef[1] * get(paste0("unemp_", start_yr)) +
+coef[2] * get(paste0("unemp_", start_yr - 1)) +
+coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
+    mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
+coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
+coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
+  mutate(max_temp = coef[1] * get(paste0("max_temp_", start_yr)) +
+coef[2] * get(paste0("max_temp_", start_yr - 1)) +
+coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
+  mutate(prec = coef[1] * get(paste0("prec_", start_yr)) +
+coef[2] * get(paste0("prec_", start_yr - 1)) +
+coef[3] * get(paste0("prec_", start_yr - 2))) %>%
+  mutate(gdp = coef[1] * get(paste0("gdp_", start_yr)) +
+coef[2] * get(paste0("gdp_", start_yr - 1)) +
+coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
+select(-c(roadway, start_yr,  end_yr))
+
+cnames = names(dd)
+
+no_drop <- !grepl("gdp_.", cnames) &
+ !grepl("prec_.", cnames) &
+ !grepl("max_temp_.", cnames) &
+ !grepl("avg_temp_.", cnames) &
+ !grepl("unemp_.", cnames)
+#+end_src
+
+#+begin_src R :results none
+## df = dd[no_drop] %>% filter(pjt_type=="X3-Resurfacing")
+df <- dd[no_drop]
+df$logy <- log(df$modified_amounts) - log(df$orig_amounts)
+
+df$pjt_type <- as.factor(df$pjt_type)
+df$road_side <- as.factor(df$road_side)
+df$funclass <- as.factor(df$funclass)
+df$access_con <- as.factor(df$access_con)
+
+cat_df <- df %>% select(pjt_type, road_side, funclass, access_con)
+
+df <- df %>%
+  mutate(ncat_pjt_type = as.numeric(pjt_type)) %>%
+  mutate(ncat_road_side = as.numeric(road_side)) %>%
+  mutate(ncat_funclass = as.numeric(funclass)) %>%
+  mutate(ncat_access_con = as.numeric(access_con)) %>%
+  select(-c(pjt_type, road_side, funclass, access_con))
+
+dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts))
+dxx = dx %>% select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con)) %>%
+  cbind(cat_df)
+
+X = model.matrix(~ 0 + ., dxx)
+vn <- colnames(X) <- colnames(X) %>% make.names()
+
+cory = 1 * (df$logy > 0)
+sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
+#+end_src
+
+* GLM classification models
+
+The ridge, lasso, and elastic net penalty can be used along with the
+logistic regression to build a binary or multiclass classifier. To
+implement the logistic regression using the =glmnet= package, one needs
+to specify =family="binomial"= in the option (=family="multinomial"= for the multiclass logistic model).
+
+In the =glmnet= package, a design matrix =X= should consist of numeric
+values. =famhist= is a factor variable, so we code =famhist==1 if
+present; 0 otherwise.
+
+#+RESULTS:
+
+We here present the R code example for the logistic regression with the
+lasso penalty. In the cross validation, we estimate the
+misclassification error by specifying =type.measure="class"=. Some other
+error measure can be used as well (eg. deviance, AUC, etc.).
+
+#+BEGIN_SRC R
+set.seed(1)
+y = 1 * (df$logy > 0)
+cvlasso = cv.glmnet(X,y,alpha=1,family="binomial",type.measure="class")
+cvlasso$lambda.min
+cvlasso$lambda.1se
+plot(cvlasso)
+
+lmlasso = glmnet(X, y, alpha=1, family="binomial")
+vn = colnames(X)
+vnat = coef(lmlasso)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+plot(lmlasso, xvar = "lambda", xlim=c(-7.3,-1.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cvlasso$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+RESULTS:
+: [1] 0.01035686
+: [1] 0.05036127
+
+The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
+
+#+BEGIN_SRC R
+lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se, family="binomial")
+coef(lmlasso)
+pred = predict(lmlasso,newx=X)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+82 x 1 sparse Matrix of class "dgCMatrix"
+                                                 s0
+(Intercept)                            5.058176e-01
+orig_days                              1.485495e-03
+orig_amounts                           9.667955e-08
+aadt                                   .           
+aadt_truck                             .           
+speedlimit                             .           
+access_cla                             .           
+pav_cond                               .           
+no_lane                                .           
+bridge                                 .           
+railcross                              .           
+pop_tot                                .           
+pop_16yrover                           .           
+med_age                                .           
+med_ind_income                         .           
+pop_16yrover_worker                    .           
+comm_car_tot                           .           
+comm_car_alone                         .           
+comm_car_carpool                       .           
+comm_workers_per_car                   .           
+comm_pubtransport                      .           
+comm_walk                              .           
+comm_bike                              .           
+comm_etc                               .           
+comm_workhome                          .           
+comm_in_county                         .           
+comm_out_county                        .           
+comm_out_state                         .           
+mean_travel_time                       .           
+hhd_no                                 .           
+hhd_avg_size                          -4.670758e-01
+hhd_med_income                         .           
+hhd_mean_income                        .           
+mean_per_capita_income                 .           
+poverty_below                          .           
+poverty_above                          .           
+work_hours_mean                        .           
+worker_med_age                         .           
+Ind_tot                                .           
+ind_agri                               .           
+ind_const                              .           
+ind_manuf                              .           
+ind_whole                              .           
+ind_retail                             .           
+ind_transport                          .           
+ind_info                               .           
+ind_fin                                .           
+ind_pro                                .           
+inde_ed_meds                           .           
+ind_art                                .           
+ind_other                              .           
+ind_public                             .           
+unemp                                  .           
+avg_temp                               .           
+max_temp                               .           
+prec                                   .           
+gdp                                    .           
+pjt_typeX1.New.Construction            .           
+pjt_typeX2.Reconstruction              .           
+pjt_typeX3.Resurfacing                 .           
+pjt_typeX4.Widening...Resurfacing      .           
+pjt_typeX5.Bridge.Construction         .           
+pjt_typeX6.Bridge.Repair               .           
+pjt_typeX7.Traffic.Operations         -4.133097e-01
+pjt_typeX8.Miscellaneous.Construction  .           
+pjt_typeZ.Other                        .           
+road_sideL                             .           
+road_sideR                             .           
+funclass2                              .           
+funclass4                              .           
+funclass6                             -1.198668e-01
+funclass7                              .           
+funclass8                              6.417499e-02
+funclass9                              .           
+funclass11                             .           
+funclass12                             .           
+funclass14                             .           
+funclass16                             .           
+funclass17                             .           
+funclass18                             .           
+access_con2                            .           
+access_con3                            .
+#+end_example
+
+#+begin_src R
+mm = glm(y ~ orig_days + orig_amounts + hhd_avg_size + pjt_typeX7.Traffic.Operations + funclass6 + funclass8, data = as.data.frame(X), family="binomial")
+coef(mm)
+pred = predict(mm,newx=X)
+tab = table(pred>0,y)
+##tab
+sum(diag(tab)) / sum(tab)
+#+end_src
+
+#+RESULTS:
+:                   (Intercept)                     orig_days
+:                  2.762998e+00                  2.794145e-03
+:                  orig_amounts                  hhd_avg_size
+:                  1.957243e-07                 -1.472561e+00
+: pjt_typeX7.Traffic.Operations                     funclass6
+:                 -1.190487e+00                 -1.202407e+00
+:                     funclass8
+:                  1.582516e+01
+: [1] 0.6831276
+
+** The elastic net
+    :PROPERTIES:
+    :CUSTOM_ID: the-elastic-net
+    :END:
+
+#+BEGIN_SRC R
+set.seed(1)
+aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
+lena = length(aseq)
+
+# perform CV for each alpha in the sequence
+cv = list()
+mcvm = numeric(lena)
+## randomly choose fold ID for each observation
+foldid=sample(1:10,size=length(y),replace=TRUE)
+for(k in 1:lena){
+  cv[[k]] = cv.glmnet(X,y,foldid=foldid,alpha=aseq[k], Type.measure="class")
+  mcvm[k] = min(cv[[k]]$cvm)
+}
+
+picka = which.min(mcvm)
+malpha = aseq[picka] # alpha for the best model
+malpha
+cv[[picka]]$lambda.1se
+#+END_SRC
+
+#+RESULTS:
+: [1] 0.3
+: [1] 0.2435519
+
+Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, family="binomial")
+vnat = coef(lmenet)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
+
+plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se, family="binomial" )
+coef(lmenet)
+pred = 1*(predict(lmenet,newx=X) > 0)
+tab = table(pred,y)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+82 x 1 sparse Matrix of class "dgCMatrix"
+                                                 s0
+(Intercept)                           -4.134678e-01
+orig_days                              8.904659e-04
+orig_amounts                           3.909568e-08
+aadt                                   .
+aadt_truck                             .
+speedlimit                             .
+access_cla                             .
+pav_cond                               .
+no_lane                                .
+bridge                                 .
+railcross                              .
+pop_tot                                .
+pop_16yrover                           .
+med_age                                .
+med_ind_income                         .
+pop_16yrover_worker                    .
+comm_car_tot                           .
+comm_car_alone                         .
+comm_car_carpool                       .
+comm_workers_per_car                   .
+comm_pubtransport                      .
+comm_walk                              .
+comm_bike                              .
+comm_etc                               .
+comm_workhome                          .
+comm_in_county                         .
+comm_out_county                        .
+comm_out_state                         .
+mean_travel_time                       .
+hhd_no                                 .
+hhd_avg_size                          -3.154970e-02
+hhd_med_income                         .
+hhd_mean_income                        .
+mean_per_capita_income                 .
+poverty_below                          .
+poverty_above                          .
+work_hours_mean                        .
+worker_med_age                         .
+Ind_tot                                .
+ind_agri                               .
+ind_const                              .
+ind_manuf                              .
+ind_whole                              .
+ind_retail                             .
+ind_transport                          .
+ind_info                               .
+ind_fin                                .
+ind_pro                                .
+inde_ed_meds                           .
+ind_art                                .
+ind_other                              .
+ind_public                             .
+unemp                                  .
+avg_temp                               .
+max_temp                               .
+prec                                   .
+gdp                                    .
+pjt_typeX1.New.Construction            .
+pjt_typeX2.Reconstruction              .
+pjt_typeX3.Resurfacing                 .
+pjt_typeX4.Widening...Resurfacing      .
+pjt_typeX5.Bridge.Construction         .
+pjt_typeX6.Bridge.Repair               .
+pjt_typeX7.Traffic.Operations         -1.096577e-01
+pjt_typeX8.Miscellaneous.Construction  .
+pjt_typeZ.Other                        .
+road_sideL                             .
+road_sideR                             .
+funclass2                              .
+funclass4                              .
+funclass6                              .
+funclass7                              .
+funclass8                              .
+funclass9                              .
+funclass11                             .
+funclass12                             .
+funclass14                             .
+funclass16                             .
+funclass17                             .
+funclass18                             .
+access_con2                            .
+access_con3                            .
+#+end_example
+** COR stepwise                                                      :export:
+The logistic model is used to predict COR events (whether COR occurs or not). The forward selection is used for the model selection.
+#+begin_src R
+ds = as.data.frame(X)
+lcor = log(df$cor)
+lsor = log(df$sor)
+y = 1 * (lcor > 0)
+N = log(length(y)) # number of observations
+
+fmod = glm(y~.,data = ds, family = "binomial") # full model
+nmod = glm(y~1,data = ds, family = "binomial") # null model
+
+# forward stepwise (BIC)
+fstep = step(nmod, scope=list(lower=nmod, upper=fmod), direction="forward", k=log(N), trace=FALSE)
+fstep$anova # enumerated variables that are added and dropped
+## coef(fstep) # coefficients in the chosen model
+cat("\nBIC: ")
+BIC(fstep)
+cat("\nAIC: ")
+AIC(fstep)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                              Step Df  Deviance Resid. Df Resid. Dev      AIC
+1                                  NA        NA       242   333.8633 335.5668
+2                   + orig_amounts -1 31.539901       241   302.3234 305.7304
+3                       + ind_agri -1  8.720837       240   293.6026 298.7130
+4                      + funclass8 -1  5.360178       239   288.2424 295.0564
+5                 + comm_out_state -1  4.152764       238   284.0896 292.6071
+6                   + hhd_avg_size -1  6.761601       237   277.3280 287.5490
+7  + pjt_typeX7.Traffic.Operations -1  4.705979       236   272.6221 284.5465
+8                     + road_sideL -1  4.724540       235   267.8975 281.5254
+9                      + ind_const -1  2.788538       234   265.1090 280.4404
+10                  + inde_ed_meds -1  3.422632       233   261.6864 278.7212
+11               + pjt_typeZ.Other -1  1.856042       232   259.8303 278.5687
+12                    + funclass18 -1  1.897502       231   257.9328 278.3746
+
+BIC:
+[1] 323.8495
+
+AIC:
+[1] 281.9328
+#+end_example
+
+The below is the summary of the model we selected. It is advised to use p-value = 0.04 to find significant variables.
+#+begin_src R
+summary(fstep)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Call:
+glm(formula = y ~ orig_amounts + ind_agri + funclass8 + comm_out_state +
+    hhd_avg_size + pjt_typeX7.Traffic.Operations + road_sideL +
+    ind_const + inde_ed_meds + pjt_typeZ.Other + funclass18,
+    family = "binomial", data = ds)
+
+Deviance Residuals:
+    Min       1Q   Median       3Q      Max
+-2.5312  -0.8265  -0.3873   0.9577   2.0794
+
+Coefficients:
+                                Estimate Std. Error z value Pr(>|z|)
+(Intercept)                    6.899e+00  2.051e+00   3.363 0.000771
+orig_amounts                   3.502e-07  7.619e-08   4.597 4.29e-06
+ind_agri                      -1.487e-02  5.466e-03  -2.721 0.006499
+funclass8                      2.449e+01  1.212e+03   0.020 0.983872
+comm_out_state                -5.552e-01  1.755e-01  -3.164 0.001558
+hhd_avg_size                  -2.644e+00  8.145e-01  -3.247 0.001168
+pjt_typeX7.Traffic.Operations -1.070e+00  4.881e-01  -2.193 0.028305
+road_sideL                    -1.708e+01  1.676e+03  -0.010 0.991871
+ind_const                      1.038e-02  4.369e-03   2.375 0.017553
+inde_ed_meds                  -3.033e-03  1.573e-03  -1.928 0.053836
+pjt_typeZ.Other                8.755e-01  6.392e-01   1.370 0.170786
+funclass18                     1.706e+01  2.400e+03   0.007 0.994329
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 333.86  on 242  degrees of freedom
+Residual deviance: 257.93  on 231  degrees of freedom
+AIC: 281.93
+
+Number of Fisher Scoring iterations: 15
+#+end_example
+
+* Tune&Train base models
+We have three base models. Each model has been tuned using 4 fold-cross
+validation. Since we aim to train a super learner instead of simple blend of
+base models, predctions collected from CV should be passed to the super learner.
+The CV-folds should be consistent for all models.
+
+#+begin_src R :tangle cor_train_base.R
+xtrain = model.matrix(~ 0 + ., data = dx)
+ytrain = 1 * (y > 0)
+weights = rep(1,length(y)) / length(y)
+
+set.seed(1)
+nfold = 4
+shu = sample(1:length(ytrain))
+xtrain = xtrain[shu,]
+ytrain = ytrain[shu]
+data_folds = caret::createFolds(ytrain, k=nfold)
+#+end_src
+
+#+RESULTS:
+
+** CatBoost
+CatBoost has a function for CV, but it doesn't let us define a fold index.
+The below is a function for 3-folds training and 1-fold prediction of CatBoost.
+#+begin_src R :tangle cor_train_base.R
+cat1fold = function(outfold, xtrain, ytrain, cat_features, fit_params, weights) {
+
+n = length(ytrain);
+oo = outfold;
+ii = (1:n)[-oo];
+
+inx = xtrain[ii,]
+outx = xtrain[oo,]
+iny = ytrain[ii]
+outy = ytrain[oo    ]
+inw = weights[ii]
+outw = weights[oo]
+
+inpool = catboost.load_pool(data = inx,
+                           label = iny,
+                           weight = inw,
+                           cat_features = cat_features - 1)
+
+outpool =  catboost.load_pool(data = outx,
+                           label = outy,
+                           weight = outw,
+                           cat_features = cat_features - 1)
+
+fit_params$loss_function = c('Logloss')
+
+catmod = catboost.train(inpool, outpool, params = fit_params)
+prob = catboost.predict(catmod, outpool, prediction_type = 'Probability')
+logloss = wlogloss(outy, prob, outw)
+return(list(prob = prob, logloss = logloss, catmod = catmod))
+}
+#+end_src
+
+#+begin_src R :results none :tangle train_base.R
+cat_features = which(stringr::str_detect(colnames(xtrain), "ncat_"))
+
+out = list()
+
+fit_params <- list(iterations = 500,
+                   border_count = 254,
+                   depth = 10,
+                   early_stopping_rounds = 20,
+                   od_type = "Iter",
+                   eval_metric = "Logloss", # overfit detection metric
+                   use_best_model = T, # no tree saves after the best iteration
+                   learning_rate = 0.1,
+                   l2_leaf_reg = 3,
+                   rsm = 1)
+
+cv_logloss = numeric(nfold)
+lprob = list()
+best_iter = numeric(nfold)
+
+set.seed(1)
+for (k in 1:nfold){
+out[[k]] = cat1fold(data_folds[[k]], xtrain, ytrain, cat_features, fit_params, weights)
+cv_logloss[k] = out[[k]]$logloss
+lprob[[k]] = out[[k]]$prob
+best_iter[k] = out[[k]]$catmod$tree_count
+}
+
+temp = unlist(lprob)
+cat_id = unlist(data_folds)
+cat_prob = temp[order(cat_id)]
+cat_best_iter = floor(median(best_iter))
+#+end_src
+
+#+begin_src R :results replace
+mean(cv_logloss)
+#+end_src
+
+#+RESULTS:
+: [1] 0.6459758
+
+To train a model abased on the full training set.
+#+begin_src R :results none :tangle cor_train_base.R
+trainpool = catboost.load_pool(data = xtrain,
+                           label = ytrain,
+                           weight = weights,
+                           cat_features = cat_features - 1)
+
+fit_params$loss_function = c('Logloss')
+fit_params$iterations = cat_best_iter
+
+cat_final = catboost.train(trainpool, params = fit_params)
+cat_imp = cat_final$feature_importances
+
+catboost.save_model(cat_final, "cor_cat_final.rds")
+
+cat_train_pred = catboost.predict(cat_final, trainpool, prediction_type = 'Probability')
+#+end_src
+
+*** test data
+To create a meat-feature of the super learner for the test data.
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+cat_final = catboost.load_model("cat_final.rds")
+
+cat_features_test = which(stringr::str_detect(colnames(xtest), "n"))
+
+testpool = catboost.load_pool(data = xtest,
+                           cat_features = cat_features_test - 1)
+
+cat_test_prob = catboost.predict(cat_final, testpool, prediction_type = 'Probability')
+}
+#+end_src
+
+#+RESULTS:
+
+*** don't export                                                 :noexport:
+#+begin_src R
+cat_features = which(stringr::str_detect(colnames(xtrain), "n"))
+
+ii = 1:10000
+oo = 10001:15000
+
+inx = xtrain[ii,]
+outx = xtrain[oo,]
+iny = ytrain[ii]
+outy = ytrain[oo]
+inw = weights[ii]
+outw = weights[oo]
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+inpool = catboost.load_pool(data = inx,
+                           label = iny,
+                           weight = inw,
+                           cat_features = cat_features - 1)
+outpool =  catboost.load_pool(data = outx,
+                           label = outy,
+                           weight = outw,
+                           cat_features = cat_features - 1)
+head(inpool, 1)[[1]]
+head(outpool, 1)[[1]]
+
+#+end_src
+
+#+RESULTS:
+:
+: [1] 0
+: [1] 0
+#+begin_src R
+fit_params <- list(iterations = 100,
+                   loss_function = c('Logloss'),
+                   border_count = 254,
+                   depth = 5,
+                   learning_rate = 0.03,
+                   l2_leaf_reg = 3,
+                   rsm = 1
+                   )
+catmod <- catboost.train(inpool, params = fit_params)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+0:	learn: 0.6571507	total: 16.7ms	remaining: 1.65s
+1:	learn: 0.6214312	total: 34.1ms	remaining: 1.67s
+2:	learn: 0.5900535	total: 54.9ms	remaining: 1.77s
+3:	learn: 0.5612429	total: 74.8ms	remaining: 1.79s
+4:	learn: 0.5416232	total: 94.7ms	remaining: 1.8s
+5:	learn: 0.5122393	total: 114ms	remaining: 1.79s
+6:	learn: 0.4950058	total: 135ms	remaining: 1.79s
+7:	learn: 0.4692697	total: 156ms	remaining: 1.79s
+8:	learn: 0.4515842	total: 174ms	remaining: 1.75s
+9:	learn: 0.4383155	total: 187ms	remaining: 1.68s
+10:	learn: 0.4266678	total: 199ms	remaining: 1.61s
+11:	learn: 0.4074968	total: 215ms	remaining: 1.58s
+12:	learn: 0.3975155	total: 226ms	remaining: 1.51s
+13:	learn: 0.3878629	total: 237ms	remaining: 1.45s
+14:	learn: 0.3750313	total: 251ms	remaining: 1.42s
+15:	learn: 0.3658158	total: 266ms	remaining: 1.4s
+16:	learn: 0.3569856	total: 276ms	remaining: 1.35s
+17:	learn: 0.3485129	total: 287ms	remaining: 1.31s
+18:	learn: 0.3413514	total: 300ms	remaining: 1.28s
+19:	learn: 0.3346430	total: 313ms	remaining: 1.25s
+20:	learn: 0.3257840	total: 331ms	remaining: 1.25s
+21:	learn: 0.3181686	total: 351ms	remaining: 1.25s
+22:	learn: 0.3108272	total: 370ms	remaining: 1.24s
+23:	learn: 0.3030650	total: 389ms	remaining: 1.23s
+24:	learn: 0.2975940	total: 409ms	remaining: 1.23s
+25:	learn: 0.2907870	total: 427ms	remaining: 1.22s
+26:	learn: 0.2864073	total: 444ms	remaining: 1.2s
+27:	learn: 0.2832268	total: 464ms	remaining: 1.19s
+28:	learn: 0.2807401	total: 485ms	remaining: 1.19s
+29:	learn: 0.2777773	total: 506ms	remaining: 1.18s
+30:	learn: 0.2742532	total: 524ms	remaining: 1.17s
+31:	learn: 0.2701718	total: 544ms	remaining: 1.16s
+32:	learn: 0.2676361	total: 563ms	remaining: 1.14s
+33:	learn: 0.2649810	total: 580ms	remaining: 1.13s
+34:	learn: 0.2636399	total: 600ms	remaining: 1.11s
+35:	learn: 0.2592926	total: 619ms	remaining: 1.1s
+36:	learn: 0.2571843	total: 631ms	remaining: 1.07s
+37:	learn: 0.2562210	total: 640ms	remaining: 1.04s
+38:	learn: 0.2545411	total: 652ms	remaining: 1.02s
+39:	learn: 0.2516069	total: 663ms	remaining: 995ms
+40:	learn: 0.2496398	total: 674ms	remaining: 970ms
+41:	learn: 0.2474086	total: 685ms	remaining: 945ms
+42:	learn: 0.2458239	total: 699ms	remaining: 927ms
+43:	learn: 0.2444295	total: 711ms	remaining: 905ms
+44:	learn: 0.2401516	total: 722ms	remaining: 883ms
+45:	learn: 0.2372965	total: 733ms	remaining: 860ms
+46:	learn: 0.2338689	total: 745ms	remaining: 840ms
+47:	learn: 0.2331415	total: 757ms	remaining: 820ms
+48:	learn: 0.2327201	total: 766ms	remaining: 797ms
+49:	learn: 0.2299527	total: 777ms	remaining: 777ms
+50:	learn: 0.2291103	total: 789ms	remaining: 758ms
+51:	learn: 0.2284340	total: 801ms	remaining: 739ms
+52:	learn: 0.2267816	total: 812ms	remaining: 720ms
+53:	learn: 0.2231718	total: 824ms	remaining: 702ms
+54:	learn: 0.2221505	total: 835ms	remaining: 683ms
+55:	learn: 0.2193230	total: 848ms	remaining: 666ms
+56:	learn: 0.2182676	total: 860ms	remaining: 649ms
+57:	learn: 0.2171348	total: 871ms	remaining: 630ms
+58:	learn: 0.2166233	total: 882ms	remaining: 613ms
+59:	learn: 0.2158233	total: 893ms	remaining: 596ms
+60:	learn: 0.2142660	total: 905ms	remaining: 579ms
+61:	learn: 0.2138851	total: 917ms	remaining: 562ms
+62:	learn: 0.2127276	total: 928ms	remaining: 545ms
+63:	learn: 0.2119463	total: 942ms	remaining: 530ms
+64:	learn: 0.2116070	total: 957ms	remaining: 515ms
+65:	learn: 0.2106625	total: 969ms	remaining: 499ms
+66:	learn: 0.2096905	total: 981ms	remaining: 483ms
+67:	learn: 0.2095111	total: 997ms	remaining: 469ms
+68:	learn: 0.2087956	total: 1.01s	remaining: 456ms
+69:	learn: 0.2083230	total: 1.04s	remaining: 444ms
+70:	learn: 0.2063132	total: 1.06s	remaining: 432ms
+71:	learn: 0.2059044	total: 1.07s	remaining: 418ms
+72:	learn: 0.2058522	total: 1.09s	remaining: 405ms
+73:	learn: 0.2053773	total: 1.11s	remaining: 391ms
+74:	learn: 0.2046195	total: 1.13s	remaining: 377ms
+75:	learn: 0.2037450	total: 1.14s	remaining: 361ms
+76:	learn: 0.2015320	total: 1.15s	remaining: 345ms
+77:	learn: 0.2014166	total: 1.16s	remaining: 328ms
+78:	learn: 0.2006063	total: 1.18s	remaining: 312ms
+79:	learn: 0.2001098	total: 1.19s	remaining: 297ms
+80:	learn: 0.1998534	total: 1.2s	remaining: 281ms
+81:	learn: 0.1994566	total: 1.21s	remaining: 266ms
+82:	learn: 0.1994041	total: 1.22s	remaining: 250ms
+83:	learn: 0.1975834	total: 1.23s	remaining: 235ms
+84:	learn: 0.1971524	total: 1.24s	remaining: 220ms
+85:	learn: 0.1968805	total: 1.27s	remaining: 207ms
+86:	learn: 0.1964372	total: 1.29s	remaining: 193ms
+87:	learn: 0.1957460	total: 1.31s	remaining: 179ms
+88:	learn: 0.1949511	total: 1.33s	remaining: 165ms
+89:	learn: 0.1940386	total: 1.34s	remaining: 150ms
+90:	learn: 0.1938085	total: 1.36s	remaining: 134ms
+91:	learn: 0.1928066	total: 1.37s	remaining: 119ms
+92:	learn: 0.1926680	total: 1.38s	remaining: 104ms
+93:	learn: 0.1914753	total: 1.4s	remaining: 89.1ms
+94:	learn: 0.1913815	total: 1.41s	remaining: 74.1ms
+95:	learn: 0.1901693	total: 1.42s	remaining: 59.2ms
+96:	learn: 0.1886325	total: 1.43s	remaining: 44.3ms
+97:	learn: 0.1885540	total: 1.44s	remaining: 29.5ms
+98:	learn: 0.1884326	total: 1.46s	remaining: 14.7ms
+99:	learn: 0.1877244	total: 1.47s	remaining: 0us
+#+end_example
+#+begin_src R
+pred = catboost.predict(catmod, outpool,
+                               prediction_type = 'Probability')
+#+end_src
+
+#+RESULTS:
+To double-chekc the weighted log-loss: https://towardsdatascience.com/understanding-binary-cross-entropy-log-loss-a-visual-explanation-a3ac6025181a
+
+#+begin_src R
+w = outw / sum(outw)
+y = outy
+p = pred
+- sum(w*(y*log(pred)+(1-y)*log(1-p)))
+#+end_src
+
+#+RESULTS:
+: [1] 0.2350202
+
+** XGBoost
+XGBoost can be trained more efficiently using its own matrix class.
+#+begin_src R :tangle cor_train_base.R
+library(xgboost)
+
+smxtrain = sparse.model.matrix(~.+0,as.data.frame(xtrain))
+## smxtest = sparse.model.matrix(~.+0,outx)
+
+dtrain = xgb.DMatrix(data = smxtrain, label = ytrain)
+## dtest = xgb.DMatrix(data = smxtest, label = outy)
+#+end_src
+
+#+RESULTS:
+
+- Tuned hyperparameters of XGBoost.
+#+BEGIN_SRC R :tangle cor_train_base.R
+#default parameters
+xgb_params <- list(objective = "binary:logistic",
+                   ## booster = "gbtree",
+                   booster = "dart",
+                   max_depth = c(10),
+                   min_child_weight = c(1),
+                   gamma = c(1),
+                   colsample_bytree = c(0.9),
+                   subsample = c(0.8),
+                   eta = c(0.1)
+                   # alpha = c(0),
+                   # lambda = c(0)
+                   )
+#+END_SRC
+
+#+RESULTS:
+
+XGBoost has a CV function accepting fold indices.
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :results none :tangle cor_train_base.R
+set.seed(1)
+xgbcv <- xgb.cv(params = xgb_params,
+                weight = weights,
+                data = dtrain,
+                nrounds = 300,
+                prediction = T,
+                folds = data_folds,
+                print_every_n = 10,
+                early_stopping_rounds = 10,
+                metrics = c("logloss")
+                )
+xgb = list(prob = xgbcv$pred,
+           logloss =  wlogloss(y = ytrain, p = xgbcv$pred, w=weights),
+           best_iter = xgbcv$best_ntreelimit)
+#+END_SRC
+
+The below is to save a model trained based on the full traing data.
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :tangle cor_train_base.R
+##model training
+xgb_final = xgb.train (params = xgb_params, data = dtrain, nrounds = xgb$best_iter)
+xgb_imp = xgb.importance(model = xgb_final) # use Gain for importance
+# xgb.plot.importance(importance_matrix = xgb_imp[1:40])
+xgb.save(xgb_final, 'cor_xgb_model')
+#+END_SRC
+
+#+RESULTS:
+: [1] TRUE
+
+*** test data
+To create a meat-feature of the super learner for the test data.
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+xgb_final = xgb.load('xgb_model')
+smxtest = sparse.model.matrix(~.+0,xtest)
+dtest = xgb.DMatrix(data = smxtest)
+xgb_test_prob = predict(xgb_final, dtest)
+}
+#+end_src
+
+*** random forest using xgboost                                  :noexport:
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+#+begin_src R
+rf_params = list(
+  colsample_bynode= 0.8,
+  learning_rate= 1,
+  max_depth= 10,
+  num_parallel_tree= 500,
+  objective= 'binary:logistic',
+  subsample= 0.8
+)
+#+end_src
+
+#+RESULTS:
+
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :results none
+set.seed(1)
+rfcv <- xgb.cv(params = rf_params,
+               weight = ww,
+               data = dtrain,
+               nrounds = 100,
+               prediction = T,
+               folds = data_folds,
+               print_every_n = 10,
+               early_stopping_rounds = 20,
+               metrics = c("logloss")
+                )
+#+END_SRC
+
+#+BEGIN_SRC R
+rf = list(prob = rfcv$pred, logloss = wlogloss(yy,rfcv$pred,ww), best_iter = rfcv$best_ntreelimit)
+#+END_SRC
+
+#+RESULTS:
+: Error: object 'rfcv' not found
+
+*** XgBoost                                                      :noexport:
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+#+begin_src R
+#train = cbind(xtrain,cat_to_numeric)
+#fe_train = cbind(xtrain[,-cat_var], cat_to_numeric)
+
+#train = cbind(xtrain[,-c(num_code_cat,cat_var)],cat_to_numeric,ytrain)
+train = cbind(xtrain,ytrain)
+
+smxtrain = sparse.model.matrix(ytrain~.+0,train)
+
+dtrain <- xgb.DMatrix(data = smxtrain, label = ytrain)
+# dtest <- xgb.DMatrix(data = x_test, label = y_test)
+#+end_src
+
+#+RESULTS:
+
+Specify that we want to learn a binary classification. We can choose a
+performance metric for a learner. More parameters can be
+specified below.
+
+#+BEGIN_SRC R
+#default parameters
+params <- list(objective = "binary:logistic")
+#+END_SRC
+
+#+RESULTS:
+
+=xgb.cv()= can be used for parameter tuning. The below performs ~nfold~-fold CV with
+maximum ~nrounds~ training rounds. It evaluates =metrics= every =print_every_n= training round.
+If the model doesn't improve the specified performance metric for
+=early_stopping_round=, then training will be stopped. ~stratified = T~ means CV
+rearranges the data as to ensure each fold is a good representative of the whole
+training data.
+
+#+attr_ravel: eval=T
+#+BEGIN_SRC R
+set.seed(1)
+xgbcv <- xgb.cv(params = params,
+                weight=weights,
+                data = dtrain,
+                nrounds = 1000,
+                nfold = 5, showsd = T, stratified = T, print_every_n = 10,
+                early_stopping_rounds = 50, metrics = "auc")
+
+# best iteration
+xgbcv$best_iteration
+#+END_SRC
+
+with numeric, with sparse model matrix
+#+begin_example
+[1]	train-auc:0.916909+0.002401	test-auc:0.913668+0.003691
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951534+0.000342	test-auc:0.946484+0.001509
+[21]	train-auc:0.956962+0.000407	test-auc:0.950562+0.001299
+[31]	train-auc:0.960254+0.000401	test-auc:0.952290+0.001248
+[41]	train-auc:0.962633+0.000389	test-auc:0.953159+0.001217
+[51]	train-auc:0.964356+0.000401	test-auc:0.953669+0.001196
+[61]	train-auc:0.965816+0.000430	test-auc:0.953907+0.001179
+[71]	train-auc:0.967288+0.000394	test-auc:0.954066+0.001261
+[81]	train-auc:0.968585+0.000438	test-auc:0.953960+0.001233
+[91]	train-auc:0.969693+0.000415	test-auc:0.954035+0.001206
+[101]	train-auc:0.971003+0.000320	test-auc:0.953887+0.001215
+[111]	train-auc:0.971945+0.000409	test-auc:0.953817+0.001251
+[121]	train-auc:0.972951+0.000322	test-auc:0.953808+0.001233
+Stopping. Best iteration:
+[72]	train-auc:0.967388+0.000414	test-auc:0.954074+0.001294
+[1] 72
+#+end_example
+
+with cat and numeric, with sparse model matrix
+#+begin_example
+[1]	train-auc:0.916908+0.002416	test-auc:0.913685+0.003602
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951582+0.000336	test-auc:0.946578+0.001563
+[21]	train-auc:0.957363+0.000407	test-auc:0.950768+0.001380
+[31]	train-auc:0.960659+0.000514	test-auc:0.952485+0.001162
+[41]	train-auc:0.963076+0.000589	test-auc:0.953191+0.001268
+[51]	train-auc:0.965005+0.000296	test-auc:0.953765+0.001250
+[61]	train-auc:0.966371+0.000271	test-auc:0.954033+0.001209
+[71]	train-auc:0.967621+0.000340	test-auc:0.954191+0.001235
+[81]	train-auc:0.968619+0.000412	test-auc:0.954219+0.001271
+[91]	train-auc:0.969470+0.000405	test-auc:0.954314+0.001312
+[101]	train-auc:0.970657+0.000380	test-auc:0.954335+0.001286
+[111]	train-auc:0.971589+0.000402	test-auc:0.954322+0.001277
+[121]	train-auc:0.972480+0.000261	test-auc:0.954231+0.001199
+[131]	train-auc:0.973313+0.000328	test-auc:0.954232+0.001172
+[141]	train-auc:0.973989+0.000395	test-auc:0.954189+0.001173
+Stopping. Best iteration:
+[100]	train-auc:0.970548+0.000376	test-auc:0.954352+0.001275
+[1] 100
+#+end_example
+
+with cat and numeric, no sparse model matrix
+#+begin_example
+[1]	train-auc:0.914789+0.002711	test-auc:0.912481+0.002133
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951206+0.000255	test-auc:0.946283+0.001577
+[21]	train-auc:0.956617+0.000420	test-auc:0.949964+0.001346
+[31]	train-auc:0.960167+0.000496	test-auc:0.952053+0.001336
+[41]	train-auc:0.962918+0.000513	test-auc:0.953003+0.001348
+[51]	train-auc:0.964922+0.000377	test-auc:0.953628+0.001121
+[61]	train-auc:0.966165+0.000221	test-auc:0.953868+0.001130
+[71]	train-auc:0.967425+0.000223	test-auc:0.954152+0.001133
+[81]	train-auc:0.968568+0.000442	test-auc:0.954096+0.001238
+[91]	train-auc:0.969877+0.000392	test-auc:0.954146+0.001200
+[101]	train-auc:0.970704+0.000389	test-auc:0.954093+0.001252
+[111]	train-auc:0.971523+0.000245	test-auc:0.954071+0.001319
+[121]	train-auc:0.972482+0.000338	test-auc:0.953982+0.001263
+Stopping. Best iteration:
+[74]	train-auc:0.967774+0.000267	test-auc:0.954210+0.001197
+[1] 74
+#+end_example
+
+#+attr_ravel: eval=F
+#+BEGIN_SRC R
+  ##model training
+  mm <- xgb.train (params = params, data = dtrain, nrounds = 72)
+
+  xgb_imp <- xgb.importance (model = mm)
+  xgb.plot.importance(importance_matrix = xgb_imp[1:20])
+#+END_SRC
+
+#+RESULTS:
+: Error in check.booster.params(params, ...) : object 'params' not found
+: Error in xgb.importance(model = mm) : object 'mm' not found
+
+importance
+R> cname[c(4,17,10,19,5,39,13,1,20,18,30,9,23,3,6,2,8)]
+ [1] "detailed occupation recode"         "capital gains"
+ [3] "major occupation code"              "dividends from stocks"
+ [5] "education"                          "veterans benefits"
+ [7] "sex"                                "age"
+ [9] "tax filer stat"                     "capital losses"
+[11] "migration prev res in sunbelt"      "major industry code"
+[13] "detailed household and family stat" "detailed industry recode"
+[15] "wage per hour"                      "class of worker"
+[17] "marital stat"
+
+** ranger
+An R package ranger is used to train the random forest. An R pacakge caret is a
+wrapper of many R packages, which we will use for training. The below is caret's model training parameters.
+#+begin_src R :tangle cor_train_base.R
+my_tr = trainControl(
+method = 'cv',
+number = nfold,
+classProbs = TRUE,
+savePredictions = "all",
+## summaryFunction = twoClassSummary, # AUC
+## ,summaryFunction = prSummary # PR-AUC
+## ,summaryFunction = fSummary # F1
+summaryFunction = mnLogLoss,
+search = "random",
+verboseIter = TRUE,
+allowParallel = TRUE,
+indexOut = data_folds
+)
+#+end_src
+
+#+RESULTS:
+
+Unlike CatBoost or XGBoost, ranger doesn't have an internal handling mecahnism
+of missing values.
+#+begin_src R :tangle cor_train_base.R
+## imputation needs for ranger
+ixtrain = xtrain
+ixtrain[is.na(ixtrain)] = -99
+
+## above50k needs to be "positive"
+## caret considers 1st class as "positive" class
+fytrain = factor(ytrain)
+levels(fytrain) = c("no_cor", "cor")
+#+end_src
+
+#+RESULTS:
+
+- Tuned hyperparameters of ranger.
+#+begin_src R :tangle cor_train_base.R
+ranger_grid <- expand.grid(
+  mtry = c(20),
+  splitrule = "gini",
+  min.node.size = c(10)
+)
+#+end_src
+
+#+RESULTS:
+
+The below is for CV and saving a final model.
+#+begin_src R :tangle cor_train_base.R
+set.seed(1)
+ranger_tune <- train(x = ixtrain, y = fytrain,
+                     method = "ranger",
+                     trControl = my_tr,
+                     tuneGrid = ranger_grid,
+                     weights = weights,
+                     preProc = NULL,
+                     importance = 'impurity',
+                     num.trees = 500
+                     )
+
+temp = ranger_tune$pred$co
+ranger_id = ranger_tune$pred$rowIndex
+ranger_prob = temp[order(ranger_id)]
+ranger_final = ranger_tune$finalModel
+ranger_imp = varImp(ranger_tune)$importance
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Fold1: mtry=20, splitrule=gini, min.node.size=10
+- Fold1: mtry=20, splitrule=gini, min.node.size=10
++ Fold2: mtry=20, splitrule=gini, min.node.size=10
+- Fold2: mtry=20, splitrule=gini, min.node.size=10
++ Fold3: mtry=20, splitrule=gini, min.node.size=10
+- Fold3: mtry=20, splitrule=gini, min.node.size=10
++ Fold4: mtry=20, splitrule=gini, min.node.size=10
+- Fold4: mtry=20, splitrule=gini, min.node.size=10
+Aggregating results
+Fitting final model on full training set
+Warning message:
+In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
+  The metric "Accuracy" was not in the result set. logLoss will be used instead.
+#+end_example
+
+=ranger= gives the confusion matrix if =probability= is set to =FALSE=.
+#+begin_src R
+ranger_final = ranger(x = ixtrain, y = fytrain,
+                      num.trees = 500,mtry = 20,importance = "impurity",
+                      write.forest = TRUE,
+                      probability = TRUE,
+                      min.node.size = 10,
+                      class.weights = NULL, splitrule = "gini", classification = TRUE)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :tangle cor_train_base.R
+saveRDS(ranger_final, "cor_ranger_final.rds")
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results replace
+caret_wlogloss(ranger_tune$pred)
+#+end_src
+
+#+RESULTS:
+: [1] 0.316729
+
+#+begin_src R :results replace
+mean(ranger_tune$resample[,1]) # incorrect. not using weight
+#+end_src
+
+#+RESULTS:
+: [1] 0.3166399
+
+*** test data
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+ranger_final = readRDS("ranger_final.rds")
+ixtest = xtest
+ixtest[is.na(ixtest)] = -99
+ranger_test_prob = predict(ranger_final, ixtest)$predictions[,1]
+}
+#+end_src
+
+#+RESULTS:
+
+To create a meat-feature of the super learner for the test data.
+
+* Fit super learners
+A single layer artificial neural network is chosen for the super learner. It is
+trained using caret. After a few rounds of tuninig, 3 hidden units and 0.3 decay
+for regularization are chosen. The super learner accepts predictions from the
+three base learners as meta-features.
+#+begin_src R :tangle train_super.R
+# set caret training parameters
+
+stk_grid =  NULL  # default tuning parameters
+
+# model specific training parameter
+stk_tr  = trainControl(
+  method = 'cv',
+  number = 4L,
+  classProbs = TRUE,
+  savePredictions = "all",
+  summaryFunction = mnLogLoss,
+  ## summaryFunction = twoClassSummary, # AUC
+  ## summaryFunction = prSummary, # PR-AUC
+  ## summaryFunction = fSummary, # F1
+  ## search = "random",
+  verboseIter = T,
+  allowParallel = T,
+  indexOut = data_folds
+)
+
+nnet_grid = expand.grid(size = 3,
+                        decay = 0.1)
+
+sup_x = data.frame(cat = cat_prob,xgb = xgb$prob,ranger = ranger_prob)
+sup_y = fytrain
+ #+end_src
+
+ #+RESULTS:
+Here, CV is only for evaluation of our classifier. We save the model as before.
+ #+begin_src R :results none :tangle train_super.R
+ # train the model
+ set.seed(1)
+ super_tune = train(x=sup_x, y=sup_y,
+              weights = weights,
+              method = "nnet",
+              trControl = stk_tr,
+              tuneGrid = nnet_grid,
+              verbose = T)
+## super_tune
+super_final = super_tune$finalModel
+super_imp = varImp(super_final)
+saveRDS(super_final, "super_final.rds")
+#+end_src
+
+#+RESULTS:
+
+*** test data
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+super_final = readRDS("super_final.rds")
+sup_x_test = data.frame(cat = cat_test_prob,xgb = xgb_test_prob,ranger = ranger_test_prob)
+super_test_prob = 1-predict(super_final, sup_x_test)
+
+}
+label_test = 1*(super_test_prob > 0.4122)
+#+end_src
+
+#+RESULTS:
+:
+: Error: object 'super_test_prob' not found
+
+** evaluation statistics
+An R package caret passes weights to learners for model training. However, the
+package doesn't use weights to calculate perforamce metrics. This implies with the presence of case weights
+caret tuning and evaluating models are not reliable.
+
+#+begin_src R :results graphics :file roccurve.pdf
+my_thres = 0.44
+data = super_tune$pred
+ff = data$Resample
+obs = data$obs
+prob = 1 - data$co
+pred = 1 * (prob > my_thres)
+ww = data$weights
+
+tp.fp = WeightedROC(prob, obs, ww)
+gg <- ggplot()+geom_path(aes(FPR, TPR), data=tp.fp)+coord_equal()
+print(gg)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results replace
+WeightedAUC(tp.fp)
+#+end_src
+
+#+RESULTS:
+: [1] 0.2380658
+
+#+begin_src R :results replace
+caret_wlogloss(super_tune$pred)
+#+end_src
+
+#+RESULTS:
+: 0.687937580891445
+
+** optimal threshold
+:PROPERTIES:
+:header-args:R: :results output
+:END:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+theshold = 0.4122, we expect the weighted F1 = 0.8702.
+#+begin_src R :results replace
+data = super_tune$pred
+vc = (1:10000) / 10000
+
+out = matrix(0,length(vc),4)
+nr = 0
+for (cut in vc){
+  temp = caret_wf1(data, cut)
+  nr = nr + 1
+  out[nr,] = c(temp$precision, temp$recall, cut, temp$f1)
+}
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results output
+out[which.max(out[,4]),4]
+out[which.max(out[,4]),3]
+#+end_src
+
+#+RESULTS:
+: 0.0001
+
+#+begin_src R :results graphics :file f1path.png
+df1 = data.frame(Threshold = out[,3], F1 = out[,4])
+gg <- ggplot()+geom_path(aes(Threshold, F1), data=df1)+coord_equal()
+print(gg)
+#+end_src
+
+#+RESULTS:
+[[file:f1path.png]]
+
+** optimal theshold - this is based on caret: not weight involved in metrics :noexport:
+
+threshold: A numeric vector of candidate probability thresholds between [0,1].
+If the class probability corresponding to the *first level of the outcome* is
+greater than the threshold, the data point is classified as that level.
+#+begin_src R
+stk_tr$summaryFunction = prSummary
+
+set.seed(1)
+resample_stats <- thresholder(ranger_final,
+                              threshold = seq(0.3, 0.5, by = 0.01),
+                              final = TRUE)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+** optimal threshold for ranger
+:PROPERTIES:
+:header-args:R: :results output
+:END:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+theshold = 0.4122, we expect the weighted F1 = 0.8702.
+#+begin_src R
+stk_tr$summaryFunction = prSummary
+
+set.seed(1)
+resample_stats <- thresholder(ranger_tune,
+                              threshold = seq(0.3, 0.5, by = 0.01),
+                              final = TRUE)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+#+RESULTS:
+
+** evaluation figures                                             :noexport:
+
+#+begin_src R
+stk_tr$summaryFunction = prSummary
+
+set.seed(1)
+resample_stats <- thresholder(super_tune,
+                              threshold = seq(0, 1, by = 0.025),
+                              final = TRUE)
+#+end_src
+
+#+RESULTS:
+: Warning messages:
+: 1: In .fun(piece, ...) :
+:   The following columns have missing values (NA), which have been removed: 'Neg Pred Value'.
+:
+: 2: In .fun(piece, ...) :
+:   The following columns have missing values (NA), which have been removed: 'Pos Pred Value', 'Precision', 'F1'.
+
+#+begin_src R :results graphics :file f1.png
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+ggplot(resample_stats, aes(x = prob_threshold, y = F1)) +
+  geom_point()
+#+end_src
+
+#+RESULTS:
+[[file:f1.png]]
+
+#+begin_src R :results graphics :file roc-like.png
+     ggplot(resample_stats, aes(x = prob_threshold, y = Sensitivity)) +
+       geom_point() +
+       geom_point(aes(y = Specificity), col = "red")
+#+end_src
+
+#+RESULTS:
+[[file:roc-like.png]]
+
+#+begin_src R :results graphics :file pr-like.png
+     ggplot(resample_stats, aes(x = prob_threshold, y = Precision)) +
+       geom_point() +
+       geom_point(aes(y = Recall), col = "red")
+#+end_src
+
+#+RESULTS:
+[[file:pr-like.png]]
+
+#+begin_src R :results graphics :file j.png
+ggplot(resample_stats, aes(x = prob_threshold, y = J)) +
+  geom_point()
+#+end_src
+
+#+RESULTS:
+[[file:j.png]]
+
+#+begin_src R :results graphics :file dist.png
+ggplot(resample_stats, aes(x = prob_threshold, y = Dist)) +
+  geom_point()
+#+end_src
+
+#+RESULTS:
+[[file:dist.png]]
+
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+* Summary
+This section is to generate summary statistics for the super learner. First, we present the variable importance.
+
+#+begin_src R
+temp = xgb_imp
+vimp = as.data.frame(temp[,c(1,2)])
+colnames(vimp)[2] = "xgb"
+#+end_src
+
+#+begin_src R :results value
+print(vimp)
+#+end_src
+
+#+RESULTS:
+: org_babel_R_eoe
+
+#+begin_src R
+ctemp = data.frame(Feature = colnames(xtrain), cat = cat_imp)
+rtemp = data.frame(Feature = row.names(ranger_imp), ranger = ranger_imp)
+colnames(rtemp)[2] = "ranger"
+vimp = inner_join(vimp, ctemp, by = "Feature")
+vimp = inner_join(vimp, rtemp, by = "Feature")
+
+row.names(vimp) = vimp[,1]
+vimp = vimp[,-1]
+ss = apply(vimp, 2, sum)
+vimp = t(t(vimp) / ss) * 100
+
+stemp = vimp %*% c(super_imp$Overall)
+
+stemp = stemp / sum(stemp) * 100
+vimp = cbind(vimp,stemp)
+colnames(vimp)[4] = "super"
+vimp = vimp[order(vimp[,4],decreasing = TRUE),]
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results output
+rtemp = data.frame(ranger = ranger_imp[,1])
+row.names(rtemp) = row.names(ranger_imp)
+rtemp %>% arrange(-ranger)
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                             ranger
+orig_amounts           100.00000000
+orig_days               55.28305498
+comm_out_state          23.81613322
+aadt                    17.08559024
+ind_agri                15.79437940
+pop_16yrover            14.00326701
+comm_etc                12.47300794
+comm_pubtransport       12.26704644
+inde_ed_meds            11.69747449
+mov_gdp                 11.61620270
+worker_med_age          11.52462634
+aadt_truck              11.09257977
+ind_other               10.26340801
+pop_tot                 10.09549874
+med_ind_income           9.89115641
+ncat_pjy_type            9.73022356
+no_lane                  9.54970994
+ind_transport            9.14557467
+comm_bike                9.06324908
+ind_manuf                8.91496511
+ind_public               8.80781755
+comm_workhome            8.75014271
+mean_travel_time         8.73241998
+med_age                  8.40942196
+work_hours_mean          8.09611812
+hhd_avg_size             7.91708015
+comm_workers_per_car     7.84304275
+ind_fin                  7.80778708
+poverty_below            7.67862348
+ind_whole                7.66380253
+mov_unemp                7.60964676
+poverty_above            7.49980825
+comm_car_carpool         7.44009042
+comm_walk                7.28567383
+ind_const                7.27869478
+ind_art                  6.97685239
+hhd_mean_income          6.82505798
+pop_16yrover_worker      6.62510531
+Ind_tot                  6.47569054
+mean_per_capita_income   6.31876309
+ind_retail               6.30799878
+ind_pro                  6.14584921
+hhd_med_income           6.09128794
+comm_in_county           5.95263106
+comm_car_tot             5.88498090
+mov_prec                 5.75859930
+mov_max_temp             5.69409065
+hhd_no                   5.51283191
+comm_car_alone           5.48561755
+comm_out_county          5.44256956
+ind_info                 5.37217002
+mov_avg_temp             4.83491927
+pav_cond                 4.34399075
+speedlimit               3.79827636
+access_cla               3.05447010
+ncat_funclass            2.83228411
+ncat_access_con          0.63886798
+bridge                   0.46895477
+ncat_road_sie            0.05283404
+railcross                0.00000000
+#+end_example
+
+#+begin_src R
+vimp
+fwrite(vimp, "vimp.csv")
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                             Xgboost     cat     ranger      super
+orig_amounts           27.4569897 30.0696230 18.3006031 20.1294958
+orig_days               1.8507219  9.1362558 10.1171325  9.4300615
+comm_out_state          7.4948217  5.0429032  4.3584960  4.6503887
+aadt                    1.6722104  4.7692312  3.1267661  3.1873066
+pop_16yrover            4.7366100  2.2263515  2.5626823  2.6839644
+ind_agri                1.5505754  0.9589156  2.8904667  2.6019110
+comm_etc                2.8190786  3.0704058  2.2826357  2.3996070
+inde_ed_meds            3.5771710  1.7498496  2.1407084  2.2039919
+comm_pubtransport       0.2950515  1.9154870  2.2449435  2.0730714
+worker_med_age          1.6881325  1.8827348  2.1090761  2.0564563
+mov_gdp                 0.3918593  2.5745667  2.1258351  2.0471375
+med_ind_income          2.9641608  1.8319661  1.8101413  1.8945522
+no_lane                 4.6481355  1.1417909  1.7476545  1.8937639
+pop_tot                 1.5192778  2.5153978  1.8475372  1.8909080
+aadt_truck              0.4793345  1.6783236  2.0300090  1.8843609
+work_hours_mean         3.5925005  3.6569794  1.4816384  1.8494991
+comm_bike               0.4182232  3.5661551  1.6586292  1.7609250
+comm_workers_per_car    2.4811066  3.7979335  1.4353241  1.7460127
+ind_transport           2.1467643  1.6619982  1.6736953  1.7062344
+ind_manuf               1.3354985  2.2235216  1.6314924  1.6695820
+ncat_pjy_type           1.5273111  0.0000000  1.7806896  1.5846335
+mean_travel_time        1.4186935  0.0000000  1.5980855  1.4255548
+med_age                 2.0451135  0.0000000  1.5389749  1.4212003
+ind_public              0.8291065  0.0000000  1.6118837  1.3949797
+comm_workhome           0.7223356  0.0000000  1.6013289  1.3786241
+ind_whole               0.7668889  1.1707447  1.4025221  1.3340613
+mov_unemp               2.4454560  0.0000000  1.3926112  1.3284228
+hhd_avg_size            0.4582042  0.8105652  1.4488734  1.3144769
+ind_fin                 0.4194999  0.4705213  1.4288721  1.2611508
+poverty_below           0.2118142  0.6284849  1.4052344  1.2425520
+comm_car_carpool        0.7695091  0.0000000  1.3615814  1.1832868
+comm_walk               0.8076995  0.0000000  1.3333222  1.1625873
+comm_out_county         1.3641909  2.0782184  0.9960231  1.1304354
+hhd_no                  3.6311435  0.0000000  1.0088815  1.0948799
+ind_art                 0.3610848  0.0000000  1.2768061  1.0839243
+pop_16yrover_worker     0.9846100  0.0000000  1.2124342  1.0750031
+hhd_med_income          0.6836555  1.0107510  1.1147424  1.0736303
+mean_per_capita_income  1.4218588  0.0000000  1.1563718  1.0596954
+speedlimit              0.9048742  4.1260360  0.6951075  1.0530176
+pav_cond                1.2335819  2.9023589  0.7949765  1.0368878
+Ind_tot                 0.7602129  0.0000000  1.1850904  1.0363516
+mov_prec                0.4136822  1.3319293  1.0538584  1.0360394
+ind_retail              0.1813928  0.0000000  1.1544018  0.9696738
+comm_car_alone          1.5872516  0.0000000  1.0039011  0.9451154
+ind_info                0.7533413  0.0000000  0.9831395  0.8684885
+mov_avg_temp            0.1792639  0.0000000  0.8848194  0.7460967
+Error in fwrite(vimp, "vimp.csv") : could not find function "fwrite"
+#+end_example
+
+** weighted logloss
+- The super learner greatly improve weighted logloss of base ones.
+#+begin_src R
+wl = c(mean(cv_logloss),
+xgb$logloss,
+caret_wlogloss(ranger_tune$pred),
+caret_wlogloss(super_tune$pred)
+)
+wl
+mname = c("L0-CatBoost", "L0-XGBoost", "L0-RF", "L1-ANN")
+dw = data.frame(Learner = mname, Logloss = round(wl,4))
+#+end_src
+
+#+RESULTS:
+: [1] 0.6526904 0.6440919 0.3210542 0.6879376
+
+#+begin_src R :results graphics :file logloss.png
+# Outside bars
+gg =
+ggplot(data=dw, aes(x=Learner, y=Logloss)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=Logloss), vjust=-0.3, size=3.5)+
+  theme_minimal()
+#+end_src
+
+#+RESULTS:
+
+** Similarity among three base learners
+
+#+begin_src R :results graphics :file threeprob.png
+library(GGally)
+bdf = data.frame(xgb = xgb$prob, catb = cat_prob, ranger = ranger_prob)
+ggpairs(bdf, mapping = aes(color = fytrain, alpha=0.4),
+    lower = list(
+    continuous = wrap("points", alpha = 0.3,    size=0.1),
+    ## continuous = "smooth",
+    combo = "facetdensity")) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        ## panel.border = element_blank(),
+        panel.background = element_blank())
+#+end_src
+
+#+RESULTS:
+** features with high variable importance
+#+begin_src R :results graphics :file eda.png
+library(GGally)
+eda = data.frame(nX5 = xtrain$nX5,ICA2 = xtrain$ICA2, nX4 = xtrain$nX4, X1 = xtrain$X1, nX10 = xtrain$nX10, X13 = xtrain$X13, X62 = xtrain$X62, cPC1 = xtrain$cPC1)
+ggpairs(eda, mapping = aes(color = fytrain, alpha=0.4),
+    lower = list(
+    continuous = wrap("points", alpha = 0.3,    size=0.1),
+    ## continuous = "smooth",
+    combo = "facetdensity")) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        ## panel.border = element_blank(),
+        panel.background = element_blank())
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results graphics :file eda_ranger.png
+eda_ranger = xtrain[,colnames(xtrain) %in% row.names(ranger_imp)[order(ranger_imp, decreasing=T)][1:10]] %>% as.data.frame()
+ggpairs(eda_ranger, mapping = aes(color = fytrain, alpha=0.4),
+    lower = list(
+    continuous = wrap("points", alpha = 0.3,    size=0.1),
+    ## continuous = "smooth",
+    combo = "facetdensity")) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        ## panel.border = element_blank(),
+        panel.background = element_blank())
+#+end_src
+
+#+RESULTS:
+
+** some figure
+#+begin_src R
+attach(dx)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+## super_final = readRDS("ranger_final.rds")
+super_prob = 1 - ranger_final$predictions[,2]
+super_pred = c(1 * (super_prob > 0.4122))
+plot_prob(orig_amounts, orig_days, 0.2, "amounts", "days", prob = super_prob)
+#+end_src
+
+#+RESULTS:
+: Error in UseMethod("depth") : 
+:   no applicable method for 'depth' applied to an object of class "NULL"
+
+#+begin_src R
+super_final = readRDS("super_final.rds")
+super_prob = 1 - super_final$fitted.values
+super_pred = c(1 * (super_prob > 0.4122))
+plot_prob(comm_out_state, aadt, 0.5, "comm", "aadt", prob = super_prob)
+#+end_src
+
+#+RESULTS:
+
+* SOR-GLM regression models
+
+The ridge, lasso, and elastic net penalty can be used along with the
+logistic regression to build a binary or multiclass classifier. To
+implement the logistic regression using the =glmnet= package, one needs
+to specify =family="binomial"= in the option (=family="multinomial"= for the multiclass logistic model).
+
+In the =glmnet= package, a design matrix =X= should consist of numeric
+values. =famhist= is a factor variable, so we code =famhist==1 if
+present; 0 otherwise.
+
+#+begin_src R
+N = log(nrow(df)) # number of observations
+y <- sory
+#+end_src
+
+#+RESULTS:
+
+We here present the R code example for the logistic regression with the
+lasso penalty. In the cross validation, we estimate the
+misclassification error by specifying =type.measure="class"=. Some other
+error measure can be used as well (eg. deviance, AUC, etc.).
+
+#+BEGIN_SRC R
+set.seed(1)
+cvlasso = cv.glmnet(X,y,alpha=1,family="gaussian")
+cvlasso$lambda.min
+cvlasso$lambda.1se
+plot(cvlasso)
+
+lmlasso = glmnet(X, y, alpha=1, family="gaussian")
+vn = colnames(X)
+vnat = coef(lmlasso)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the end of the path
+plot(lmlasso, xvar = "lambda", xlim=c(-7.3,-1.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cvlasso$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+RESULTS:
+: [1] 0.02902478
+: [1] 0.2047641
+
+The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
+
+#+BEGIN_SRC R
+lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se, family="gaussian")
+coef(lmlasso)[coef(lmlasso) != 0]
+pred = predict(lmlasso,newx=X)
+#+END_SRC
+
+#+RESULTS:
+: Error in glmnet(X, y, alpha = 1, lambda = cvlasso$lambda.1se, family = "gaussian") :
+:   object 'cvlasso' not found
+: Error in coef(lmlasso) : object 'lmlasso' not found
+: Error in predict(lmlasso, newx = X) : object 'lmlasso' not found
+
+** The elastic net
+    :PROPERTIES:
+    :CUSTOM_ID: the-elastic-net
+    :END:
+
+#+BEGIN_SRC R
+set.seed(1)
+aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
+lena = length(aseq)
+
+# perform CV for each alpha in the sequence
+cv = list()
+mcvm = numeric(lena)
+## randomly choose fold ID for each observation
+foldid=sample(1:10,size=length(y),replace=TRUE)
+for(k in 1:lena){
+  cv[[k]] = cv.glmnet(X,y,foldid=foldid,alpha=aseq[k], family="gaussian")
+  mcvm[k] = min(cv[[k]]$cvm)
+}
+
+picka = which.min(mcvm)
+malpha = aseq[picka] # alpha for the best model
+malpha
+cv[[picka]]$lambda.1se
+#+END_SRC
+
+#+RESULTS:
+: [1] 1
+: [1] 0.2047641
+
+Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, family="gaussian")
+vnat = coef(lmenet)
+vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
+
+plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
+axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
+abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R
+lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se, family="gaussian" )
+coef(lmenet)
+pred = 1*(predict(lmenet,newx=X) > 0)
+tab = table(pred,y)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+82 x 1 sparse Matrix of class "dgCMatrix"
+                                             s0
+(Intercept)                           -1.316229
+orig_days                              0.000000
+orig_amounts                           .
+aadt                                   .
+aadt_truck                             .
+speedlimit                             .
+access_cla                             .
+pav_cond                               .
+no_lane                                .
+bridge                                 .
+railcross                              .
+pop_tot                                .
+pop_16yrover                           .
+med_age                                .
+med_ind_income                         .
+pop_16yrover_worker                    .
+comm_car_tot                           .
+comm_car_alone                         .
+comm_car_carpool                       .
+comm_workers_per_car                   .
+comm_pubtransport                      .
+comm_walk                              .
+comm_bike                              .
+comm_etc                               .
+comm_workhome                          .
+comm_in_county                         .
+comm_out_county                        .
+comm_out_state                         .
+mean_travel_time                       .
+hhd_no                                 .
+hhd_avg_size                           .
+hhd_med_income                         .
+hhd_mean_income                        .
+mean_per_capita_income                 .
+poverty_below                          .
+poverty_above                          .
+work_hours_mean                        .
+worker_med_age                         .
+Ind_tot                                .
+ind_agri                               .
+ind_const                              .
+ind_manuf                              .
+ind_whole                              .
+ind_retail                             .
+ind_transport                          .
+ind_info                               .
+ind_fin                                .
+ind_pro                                .
+inde_ed_meds                           .
+ind_art                                .
+ind_other                              .
+ind_public                             .
+unemp                                  .
+avg_temp                               .
+max_temp                               .
+prec                                   .
+gdp                                    .
+pjt_typeX1.New.Construction            .
+pjt_typeX2.Reconstruction              .
+pjt_typeX3.Resurfacing                 .
+pjt_typeX4.Widening...Resurfacing      .
+pjt_typeX5.Bridge.Construction         .
+pjt_typeX6.Bridge.Repair               .
+pjt_typeX7.Traffic.Operations          .
+pjt_typeX8.Miscellaneous.Construction  .
+pjt_typeZ.Other                        .
+road_sideL                             .
+road_sideR                             .
+funclass2                              .
+funclass4                              .
+funclass6                              .
+funclass7                              .
+funclass8                              .
+funclass9                              .
+funclass11                             .
+funclass12                             .
+funclass14                             .
+funclass16                             .
+funclass17                             .
+funclass18                             .
+access_con2                            .
+access_con3                            .
+#+end_example
+** SOR stepwise
+The goal is to predict SOR using the linear regression. The target variable is
+\[
+\log(\text{modified\_days} - \text{orig\_days} +1) - \log(orig\_days)
+\]
+The forward selection is used.
+#+begin_src R
+fmod = lm(lsor~.,data = as.data.frame(X)) # full model
+nmod = lm(lsor~1,data = as.data.frame(X)) # null model
+
+# forward stepwise (BIC)
+fstep = step(nmod, scope=list(lower=nmod, upper=fmod), direction="forward", k=log(N), trace=FALSE)
+fstep$anova # enumerated variables that are added and dropped
+coef(fstep) # coefficients in the chosen model
+BIC(fstep)
+AIC(fstep)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                                  Step Df  Deviance Resid. Df Resid. Dev        AIC
+1                                      NA        NA       242   206.7864  -37.51069
+2                           + max_temp -1 10.188582       241   196.5978  -48.08509
+3                       + orig_amounts -1  9.486198       240   187.1116  -58.39912
+4                          + orig_days -1 13.526581       239   173.5850  -74.92980
+5               + comm_workers_per_car -1 11.629450       238   161.9556  -90.07727
+6                         + ind_public -1  4.435486       237   157.5201  -95.12167
+7                    + pjt_typeZ.Other -1  3.075578       236   154.4445  -98.20968
+8  + pjt_typeX4.Widening...Resurfacing -1  2.766039       235   151.6785 -100.89767
+9                          + funclass4 -1  2.678869       234   148.9996 -103.52428
+10                    + comm_in_county -1  1.949279       233   147.0503 -105.02081
+11                         + comm_bike -1  1.989198       232   145.0611 -106.62690
+12                    + worker_med_age -1  1.906775       231   143.1543 -108.13874
+13                        + funclass16 -1  2.065132       230   141.0892 -109.96628
+14       + pjt_typeX1.New.Construction -1  2.014463       229   139.0747 -111.75734
+15                         + funclass8 -1  1.993147       228   137.0816 -113.56160
+16                    + hhd_med_income -1  1.870801       227   135.2108 -115.19726
+17                           + ind_fin -1  2.258034       226   132.9528 -117.58617
+18                        + road_sideR -1  1.315065       225   131.6377 -118.29822
+19                             + unemp -1  1.230207       224   130.4075 -118.87634
+20                          + avg_temp -1  1.855341       223   128.5521 -120.65491
+21                          + ind_info -1  1.596133       222   126.9560 -121.98745
+22          + pjt_typeX6.Bridge.Repair -1  1.320312       221   125.6357 -122.82434
+                      (Intercept)                          max_temp
+                     3.392373e+01                     -5.217733e-01
+                     orig_amounts                         orig_days
+                     1.523244e-07                     -3.882572e-03
+             comm_workers_per_car                        ind_public
+                    -1.991549e+01                     -9.967687e-04
+                  pjt_typeZ.Other pjt_typeX4.Widening...Resurfacing
+                     4.530178e-01                      1.118003e+00
+                        funclass4                    comm_in_county
+                    -3.846678e-01                      2.525975e-02
+                        comm_bike                    worker_med_age
+                    -1.275273e-01                      6.872567e-02
+                       funclass16       pjt_typeX1.New.Construction
+                    -3.180916e-01                     -1.559576e+00
+                        funclass8                    hhd_med_income
+                     1.125770e+00                     -2.518292e-05
+                          ind_fin                        road_sideR
+                     2.398762e-03                     -1.662309e-01
+                            unemp                          avg_temp
+                     2.110358e-01                      3.478937e-01
+                         ind_info          pjt_typeX6.Bridge.Repair
+                    -7.636439e-03                     -2.089703e-01
+[1] 655.6435
+[1] 575.3031
+#+end_example
+
+The below is the summary of a selected regression model. Perhaps, we can say variables whose p-value $\le$ 0.04 are significant.
+#+begin_src R
+summary(fstep)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+Call:
+lm(formula = lsor ~ max_temp + orig_amounts + orig_days + comm_workers_per_car +
+    ind_public + pjt_typeZ.Other + pjt_typeX4.Widening...Resurfacing +
+    funclass4 + comm_in_county + comm_bike + worker_med_age +
+    funclass16 + pjt_typeX1.New.Construction + funclass8 + hhd_med_income +
+    ind_fin + road_sideR + unemp + avg_temp + ind_info + pjt_typeX6.Bridge.Repair,
+    data = as.data.frame(X))
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-2.88214 -0.43075 -0.00352  0.47336  1.51373
+
+Coefficients:
+                                    Estimate Std. Error t value Pr(>|t|)
+(Intercept)                        3.392e+01  5.767e+00   5.883 1.48e-08
+max_temp                          -5.218e-01  1.529e-01  -3.413 0.000765
+orig_amounts                       1.523e-07  1.975e-08   7.714 4.14e-13
+orig_days                         -3.883e-03  6.017e-04  -6.452 6.86e-10
+comm_workers_per_car              -1.992e+01  3.807e+00  -5.232 3.89e-07
+ind_public                        -9.968e-04  1.131e-03  -0.881 0.379013
+pjt_typeZ.Other                    4.530e-01  2.244e-01   2.019 0.044690
+pjt_typeX4.Widening...Resurfacing  1.118e+00  3.925e-01   2.849 0.004805
+funclass4                         -3.847e-01  1.411e-01  -2.725 0.006938
+comm_in_county                     2.526e-02  6.888e-03   3.667 0.000307
+comm_bike                         -1.275e-01  6.486e-02  -1.966 0.050544
+worker_med_age                     6.873e-02  2.757e-02   2.493 0.013411
+funclass16                        -3.181e-01  1.343e-01  -2.368 0.018755
+pjt_typeX1.New.Construction       -1.560e+00  8.434e-01  -1.849 0.065760
+funclass8                          1.126e+00  5.740e-01   1.961 0.051112
+hhd_med_income                    -2.518e-05  8.499e-06  -2.963 0.003379
+ind_fin                            2.399e-03  1.252e-03   1.916 0.056700
+road_sideR                        -1.662e-01  1.087e-01  -1.529 0.127704
+unemp                              2.110e-01  8.400e-02   2.512 0.012708
+avg_temp                           3.479e-01  1.448e-01   2.403 0.017073
+ind_info                          -7.636e-03  4.670e-03  -1.635 0.103452
+pjt_typeX6.Bridge.Repair          -2.090e-01  1.371e-01  -1.524 0.128945
+
+Residual standard error: 0.754 on 221 degrees of freedom
+Multiple R-squared:  0.3924,	Adjusted R-squared:  0.3347
+F-statistic: 6.798 on 21 and 221 DF,  p-value: 6.854e-15
+#+end_example
+
+
+#+begin_src R :file sor_reg_plots.png
+## pdf("sor_reg_plots.pdf")
+par(mfrow = c(2,2))
+plot(fstep)
+## dev.off()
+#+end_src
+
+#+RESULTS:
+: Warning message:
+: not plotting observations with leverage one:
+:   49
+
+* SOR-Tune&Train base models
+We have three base models. Each model has been tuned using 4 fold-cross
+validation. Since we aim to train a super learner instead of simple blend of
+base models, predctions collected from CV should be passed to the super learner.
+The CV-folds should be consistent for all models.
+
+#+begin_src R :tangle sor_train_base.R
+xtrain <- model.matrix(~ 0 + ., data = dx)
+## y = log(df$sor)
+ytrain <- y <- sory
+weights <- rep(1, length(y)) / length(y)
+
+set.seed(1)
+nfold <- 4
+## shu = sample(1:length(ytrain))
+## xtrain = xtrain[shu,]
+## ytrain = ytrain[shu]
+data_folds <- caret::createFolds(ytrain, k = nfold)
+#+end_src
+
+#+RESULTS:
+
+** CatBoost
+CatBoost has a function for CV, but it doesn't let us define a fold index.
+The below is a function for 3-folds training and 1-fold prediction of CatBoost.
+#+begin_src R :tangle sor_train_base.R
+cat1fold = function(outfold, xtrain, ytrain, cat_features, fit_params, weights) {
+
+n = length(ytrain);
+oo = outfold;
+ii = (1:n)[-oo];
+
+inx = xtrain[ii,]
+outx = xtrain[oo,]
+iny = ytrain[ii]
+outy = ytrain[oo]
+inw = weights[ii]
+outw = weights[oo]
+
+inpool = catboost.load_pool(data = inx,
+                           label = iny,
+                           weight = inw,
+                           cat_features = cat_features - 1)
+
+outpool =  catboost.load_pool(data = outx,
+                           label = outy,
+                           weight = outw,
+                           cat_features = cat_features - 1)
+
+fit_params$loss_function = c('RMSE')
+
+catmod = catboost.train(inpool, outpool)
+yhat = catboost.predict(catmod, outpool)
+loss = sqrt(mean((outy - yhat)^2))
+return(list(yhat = yhat, loss = loss, catmod = catmod, names = names(catmod)))
+}
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results none :tangle sor_train_base.R
+cat_features = which(stringr::str_detect(colnames(xtrain), "ncat_"))
+
+out = list()
+
+fit_params <- list(iterations = 500,
+                   border_count = 254,
+                   depth = 10,
+                   early_stopping_rounds = 20,
+                   od_type = "Iter",
+                   eval_metric = "RMSE", # overfit detection metric
+                   use_best_model = T, # no tree saves after the best iteration
+                   learning_rate = 0.1,
+                   l2_leaf_reg = 3,
+                   rsm = 1)
+
+best_iter <- cv_loss <- numeric(nfold)
+yhat = list()
+
+set.seed(1)
+for (k in 1:nfold){
+out[[k]] = cat1fold(data_folds[[k]], xtrain, ytrain, cat_features, fit_params, weights)
+cv_loss[k] = out[[k]]$loss
+yhat[[k]] = out[[k]]$yhat
+best_iter[k] = out[[k]]$catmod$tree_count
+}
+
+temp = unlist(yhat)
+cat_id = unlist(data_folds)
+cat_yhat = temp[order(cat_id)]
+cat_best_iter = floor(median(best_iter))
+#+end_src
+
+#+begin_src R :results replace
+mean(cv_loss)
+#+end_src
+
+#+RESULTS:
+: [1] 0.8986183
+
+To train a model abased on the full training set.
+#+begin_src R :results none :tangle sor_train_base.R
+trainpool = catboost.load_pool(data = xtrain,
+                           label = ytrain,
+                           weight = weights,
+                           cat_features = cat_features - 1)
+
+fit_params$loss_function = c('RMSE')
+fit_params$iterations = cat_best_iter
+
+cat_final = catboost.train(trainpool, params = fit_params)
+cat_imp = cat_final$feature_importances
+
+catboost.save_model(cat_final, "sor_cat_final.rds")
+
+cat_train_pred = catboost.predict(cat_final, trainpool)
+#+end_src
+
+#+begin_src R :results none
+cor(cat_train_pred, ytrain)^2
+#+end_src
+
+*** test data
+To create a meat-feature of the super learner for the test data.
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+cat_final = catboost.load_model("cat_final.rds")
+
+cat_features_test = which(stringr::str_detect(colnames(xtest), "n"))
+
+testpool = catboost.load_pool(data = xtest,
+                           cat_features = cat_features_test - 1)
+
+cat_test_prob = catboost.predict(cat_final, testpool, prediction_type = 'Probability')
+}
+#+end_src
+
+#+RESULTS:
+: Error: object 'TEST_SET' not found
+
+*** don't export                                                 :noexport:
+#+begin_src R
+cat_features = which(stringr::str_detect(colnames(xtrain), "n"))
+
+ii = 1:10000
+oo = 10001:15000
+
+inx = xtrain[ii,]
+outx = xtrain[oo,]
+iny = ytrain[ii]
+outy = ytrain[oo]
+inw = weights[ii]
+outw = weights[oo]
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+inpool = catboost.load_pool(data = inx,
+                           label = iny,
+                           weight = inw,
+                           cat_features = cat_features - 1)
+outpool =  catboost.load_pool(data = outx,
+                           label = outy,
+                           weight = outw,
+                           cat_features = cat_features - 1)
+head(inpool, 1)[[1]]
+head(outpool, 1)[[1]]
+
+#+end_src
+
+#+RESULTS:
+:
+: [1] 0
+: [1] 0
+#+begin_src R
+fit_params <- list(iterations = 100,
+                   loss_function = c('Logloss'),
+                   border_count = 254,
+                   depth = 5,
+                   learning_rate = 0.03,
+                   l2_leaf_reg = 3,
+                   rsm = 1
+                   )
+catmod <- catboost.train(inpool, params = fit_params)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+0:	learn: 0.6571507	total: 16.7ms	remaining: 1.65s
+1:	learn: 0.6214312	total: 34.1ms	remaining: 1.67s
+2:	learn: 0.5900535	total: 54.9ms	remaining: 1.77s
+3:	learn: 0.5612429	total: 74.8ms	remaining: 1.79s
+4:	learn: 0.5416232	total: 94.7ms	remaining: 1.8s
+5:	learn: 0.5122393	total: 114ms	remaining: 1.79s
+6:	learn: 0.4950058	total: 135ms	remaining: 1.79s
+7:	learn: 0.4692697	total: 156ms	remaining: 1.79s
+8:	learn: 0.4515842	total: 174ms	remaining: 1.75s
+9:	learn: 0.4383155	total: 187ms	remaining: 1.68s
+10:	learn: 0.4266678	total: 199ms	remaining: 1.61s
+11:	learn: 0.4074968	total: 215ms	remaining: 1.58s
+12:	learn: 0.3975155	total: 226ms	remaining: 1.51s
+13:	learn: 0.3878629	total: 237ms	remaining: 1.45s
+14:	learn: 0.3750313	total: 251ms	remaining: 1.42s
+15:	learn: 0.3658158	total: 266ms	remaining: 1.4s
+16:	learn: 0.3569856	total: 276ms	remaining: 1.35s
+17:	learn: 0.3485129	total: 287ms	remaining: 1.31s
+18:	learn: 0.3413514	total: 300ms	remaining: 1.28s
+19:	learn: 0.3346430	total: 313ms	remaining: 1.25s
+20:	learn: 0.3257840	total: 331ms	remaining: 1.25s
+21:	learn: 0.3181686	total: 351ms	remaining: 1.25s
+22:	learn: 0.3108272	total: 370ms	remaining: 1.24s
+23:	learn: 0.3030650	total: 389ms	remaining: 1.23s
+24:	learn: 0.2975940	total: 409ms	remaining: 1.23s
+25:	learn: 0.2907870	total: 427ms	remaining: 1.22s
+26:	learn: 0.2864073	total: 444ms	remaining: 1.2s
+27:	learn: 0.2832268	total: 464ms	remaining: 1.19s
+28:	learn: 0.2807401	total: 485ms	remaining: 1.19s
+29:	learn: 0.2777773	total: 506ms	remaining: 1.18s
+30:	learn: 0.2742532	total: 524ms	remaining: 1.17s
+31:	learn: 0.2701718	total: 544ms	remaining: 1.16s
+32:	learn: 0.2676361	total: 563ms	remaining: 1.14s
+33:	learn: 0.2649810	total: 580ms	remaining: 1.13s
+34:	learn: 0.2636399	total: 600ms	remaining: 1.11s
+35:	learn: 0.2592926	total: 619ms	remaining: 1.1s
+36:	learn: 0.2571843	total: 631ms	remaining: 1.07s
+37:	learn: 0.2562210	total: 640ms	remaining: 1.04s
+38:	learn: 0.2545411	total: 652ms	remaining: 1.02s
+39:	learn: 0.2516069	total: 663ms	remaining: 995ms
+40:	learn: 0.2496398	total: 674ms	remaining: 970ms
+41:	learn: 0.2474086	total: 685ms	remaining: 945ms
+42:	learn: 0.2458239	total: 699ms	remaining: 927ms
+43:	learn: 0.2444295	total: 711ms	remaining: 905ms
+44:	learn: 0.2401516	total: 722ms	remaining: 883ms
+45:	learn: 0.2372965	total: 733ms	remaining: 860ms
+46:	learn: 0.2338689	total: 745ms	remaining: 840ms
+47:	learn: 0.2331415	total: 757ms	remaining: 820ms
+48:	learn: 0.2327201	total: 766ms	remaining: 797ms
+49:	learn: 0.2299527	total: 777ms	remaining: 777ms
+50:	learn: 0.2291103	total: 789ms	remaining: 758ms
+51:	learn: 0.2284340	total: 801ms	remaining: 739ms
+52:	learn: 0.2267816	total: 812ms	remaining: 720ms
+53:	learn: 0.2231718	total: 824ms	remaining: 702ms
+54:	learn: 0.2221505	total: 835ms	remaining: 683ms
+55:	learn: 0.2193230	total: 848ms	remaining: 666ms
+56:	learn: 0.2182676	total: 860ms	remaining: 649ms
+57:	learn: 0.2171348	total: 871ms	remaining: 630ms
+58:	learn: 0.2166233	total: 882ms	remaining: 613ms
+59:	learn: 0.2158233	total: 893ms	remaining: 596ms
+60:	learn: 0.2142660	total: 905ms	remaining: 579ms
+61:	learn: 0.2138851	total: 917ms	remaining: 562ms
+62:	learn: 0.2127276	total: 928ms	remaining: 545ms
+63:	learn: 0.2119463	total: 942ms	remaining: 530ms
+64:	learn: 0.2116070	total: 957ms	remaining: 515ms
+65:	learn: 0.2106625	total: 969ms	remaining: 499ms
+66:	learn: 0.2096905	total: 981ms	remaining: 483ms
+67:	learn: 0.2095111	total: 997ms	remaining: 469ms
+68:	learn: 0.2087956	total: 1.01s	remaining: 456ms
+69:	learn: 0.2083230	total: 1.04s	remaining: 444ms
+70:	learn: 0.2063132	total: 1.06s	remaining: 432ms
+71:	learn: 0.2059044	total: 1.07s	remaining: 418ms
+72:	learn: 0.2058522	total: 1.09s	remaining: 405ms
+73:	learn: 0.2053773	total: 1.11s	remaining: 391ms
+74:	learn: 0.2046195	total: 1.13s	remaining: 377ms
+75:	learn: 0.2037450	total: 1.14s	remaining: 361ms
+76:	learn: 0.2015320	total: 1.15s	remaining: 345ms
+77:	learn: 0.2014166	total: 1.16s	remaining: 328ms
+78:	learn: 0.2006063	total: 1.18s	remaining: 312ms
+79:	learn: 0.2001098	total: 1.19s	remaining: 297ms
+80:	learn: 0.1998534	total: 1.2s	remaining: 281ms
+81:	learn: 0.1994566	total: 1.21s	remaining: 266ms
+82:	learn: 0.1994041	total: 1.22s	remaining: 250ms
+83:	learn: 0.1975834	total: 1.23s	remaining: 235ms
+84:	learn: 0.1971524	total: 1.24s	remaining: 220ms
+85:	learn: 0.1968805	total: 1.27s	remaining: 207ms
+86:	learn: 0.1964372	total: 1.29s	remaining: 193ms
+87:	learn: 0.1957460	total: 1.31s	remaining: 179ms
+88:	learn: 0.1949511	total: 1.33s	remaining: 165ms
+89:	learn: 0.1940386	total: 1.34s	remaining: 150ms
+90:	learn: 0.1938085	total: 1.36s	remaining: 134ms
+91:	learn: 0.1928066	total: 1.37s	remaining: 119ms
+92:	learn: 0.1926680	total: 1.38s	remaining: 104ms
+93:	learn: 0.1914753	total: 1.4s	remaining: 89.1ms
+94:	learn: 0.1913815	total: 1.41s	remaining: 74.1ms
+95:	learn: 0.1901693	total: 1.42s	remaining: 59.2ms
+96:	learn: 0.1886325	total: 1.43s	remaining: 44.3ms
+97:	learn: 0.1885540	total: 1.44s	remaining: 29.5ms
+98:	learn: 0.1884326	total: 1.46s	remaining: 14.7ms
+99:	learn: 0.1877244	total: 1.47s	remaining: 0us
+#+end_example
+#+begin_src R
+pred = catboost.predict(catmod, outpool,
+                               prediction_type = 'Probability')
+#+end_src
+
+#+RESULTS:
+To double-chekc the weighted log-loss: https://towardsdatascience.com/understanding-binary-cross-entropy-log-loss-a-visual-explanation-a3ac6025181a
+
+#+begin_src R
+w = outw / sum(outw)
+y = outy
+p = pred
+- sum(w*(y*log(pred)+(1-y)*log(1-p)))
+#+end_src
+
+#+RESULTS:
+: [1] 0.2350202
+
+** XGBoost
+XGBoost can be trained more efficiently using its own matrix class.
+#+begin_src R :tangle sor_train_base.R
+library(xgboost)
+
+smxtrain = sparse.model.matrix(~.+0,as.data.frame(xtrain))
+## smxtest = sparse.model.matrix(~.+0,outx)
+
+dtrain = xgb.DMatrix(data = smxtrain, label = ytrain)
+## dtest = xgb.DMatrix(data = smxtest, label = outy)
+#+end_src
+
+#+RESULTS:
+
+- Tuned hyperparameters of XGBoost.
+#+BEGIN_SRC R :tangle sor_train_base.R
+#default parameters
+xgb_params <- list(objective = "reg:squarederror",
+                   ## booster = "gbtree",
+                   booster = "dart",
+                   max_depth = c(10),
+                   min_child_weight = c(1),
+                   gamma = c(1),
+                   colsample_bytree = c(0.9),
+                   subsample = c(0.8),
+                   eta = c(0.1)
+                   # alpha = c(0),
+                   # lambda = c(0)
+                   )
+#+END_SRC
+
+#+RESULTS:
+
+XGBoost has a CV function accepting fold indices.
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :results none :tangle sor_train_base.R
+set.seed(1)
+xgbcv <- xgb.cv(params = xgb_params,
+                weight = weights,
+                data = dtrain,
+                nrounds = 300,
+                prediction = T,
+                folds = data_folds,
+                print_every_n = 10,
+                early_stopping_rounds = 20,
+                metrics = c("rmse")
+                )
+xgb = list(pred = xgbcv$pred,
+           loss =  sqrt(mean((ytrain - xgbcv$pred)^2)),
+           best_iter = xgbcv$best_ntreelimit)
+#+END_SRC
+
+#+RESULTS:
+
+The below is to save a model trained based on the full traing data.
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :tangle sor_train_base.R
+##model training
+xgb_final = xgb.train (params = xgb_params, data = dtrain, nrounds = xgb$best_iter)
+xgb_imp = xgb.importance(model = xgb_final) # use Gain for importance
+# xgb.plot.importance(importance_matrix = xgb_imp[1:40])
+xgb.save(xgb_final, 'sor_xgb.model')
+#+END_SRC
+
+#+BEGIN_SRC R
+cor(predict(xgb_final, dtrain), ytrain)^2
+#+END_SRC
+
+#+RESULTS:
+: [1] 0.9126958
+
+*** test data
+To create a meat-feature of the super learner for the test data.
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+xgb_final = xgb.load('xgb_model')
+smxtest = sparse.model.matrix(~.+0,xtest)
+dtest = xgb.DMatrix(data = smxtest)
+xgb_test_prob = predict(xgb_final, dtest)
+}
+#+end_src
+
+*** random forest using xgboost                                  :noexport:
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+#+begin_src R
+rf_params = list(
+  colsample_bynode= 0.8,
+  learning_rate= 1,
+  max_depth= 10,
+  num_parallel_tree= 500,
+  objective= 'binary:logistic',
+  subsample= 0.8
+)
+#+end_src
+
+#+RESULTS:
+
+#+attr_ravel: eval=T
+#+BEGIN_SRC R :results none
+set.seed(1)
+rfcv <- xgb.cv(params = rf_params,
+               weight = ww,
+               data = dtrain,
+               nrounds = 100,
+               prediction = T,
+               folds = data_folds,
+               print_every_n = 10,
+               early_stopping_rounds = 20,
+               metrics = c("logloss")
+                )
+#+END_SRC
+
+#+BEGIN_SRC R
+rf = list(prob = rfcv$pred, logloss = wlogloss(yy,rfcv$pred,ww), best_iter = rfcv$best_ntreelimit)
+#+END_SRC
+
+#+RESULTS:
+: Error: object 'rfcv' not found
+
+*** XgBoost                                                      :noexport:
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+
+#+begin_src R
+#train = cbind(xtrain,cat_to_numeric)
+#fe_train = cbind(xtrain[,-cat_var], cat_to_numeric)
+
+#train = cbind(xtrain[,-c(num_code_cat,cat_var)],cat_to_numeric,ytrain)
+train = cbind(xtrain,ytrain)
+
+smxtrain = sparse.model.matrix(ytrain~.+0,train)
+
+dtrain <- xgb.DMatrix(data = smxtrain, label = ytrain)
+# dtest <- xgb.DMatrix(data = x_test, label = y_test)
+#+end_src
+
+#+RESULTS:
+
+Specify that we want to learn a binary classification. We can choose a
+performance metric for a learner. More parameters can be
+specified below.
+
+#+BEGIN_SRC R
+#default parameters
+params <- list(objective = "binary:logistic")
+#+END_SRC
+
+#+RESULTS:
+
+=xgb.cv()= can be used for parameter tuning. The below performs ~nfold~-fold CV with
+maximum ~nrounds~ training rounds. It evaluates =metrics= every =print_every_n= training round.
+If the model doesn't improve the specified performance metric for
+=early_stopping_round=, then training will be stopped. ~stratified = T~ means CV
+rearranges the data as to ensure each fold is a good representative of the whole
+training data.
+
+#+attr_ravel: eval=T
+#+BEGIN_SRC R
+set.seed(1)
+xgbcv <- xgb.cv(params = params,
+                weight=weights,
+                data = dtrain,
+                nrounds = 1000,
+                nfold = 5, showsd = T, stratified = T, print_every_n = 10,
+                early_stopping_rounds = 50, metrics = "auc")
+
+# best iteration
+xgbcv$best_iteration
+#+END_SRC
+
+with numeric, with sparse model matrix
+#+begin_example
+[1]	train-auc:0.916909+0.002401	test-auc:0.913668+0.003691
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951534+0.000342	test-auc:0.946484+0.001509
+[21]	train-auc:0.956962+0.000407	test-auc:0.950562+0.001299
+[31]	train-auc:0.960254+0.000401	test-auc:0.952290+0.001248
+[41]	train-auc:0.962633+0.000389	test-auc:0.953159+0.001217
+[51]	train-auc:0.964356+0.000401	test-auc:0.953669+0.001196
+[61]	train-auc:0.965816+0.000430	test-auc:0.953907+0.001179
+[71]	train-auc:0.967288+0.000394	test-auc:0.954066+0.001261
+[81]	train-auc:0.968585+0.000438	test-auc:0.953960+0.001233
+[91]	train-auc:0.969693+0.000415	test-auc:0.954035+0.001206
+[101]	train-auc:0.971003+0.000320	test-auc:0.953887+0.001215
+[111]	train-auc:0.971945+0.000409	test-auc:0.953817+0.001251
+[121]	train-auc:0.972951+0.000322	test-auc:0.953808+0.001233
+Stopping. Best iteration:
+[72]	train-auc:0.967388+0.000414	test-auc:0.954074+0.001294
+[1] 72
+#+end_example
+
+with cat and numeric, with sparse model matrix
+#+begin_example
+[1]	train-auc:0.916908+0.002416	test-auc:0.913685+0.003602
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951582+0.000336	test-auc:0.946578+0.001563
+[21]	train-auc:0.957363+0.000407	test-auc:0.950768+0.001380
+[31]	train-auc:0.960659+0.000514	test-auc:0.952485+0.001162
+[41]	train-auc:0.963076+0.000589	test-auc:0.953191+0.001268
+[51]	train-auc:0.965005+0.000296	test-auc:0.953765+0.001250
+[61]	train-auc:0.966371+0.000271	test-auc:0.954033+0.001209
+[71]	train-auc:0.967621+0.000340	test-auc:0.954191+0.001235
+[81]	train-auc:0.968619+0.000412	test-auc:0.954219+0.001271
+[91]	train-auc:0.969470+0.000405	test-auc:0.954314+0.001312
+[101]	train-auc:0.970657+0.000380	test-auc:0.954335+0.001286
+[111]	train-auc:0.971589+0.000402	test-auc:0.954322+0.001277
+[121]	train-auc:0.972480+0.000261	test-auc:0.954231+0.001199
+[131]	train-auc:0.973313+0.000328	test-auc:0.954232+0.001172
+[141]	train-auc:0.973989+0.000395	test-auc:0.954189+0.001173
+Stopping. Best iteration:
+[100]	train-auc:0.970548+0.000376	test-auc:0.954352+0.001275
+[1] 100
+#+end_example
+
+with cat and numeric, no sparse model matrix
+#+begin_example
+[1]	train-auc:0.914789+0.002711	test-auc:0.912481+0.002133
+Multiple eval metrics are present. Will use test_auc for early stopping.
+Will train until test_auc hasn't improved in 50 rounds.
+
+[11]	train-auc:0.951206+0.000255	test-auc:0.946283+0.001577
+[21]	train-auc:0.956617+0.000420	test-auc:0.949964+0.001346
+[31]	train-auc:0.960167+0.000496	test-auc:0.952053+0.001336
+[41]	train-auc:0.962918+0.000513	test-auc:0.953003+0.001348
+[51]	train-auc:0.964922+0.000377	test-auc:0.953628+0.001121
+[61]	train-auc:0.966165+0.000221	test-auc:0.953868+0.001130
+[71]	train-auc:0.967425+0.000223	test-auc:0.954152+0.001133
+[81]	train-auc:0.968568+0.000442	test-auc:0.954096+0.001238
+[91]	train-auc:0.969877+0.000392	test-auc:0.954146+0.001200
+[101]	train-auc:0.970704+0.000389	test-auc:0.954093+0.001252
+[111]	train-auc:0.971523+0.000245	test-auc:0.954071+0.001319
+[121]	train-auc:0.972482+0.000338	test-auc:0.953982+0.001263
+Stopping. Best iteration:
+[74]	train-auc:0.967774+0.000267	test-auc:0.954210+0.001197
+[1] 74
+#+end_example
+
+#+attr_ravel: eval=F
+#+BEGIN_SRC R
+  ##model training
+  mm <- xgb.train (params = params, data = dtrain, nrounds = 72)
+
+  xgb_imp <- xgb.importance (model = mm)
+  xgb.plot.importance(importance_matrix = xgb_imp[1:20])
+#+END_SRC
+
+#+RESULTS:
+: Error in check.booster.params(params, ...) : object 'params' not found
+: Error in xgb.importance(model = mm) : object 'mm' not found
+
+importance
+R> cname[c(4,17,10,19,5,39,13,1,20,18,30,9,23,3,6,2,8)]
+ [1] "detailed occupation recode"         "capital gains"
+ [3] "major occupation code"              "dividends from stocks"
+ [5] "education"                          "veterans benefits"
+ [7] "sex"                                "age"
+ [9] "tax filer stat"                     "capital losses"
+[11] "migration prev res in sunbelt"      "major industry code"
+[13] "detailed household and family stat" "detailed industry recode"
+[15] "wage per hour"                      "class of worker"
+[17] "marital stat"
+
+** ranger
+An R package ranger is used to train the random forest. An R pacakge caret is a
+wrapper of many R packages, which we will use for training. The below is caret's model training parameters.
+#+begin_src R :tangle sor_train_base.R
+my_tr = trainControl(
+method = 'cv',
+number = nfold,
+## classProbs = TRUE,
+savePredictions = "all",
+## ,summaryFunction = twoClassSummary # AUC
+## ,summaryFunction = prSummary # PR-AUC
+## ,summaryFunction = fSummary # F1
+## summaryFunction = mnLogLoss,
+search = "random",
+verboseIter = TRUE,
+allowParallel = TRUE,
+indexOut = data_folds
+)
+#+end_src
+
+#+RESULTS:
+
+Unlike CatBoost or XGBoost, ranger doesn't have an internal handling mecahnism
+of missing values.
+#+begin_src R :tangle sor_train_base.R
+## imputation needs for ranger
+ixtrain = xtrain
+ixtrain[is.na(ixtrain)] = -99
+
+## above50k needs to be "positive"
+## caret considers 1st class as "positive" class
+## fytrain = factor(-(ytrain - 1))
+## levels(fytrain) = c("no_co", "co")
+#+end_src
+
+#+RESULTS:
+
+- Tuned hyperparameters of ranger.
+#+begin_src R :tangle sor_train_base.R
+ranger_grid <- expand.grid(
+  mtry = c(20),
+  ## splitrule = "gini",
+  min.node.size = c(10)
+)
+#+end_src
+
+#+RESULTS:
+
+The below is for CV and saving a final model.
+#+begin_src R :tangle sor_train_base.R
+set.seed(1)
+ranger_tune <- train(x = ixtrain, y = ytrain,
+                     method = "ranger",
+                     trControl = my_tr,
+                     ## tuneGrid = ranger_grid,
+                     weights = weights,
+                     preProc = NULL,
+                     importance = 'impurity',
+                     num.trees = 500
+                     )
+
+ranger_id = ranger_tune$pred$rowIndex
+ranger_final = ranger_tune$finalModel
+ranger_imp = varImp(ranger_tune)$importance
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Fold1: min.node.size=7, mtry=23, splitrule=extratrees
+- Fold1: min.node.size=7, mtry=23, splitrule=extratrees
++ Fold1: min.node.size=1, mtry=43, splitrule=maxstat
+- Fold1: min.node.size=1, mtry=43, splitrule=maxstat
++ Fold1: min.node.size=2, mtry=14, splitrule=maxstat
+- Fold1: min.node.size=2, mtry=14, splitrule=maxstat
++ Fold2: min.node.size=7, mtry=23, splitrule=extratrees
+- Fold2: min.node.size=7, mtry=23, splitrule=extratrees
++ Fold2: min.node.size=1, mtry=43, splitrule=maxstat
+- Fold2: min.node.size=1, mtry=43, splitrule=maxstat
++ Fold2: min.node.size=2, mtry=14, splitrule=maxstat
+- Fold2: min.node.size=2, mtry=14, splitrule=maxstat
++ Fold3: min.node.size=7, mtry=23, splitrule=extratrees
+- Fold3: min.node.size=7, mtry=23, splitrule=extratrees
++ Fold3: min.node.size=1, mtry=43, splitrule=maxstat
+- Fold3: min.node.size=1, mtry=43, splitrule=maxstat
++ Fold3: min.node.size=2, mtry=14, splitrule=maxstat
+- Fold3: min.node.size=2, mtry=14, splitrule=maxstat
++ Fold4: min.node.size=7, mtry=23, splitrule=extratrees
+- Fold4: min.node.size=7, mtry=23, splitrule=extratrees
++ Fold4: min.node.size=1, mtry=43, splitrule=maxstat
+- Fold4: min.node.size=1, mtry=43, splitrule=maxstat
++ Fold4: min.node.size=2, mtry=14, splitrule=maxstat
+- Fold4: min.node.size=2, mtry=14, splitrule=maxstat
+Aggregating results
+Selecting tuning parameters
+Fitting mtry = 23, splitrule = extratrees, min.node.size = 7 on full training set
+#+end_example
+
+This is in-sample R squared (not CV, OOB, etc.)
+#+begin_src R
+mean(ranger_tune$resample$Rsquared)
+#+end_src
+
+#+RESULTS:
+: [1] 0.6459222
+
+#+begin_src R
+cor(ranger_final$predictions, ytrain)
+#+end_src
+
+#+RESULTS:
+: [1] 0.22103
+
+#+begin_src R
+ranger_final = ranger(x = ixtrain, y = ytrain,
+                      num.trees = 500,mtry = 23,importance = "impurity",
+                      write.forest = TRUE, min.node.size = 7,
+                      class.weights = NULL)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :tangle sor_train_base.R
+saveRDS(ranger_final, "sor_ranger_final.rds")
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results replace
+mean(ranger_tune$resample[,1]) # incorrect. not using weight
+#+end_src
+
+#+RESULTS:
+: [1] 0.6036299
+
+*** test data
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+ranger_final = readRDS("ranger_final.rds")
+ixtest = xtest
+ixtest[is.na(ixtest)] = -99
+ranger_test_prob = predict(ranger_final, ixtest)$predictions[,1]
+}
+#+end_src
+
+#+RESULTS:
+
+To create a meat-feature of the super learner for the test data.
+* SOR-Fit super learners
+A single layer artificial neural network is chosen for the super learner. It is
+trained using caret. After a few rounds of tuninig, 3 hidden units and 0.3 decay
+for regularization are chosen. The super learner accepts predictions from the
+three base learners as meta-features.
+#+begin_src R :tangle sor_train_super.R
+## set caret training parameters
+
+stk_grid =  NULL  # default tuning parameters
+
+                                        # model specific training parameter
+stk_tr  = trainControl(
+  method = 'cv',
+  number = 4L,
+  ## classProbs = TRUE,
+  savePredictions = "all",
+  ## summaryFunction = mnLogLoss,
+  ## summaryFunction = twoClassSummary, # AUC
+  ## summaryFunction = prSummary, # PR-AUC
+  ## summaryFunction = fSummary, # F1
+  ## search = "random",
+  verboseIter = T,
+  allowParallel = T,
+  indexOut = data_folds
+)
+
+nnet_grid = expand.grid(size = 3,
+                        decay = 0.05)
+
+sup_x = data.frame(cat = cat_yhat,xgb = xgb$pred,ranger = ranger_final$predictions)
+sup_y = ytrain
+#+end_src
+
+ #+RESULTS:
+Here, CV is only for evaluation of our classifier. We save the model as before.
+#+begin_src R :results none :tangle train_super.R
+## train the model
+set.seed(1)
+super_tune = train(x=sup_x, y=sup_y,
+                   weights = weights,
+                   method = "nnet",
+                   trControl = stk_tr,
+                   tuneGrid = nnet_grid,
+                   verbose = T)
+## super_tune
+super_final = super_tune$finalModel
+super_imp = varImp(super_final)
+saveRDS(super_final, "sor_super_final.rds")
+#+end_src
+
+#+RESULTS:
+
+*** test data
+#+begin_src R :tangle test_prediction.R
+if (TEST_SET){
+super_final = readRDS("super_final.rds")
+sup_x_test = data.frame(cat = cat_test_prob,xgb = xgb_test_prob,ranger = ranger_test_prob)
+super_test_prob = 1-predict(super_final, sup_x_test)
+
+}
+label_test = 1*(super_test_prob > 0.4122)
+#+end_src
+
+#+RESULTS:
+:
+: Error: object 'super_test_prob' not found
+
+** evaluation statistics
+An R package caret passes weights to learners for model training. However, the
+package doesn't use weights to calculate perforamce metrics. This implies with the presence of case weights
+caret tuning and evaluating models are not reliable.
+
+#+begin_src R :results graphics :file roccurve.pdf
+my_thres = 0.4122
+data = super_tune$pred
+ff = data$Resample
+obs = data$obs
+prob = 1 - data$above50k
+pred = 1 * (prob > my_thres)
+ww = data$weights
+
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results replace
+WeightedAUC(tp.fp)
+#+end_src
+
+#+RESULTS:
+: 0.752469135802469
+
+** optimal theshold - this is based on caret: not weight involved in metrics :noexport:
+
+threshold: A numeric vector of candidate probability thresholds between [0,1].
+If the class probability corresponding to the *first level of the outcome* is
+greater than the threshold, the data point is classified as that level.
+#+begin_src R
+stk_tr$summaryFunction = prSummary
+
+set.seed(1)
+resample_stats <- thresholder(ranger_final,
+                              threshold = seq(0.3, 0.5, by = 0.01),
+                              final = TRUE)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+** optimal threshold for ranger
+:PROPERTIES:
+:header-args:R: :results output
+:END:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+theshold = 0.4122, we expect the weighted F1 = 0.8702.
+#+begin_src R
+stk_tr$summaryFunction = prSummary
+
+set.seed(1)
+resample_stats <- thresholder(ranger_tune,
+                              threshold = seq(0.3, 0.5, by = 0.01),
+                              final = TRUE)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+#+RESULTS:
+
+** evaluation figures                                             :noexport:
+
+#+begin_src R
+stk_tr$summaryFunction = prSummary
+
+set.seed(1)
+resample_stats <- thresholder(super_tune,
+                              threshold = seq(0, 1, by = 0.025),
+                              final = TRUE)
+#+end_src
+
+#+RESULTS:
+: Warning messages:
+: 1: In .fun(piece, ...) :
+:   The following columns have missing values (NA), which have been removed: 'Neg Pred Value'.
+:
+: 2: In .fun(piece, ...) :
+:   The following columns have missing values (NA), which have been removed: 'Pos Pred Value', 'Precision', 'F1'.
+
+#+begin_src R :results graphics :file f1.png
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+ggplot(resample_stats, aes(x = prob_threshold, y = F1)) +
+  geom_point()
+#+end_src
+
+#+RESULTS:
+[[file:f1.png]]
+
+#+begin_src R :results graphics :file roc-like.png
+     ggplot(resample_stats, aes(x = prob_threshold, y = Sensitivity)) +
+       geom_point() +
+       geom_point(aes(y = Specificity), col = "red")
+#+end_src
+
+#+RESULTS:
+[[file:roc-like.png]]
+
+#+begin_src R :results graphics :file pr-like.png
+     ggplot(resample_stats, aes(x = prob_threshold, y = Precision)) +
+       geom_point() +
+       geom_point(aes(y = Recall), col = "red")
+#+end_src
+
+#+RESULTS:
+[[file:pr-like.png]]
+
+#+begin_src R :results graphics :file j.png
+ggplot(resample_stats, aes(x = prob_threshold, y = J)) +
+  geom_point()
+#+end_src
+
+#+RESULTS:
+[[file:j.png]]
+
+#+begin_src R :results graphics :file dist.png
+ggplot(resample_stats, aes(x = prob_threshold, y = Dist)) +
+  geom_point()
+#+end_src
+
+#+RESULTS:
+[[file:dist.png]]
+
+:PROPERTIES:
+:header-args:R:          :eval no
+:END:
+* SOR-Summary
+This section is to generate summary statistics for the super learner. First, we present the variable importance.
+
+#+begin_src R
+temp = xgb_imp
+vimp = as.data.frame(temp[,c(1,2)])
+colnames(vimp)[2] = "xgb"
+#+end_src
+
+#+RESULTS:
+: Error: object 'xgb_imp' not found
+: Error in as.data.frame(temp[, c(1, 2)]) : object 'temp' not found
+: Error in colnames(vimp)[2] = "xgb" : object 'vimp' not found
+
+#+begin_src R :results value
+print(vimp)
+#+end_src
+
+#+RESULTS:
+: org_babel_R_eoe
+
+#+begin_src R
+ctemp = data.frame(Feature = colnames(xtrain), cat = cat_imp)
+rtemp = data.frame(Feature = row.names(ranger_imp), ranger = ranger_imp)
+colnames(rtemp)[2] = "ranger"
+vimp = inner_join(vimp, ctemp, by = "Feature")
+vimp = inner_join(vimp, rtemp, by = "Feature")
+
+row.names(vimp) = vimp[,1]
+vimp = vimp[,-1]
+ss = apply(vimp, 2, sum)
+vimp = t(t(vimp) / ss) * 100
+
+stemp = vimp %*% c(super_imp$Overall)
+
+stemp = stemp / sum(stemp) * 100
+vimp = cbind(vimp,stemp)
+colnames(vimp)[4] = "super"
+vimp = vimp[order(vimp[,4],decreasing = TRUE),]
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results output
+rtemp = data.frame(ranger = ranger_imp[,1])
+row.names(rtemp) = row.names(ranger_imp)
+rtemp %>% arrange(-ranger)
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                             ranger
+orig_amounts           100.00000000
+orig_days               55.28305498
+comm_out_state          23.81613322
+aadt                    17.08559024
+ind_agri                15.79437940
+pop_16yrover            14.00326701
+comm_etc                12.47300794
+comm_pubtransport       12.26704644
+inde_ed_meds            11.69747449
+mov_gdp                 11.61620270
+worker_med_age          11.52462634
+aadt_truck              11.09257977
+ind_other               10.26340801
+pop_tot                 10.09549874
+med_ind_income           9.89115641
+ncat_pjy_type            9.73022356
+no_lane                  9.54970994
+ind_transport            9.14557467
+comm_bike                9.06324908
+ind_manuf                8.91496511
+ind_public               8.80781755
+comm_workhome            8.75014271
+mean_travel_time         8.73241998
+med_age                  8.40942196
+work_hours_mean          8.09611812
+hhd_avg_size             7.91708015
+comm_workers_per_car     7.84304275
+ind_fin                  7.80778708
+poverty_below            7.67862348
+ind_whole                7.66380253
+mov_unemp                7.60964676
+poverty_above            7.49980825
+comm_car_carpool         7.44009042
+comm_walk                7.28567383
+ind_const                7.27869478
+ind_art                  6.97685239
+hhd_mean_income          6.82505798
+pop_16yrover_worker      6.62510531
+Ind_tot                  6.47569054
+mean_per_capita_income   6.31876309
+ind_retail               6.30799878
+ind_pro                  6.14584921
+hhd_med_income           6.09128794
+comm_in_county           5.95263106
+comm_car_tot             5.88498090
+mov_prec                 5.75859930
+mov_max_temp             5.69409065
+hhd_no                   5.51283191
+comm_car_alone           5.48561755
+comm_out_county          5.44256956
+ind_info                 5.37217002
+mov_avg_temp             4.83491927
+pav_cond                 4.34399075
+speedlimit               3.79827636
+access_cla               3.05447010
+ncat_funclass            2.83228411
+ncat_access_con          0.63886798
+bridge                   0.46895477
+ncat_road_sie            0.05283404
+railcross                0.00000000
+#+end_example
+
+#+begin_src R
+vimp
+fwrite(vimp, "vimp.csv")
+#+end_src
+
+#+RESULTS:
+#+begin_example
+                             Xgboost     cat     ranger      super
+orig_amounts           27.4569897 30.0696230 18.3006031 20.1294958
+orig_days               1.8507219  9.1362558 10.1171325  9.4300615
+comm_out_state          7.4948217  5.0429032  4.3584960  4.6503887
+aadt                    1.6722104  4.7692312  3.1267661  3.1873066
+pop_16yrover            4.7366100  2.2263515  2.5626823  2.6839644
+ind_agri                1.5505754  0.9589156  2.8904667  2.6019110
+comm_etc                2.8190786  3.0704058  2.2826357  2.3996070
+inde_ed_meds            3.5771710  1.7498496  2.1407084  2.2039919
+comm_pubtransport       0.2950515  1.9154870  2.2449435  2.0730714
+worker_med_age          1.6881325  1.8827348  2.1090761  2.0564563
+mov_gdp                 0.3918593  2.5745667  2.1258351  2.0471375
+med_ind_income          2.9641608  1.8319661  1.8101413  1.8945522
+no_lane                 4.6481355  1.1417909  1.7476545  1.8937639
+pop_tot                 1.5192778  2.5153978  1.8475372  1.8909080
+aadt_truck              0.4793345  1.6783236  2.0300090  1.8843609
+work_hours_mean         3.5925005  3.6569794  1.4816384  1.8494991
+comm_bike               0.4182232  3.5661551  1.6586292  1.7609250
+comm_workers_per_car    2.4811066  3.7979335  1.4353241  1.7460127
+ind_transport           2.1467643  1.6619982  1.6736953  1.7062344
+ind_manuf               1.3354985  2.2235216  1.6314924  1.6695820
+ncat_pjy_type           1.5273111  0.0000000  1.7806896  1.5846335
+mean_travel_time        1.4186935  0.0000000  1.5980855  1.4255548
+med_age                 2.0451135  0.0000000  1.5389749  1.4212003
+ind_public              0.8291065  0.0000000  1.6118837  1.3949797
+comm_workhome           0.7223356  0.0000000  1.6013289  1.3786241
+ind_whole               0.7668889  1.1707447  1.4025221  1.3340613
+mov_unemp               2.4454560  0.0000000  1.3926112  1.3284228
+hhd_avg_size            0.4582042  0.8105652  1.4488734  1.3144769
+ind_fin                 0.4194999  0.4705213  1.4288721  1.2611508
+poverty_below           0.2118142  0.6284849  1.4052344  1.2425520
+comm_car_carpool        0.7695091  0.0000000  1.3615814  1.1832868
+comm_walk               0.8076995  0.0000000  1.3333222  1.1625873
+comm_out_county         1.3641909  2.0782184  0.9960231  1.1304354
+hhd_no                  3.6311435  0.0000000  1.0088815  1.0948799
+ind_art                 0.3610848  0.0000000  1.2768061  1.0839243
+pop_16yrover_worker     0.9846100  0.0000000  1.2124342  1.0750031
+hhd_med_income          0.6836555  1.0107510  1.1147424  1.0736303
+mean_per_capita_income  1.4218588  0.0000000  1.1563718  1.0596954
+speedlimit              0.9048742  4.1260360  0.6951075  1.0530176
+pav_cond                1.2335819  2.9023589  0.7949765  1.0368878
+Ind_tot                 0.7602129  0.0000000  1.1850904  1.0363516
+mov_prec                0.4136822  1.3319293  1.0538584  1.0360394
+ind_retail              0.1813928  0.0000000  1.1544018  0.9696738
+comm_car_alone          1.5872516  0.0000000  1.0039011  0.9451154
+ind_info                0.7533413  0.0000000  0.9831395  0.8684885
+mov_avg_temp            0.1792639  0.0000000  0.8848194  0.7460967
+Error in fwrite(vimp, "vimp.csv") : could not find function "fwrite"
+#+end_example
+
+** weighted logloss
+- The super learner greatly improve weighted logloss of base ones.
+#+begin_src R
+wl = c(mean(cv_logloss),
+xgb$logloss,
+caret_wlogloss(ranger_tune$pred),
+caret_wlogloss(super_tune$pred)
+)
+wl
+mname = c("L0-CatBoost", "L0-XGBoost", "L0-RF", "L1-ANN")
+dw = data.frame(Learner = mname, Logloss = round(wl,4))
+#+end_src
+
+#+RESULTS:
+: [1] 0.6526904 0.6440919 0.3210542 0.6879376
+
+#+begin_src R :results graphics :file logloss.png
+# Outside bars
+gg =
+ggplot(data=dw, aes(x=Learner, y=Logloss)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=Logloss), vjust=-0.3, size=3.5)+
+  theme_minimal()
+#+end_src
+
+#+RESULTS:
+
+** Similarity among three base learners
+
+#+begin_src R :results graphics :file threeprob.png
+library(GGally)
+bdf = data.frame(xgb = xgb$prob, catb = cat_prob, ranger = ranger_prob)
+ggpairs(bdf, mapping = aes(color = fytrain, alpha=0.4),
+    lower = list(
+    continuous = wrap("points", alpha = 0.3,    size=0.1),
+    ## continuous = "smooth",
+    combo = "facetdensity")) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        ## panel.border = element_blank(),
+        panel.background = element_blank())
+#+end_src
+
+#+RESULTS:
+** features with high variable importance
+#+begin_src R :results graphics :file eda.png
+library(GGally)
+eda = data.frame(nX5 = xtrain$nX5,ICA2 = xtrain$ICA2, nX4 = xtrain$nX4, X1 = xtrain$X1, nX10 = xtrain$nX10, X13 = xtrain$X13, X62 = xtrain$X62, cPC1 = xtrain$cPC1)
+ggpairs(eda, mapping = aes(color = fytrain, alpha=0.4),
+    lower = list(
+    continuous = wrap("points", alpha = 0.3,    size=0.1),
+    ## continuous = "smooth",
+    combo = "facetdensity")) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        ## panel.border = element_blank(),
+        panel.background = element_blank())
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results graphics :file eda_ranger.png
+eda_ranger = xtrain[,colnames(xtrain) %in% row.names(ranger_imp)[order(ranger_imp, decreasing=T)][1:10]] %>% as.data.frame()
+ggpairs(eda_ranger, mapping = aes(color = fytrain, alpha=0.4),
+    lower = list(
+    continuous = wrap("points", alpha = 0.3,    size=0.1),
+    ## continuous = "smooth",
+    combo = "facetdensity")) +
+    theme_bw() +
+    theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        ## panel.border = element_blank(),
+        panel.background = element_blank())
+#+end_src
+
+#+RESULTS:
+
+** some figure
+#+begin_src R
+attach(dx)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+## super_final = readRDS("ranger_final.rds")
+super_prob = 1 - ranger_final$predictions[,2]
+super_pred = c(1 * (super_prob > 0.4122))
+plot_prob(orig_amounts, orig_days, 0.2, "amounts", "days", prob = super_prob)
+#+end_src
+
+#+RESULTS:
+: Error in UseMethod("depth") :
+:   no applicable method for 'depth' applied to an object of class "NULL"
+
+#+begin_src R
+super_final = readRDS("super_final.rds")
+super_prob = 1 - super_final$fitted.values
+super_pred = c(1 * (super_prob > 0.4122))
+plot_prob(comm_out_state, aadt, 0.5, "comm", "aadt", prob = super_prob)
+#+end_src
+
+#+RESULTS:
+
+* ToExport - COR [2021-02-24 Wed]                                  :noexport:
+:PROPERTIES:
+:header-args:R: :exports results :noweb yes
+:END:
+
+A prediction target variable: $y = 1$ if $\log COR > 0$; 0 otherwise, where
+\[
+COR = \frac{\text{original amounts} + \text{modified amounts}}{\text{original amounts}}
+\]
+We use the random forest to train the prediction model. The =R= package =ranger= is used for the training.
+Moving average (three years backward from a project start year) covariates are generated and substituted with time series covariates.
+#+begin_src R :results none
+source('prerequisite.R')
+source('custom_function.R')
+source('preprocess.R')
+y = 1 * (df$logy > 0)
+#+end_src
+
+** Logistic regression                                             :noexport:
+Variables are selected by LASSO. The accuracy is 67%.
+#+begin_src R :results code :exports both
+mm = glm(y ~ orig_days + orig_amounts + hhd_avg_size + ind_agri,
+         data = dx, family="binomial")
+coef(mm) %>% knitr::kable()
+pred = predict(mm,newx=dx)
+tab = table(pred>0,y)
+##tab
+sum(diag(tab)) / sum(tab)
+#+end_src
+
+#+RESULTS:
+#+begin_src R
+
+
+|             |          x|
+|:------------|----------:|
+|(Intercept)  |  1.5617775|
+|orig_days    |  0.0019859|
+|orig_amounts |  0.0000003|
+|hhd_avg_size | -0.9898076|
+|ind_agri     | -0.0087161|
+[1] 0.6748971
+#+end_src
+
+** RF (trained using =ranger=)
+The OOB accuracy is 78.3% at the optimal threshold (0.5-ish?). The variable importance is listed below:
+#+begin_src R :results drawer
+ranger_final = readRDS("cor_ranger_final.rds")
+ranger_imp = ranger_final$variable.importance
+rtemp = data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) = names(ranger_imp)
+rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:10)
+rrtemp %>% knitr::kable()
+#+end_src
+
+#+RESULTS:
+:results:
+
+
+|                    |  ranger_imp |
+| :----------------- | ----------: |
+| orig_amounts       |   16.765130 |
+| orig_days          |    9.236459 |
+| comm_out_state     |    3.736345 |
+| aadt               |    2.854666 |
+| ind_agri           |    2.632328 |
+| pop_16yrover       |    2.301763 |
+| comm_pubtransport  |    2.169907 |
+| gdp                |    2.070973 |
+| comm_etc           |    2.019489 |
+| inde_ed_meds       |    2.011766 |
+:end:
+
+Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
+
+#+begin_quote
+'prediction.error': Overall out of bag prediction error. For
+          classification this is the fraction of missclassified
+          samples, for probability estimation the Brier score, for
+          regression the mean squared error and for survival one minus
+          Harrell's C-index.
+#+end_quote
+
+#+begin_src R
+ranger_final$prediction.error
+#+end_src
+
+#+RESULTS:
+: [1] 0.2169273
+
+#+begin_src R :results code graphics file :file cor_ranger_vimp.png
+plot_vimp(rrtemp,2)
+#+end_src
+
+#+RESULTS:
+[[file:cor_ranger_vimp.png]]
+
+** optimal threshold                                              :noexport:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+threshold = 0.5, we expect the weighted F1 = 0.934.
+#+begin_src R
+set.seed(1)
+resample_stats <- thresholder(ranger_tune,
+                              threshold = seq(0.2, 0.8, by = 0.01),
+                              final = TRUE)
+
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+#+RESULTS:
+: Error in thresholder(ranger_tune, threshold = seq(0.2, 0.8, by = 0.01),  :
+:   object 'ranger_tune' not found
+: Error: object 'resample_stats' not found
+: Error: object 'resample_stats' not found
+: Error: object 'ot' not found
+
+** main effects
+#+begin_src R
+mip = rtemp %>% arrange(desc(ranger_imp)) %>% slice(1:8)
+
+mdx = which(colnames(dx) %in% row.names(mip))
+right = data.frame(name = row.names(mip), vimp = mip[,1])
+left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+
+mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+#+end_src
+
+#+RESULTS:
+
+Since the prediction model is not easily interpretable, we visualize main effects of eight covariates using accumulated local effects (ALE) and partial dependence (PD) plots proposed in https://arxiv.org/pdf/1612.08468;Visualizing
+The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to have COR. The last one describes interaction effects of =orig_amount= and =orig_days=.
+#+begin_src R :results code graphics file :file cor_aleplot.png
+## Define the predictive function
+yhat <- function(X.model, newdata) {
+  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
+  eps <- .Machine$double.eps
+  out <- log(pp + eps / (1 - pp + eps))
+  return(out)
+  }
+
+dfx = as.data.frame(dx)
+
+## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
+par(mfrow = c(3,3))
+ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
+ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
+ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
+ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
+ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
+ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
+ALE.7=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30, NA.plot = TRUE)
+ALE.8=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30, NA.plot = TRUE)
+ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
+## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
+#+end_src
+
+#+RESULTS:
+[[file:cor_aleplot.png]]
+
+The below is a matrix of PD plot.
+#+begin_src R :results code graphics file :file cor_pdplot.png
+## Calculate and plot the Asecond-order interaction effx2, x3
+par(mfrow = c(3,3))
+PD.1=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30)
+PD.2=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30)
+PD.3=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30)
+PD.4=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30)
+PD.5=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30)
+PD.6=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30)
+PD.7=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30)
+PD.8=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30)
+PD.12=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20)
+## PD.23=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
+## PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
+#+end_src
+
+#+RESULTS:
+[[file:cor_pdplot.png]]
+
+** mapping high COR events                                         :noexport:
+#+begin_quote
+'predictions': Predicted classes/values, based on out of bag samples
+          (classification and regression only).
+#+end_quote
+
+#+begin_src R
+ff = df %>% mutate(pred = ranger_final$predictions[, 2]) %>%
+  filter((orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0])) | (orig_amounts <= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days <= min(ALE.2$x.values[ALE.2$f.values > 0])))
+
+df$oram_hl = 1 * (df$orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]))
+df$orda_hl = 1 * (df$orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0]))
+
+pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+mis = df[pred != y, ]
+hit = df[pred == y, ]
+
+
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+xmin = min(df$x)
+ymin = min(df$y)
+xmax = max(df$x)
+ymax = max(df$y)
+
+par(mfrow = c(2,2))
+plot(df$x, df$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(mis$x, mis$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(ff$x, ff$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(hit$x, hit$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+
+pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+sum(pred != y) / length(y)
+
+#+end_src
+
+#+RESULTS:
+: [1] 0.5349794
+
+=comm_out_state= can take account for the spatial effect. It has high values when the site is located along with the state border. =com_low= contains high and low =comm_out_state=. high / low surfix is about the prediction value, not the variable value
+#+begin_src R
+xeq = ALE.3$x.values[ALE.3$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+com_high <- df %>% filter(comm_out_state <= maxx & comm_out_state >= minx)
+com_low <- df %>% filter(comm_out_state > maxx | comm_out_state < minx)
+df$com_hl <- 1 * (df$comm_out_state <= maxx & df$comm_out_state >= minx)
+
+par(mfrow = c(2, 2))
+plot(com_high$x, com_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(com_low$x, com_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+=aadt= might be associated with the location as well. high =aadt= nearby big cities / highway hub?
+#+begin_src R
+aadt_high = df %>% filter(aadt > min(ALE.4$x.values[ALE.4$f.values > 0]))
+aadt_low = df %>% filter(aadt <= min(ALE.4$x.values[ALE.4$f.values > 0]))
+df$aadt_hl = with(df, 1 * (aadt > min(ALE.4$x.values[ALE.4$f.values > 0])))
+
+par(mfrow=c(2,2))
+plot(aadt_high$x, aadt_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(aadt_low$x, aadt_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+=gdp= would also be highly associated with city / county level factor
+#+begin_src R
+xeq = ALE.8$x.values[ALE.8$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+gdp_high <- df %>% filter(gdp <= maxx & gdp >= minx)
+gdp_low <- df %>% filter(gdp > maxx | gdp < minx)
+df$gdp_hl = with(df, 1 * (gdp <= maxx & gdp >= minx))
+
+par(mfrow = c(2, 2))
+plot(gdp_high$x, gdp_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+
+** spatial pattern
+:PROPERTIES:
+:header-args:R: :exports results :width 672 :height 672
+:END:
+
+Questions to answer:
+- Are there spatial pattern in COR?
+- Are there spatial pattern in covariates?
+- Does the prediction model take some spatial pattern into account?
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R :results none
+pred = 1 * (pred > 0.5)
+df$mis = 1 * (pred != y)
+df %>% filter(y > min(y))
+
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+#+END_SRC
+
+#+begin_src R
+gg_base = gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+load("col.pal.RData")
+temp = col.pal(10)
+col_pal = c(temp[1:2])
+
+ov_map = function(df, vname) {
+gg = gg_base +
+  geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var) , size = 2, alpha = 0.5)+
+  scale_colour_manual(values=cbPalette) +
+  labs(color = paste0(vname,"\n")) +
+  ## scale_fill_gradient2() +
+  theme_bw() +
+  ditch_the_axes
+print(gg)
+return(gg)
+}
+
+# The palette with grey:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# The palette with black:
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# To use for fills, add
+  ## scale_fill_manual(values=cbPalette)
+
+# To use for line and point colors, add
+  ## scale_colour_manual(values=cbPalette)
+
+
+#+end_src
+
+#+RESULTS:
+
+*** misclassified projects
+
+The spatial plot of mis-classification of the prediction model is presented below; violet: incorrect vs white: correct.
+#+begin_src R :results graphics file :file mis_map.png
+var = factor(df$mis, label = c("miss","hit"))
+df %>% mutate(var = var) %>% ov_map("classification")
+#+END_SRC
+
+#+RESULTS:
+[[file:mis_map.png]]
+
+*** spatial main effect
+The below are a list of spatial plots for two sets of locations separated by the direction of covariate's main effect: violet: positive main effect vs white: negative main effect. The "positive" means the chance of COR is greater than 0.5.
+**** high main effect: =orig_amount=
+#+begin_src R :results graphics file :file oram_map.png
+df %>% mutate(var = factor(df$oram_hl, label = c("high","low"))) %>% ov_map("orgi_amount")
+#+end_src
+
+#+RESULTS:
+[[file:oram_map.png]]
+
+
+**** high main effect: =orig_day=
+#+begin_src R :results graphics file :file orda_map.png
+df %>% mutate(var = factor(df$orda_hl, label = c("high","low"))) %>% ov_map("orig_day")
+#+end_src
+
+#+RESULTS:
+[[file:orda_map.png]]
+
+
+
+**** high main effect: =comm_out_state=
+#+begin_src R :results graphics file :file com_map.png
+df %>% mutate(var = factor(df$com_hl, label = c("high","low"))) %>% ov_map("comm_out_state")
+#+end_src
+
+#+RESULTS:
+[[file:com_map.png]]
+
+
+**** high main effect: =gdp=
+#+begin_src R :results graphics file :file gdp_map.png
+df %>% mutate(var = factor(df$gdp_hl, label = c("high","low"))) %>% ov_map("gdp")
+#+end_src
+
+#+RESULTS:
+[[file:gdp_map.png]]
+
+**** high main effect: =aadt=
+#+begin_src R :results graphics file :file aadt_map.png
+df %>% mutate(var = factor(df$aadt_hl, label = c("high","low"))) %>% ov_map("aadt")
+#+end_src
+
+#+RESULTS:
+[[file:aadt_map.png]]
+
+* ToExport - SOR [2021-02-12 Fri]                                  :noexport:
+A prediction target variable
+\[
+SOR = \log(\text{modified\_days} - \text{orig\_days} +1) - \log(orig\_days)
+\]
+
+#+begin_src R :results none
+source('prerequisite.R')
+source('custom_function.R')
+source('preprocess.R')
+#+end_src
+
+** Logistic regression                                             :noexport:
+Variables are selected by LASSO.
+#+begin_src R :results code :exports both
+mm = glm(y ~ orig_days + orig_amounts + hhd_avg_size + ind_agri,
+         data = dx, family="binomial")
+coef(mm) %>% knitr::kable()
+pred = predict(mm,newx=dx)
+tab = table(pred>0,y)
+##tab
+sum(diag(tab)) / sum(tab)
+#+end_src
+
+#+RESULTS:
+#+begin_src R
+
+
+|             |          x|
+                           |:------------|----------:|
+|(Intercept)  |  1.5617775|
+   |orig_days    |  0.0019859|
+      |orig_amounts |  0.0000003|
+         |hhd_avg_size | -0.9898076|
+            |ind_agri     | -0.0087161|
+               [1] 0.6748971
+#+end_src
+
+** RF (trained using =ranger=)
+The accuracy is 92% at the optimal threshold (0.44). The variable importance is listed below:
+#+begin_src R :results code
+ranger_final = readRDS("sor_ranger_final.rds")
+ranger_imp = ranger_final$variable.importance
+rtemp = data.frame(ranger = ranger_imp)
+row.names(rtemp) = names(ranger_imp)
+rtemp %>% arrange(-ranger) %>% slice(1:20) %>% knitr::kable()
+#+end_src
+
+#+RESULTS:
+#+begin_src R
+
+
+|                     |    ranger|
+                             |:--------------------|---------:|
+|orig_days            | 11.990988|
+   |orig_amounts         |  5.687667|
+      |ncat_pjt_type        |  5.683555|
+         |prec                 |  5.128301|
+            |max_temp             |  4.892555|
+               |ind_manuf            |  4.400662|
+                  |avg_temp             |  3.821630|
+                     |access_cla           |  3.817161|
+                        |ncat_road_side       |  3.733764|
+                           |no_lane              |  3.640826|
+                              |gdp                  |  3.596934|
+                                 |hhd_avg_size         |  3.473615|
+                                    |pav_cond             |  3.356626|
+                                       |comm_out_county      |  3.287972|
+                                          |speedlimit           |  3.235455|
+                                             |unemp                |  3.178557|
+                                                |comm_workers_per_car |  3.172541|
+                                                   |comm_in_county       |  3.081504|
+                                                      |comm_pubtransport    |  3.070720|
+                                                         |ncat_funclass        |  2.921511|
+#+end_src
+
+#+begin_src R
+cor(sory, ranger_final$predictions)
+#+end_src
+
+#+RESULTS:
+: [1] 0.22103
+
+#+begin_src R :results code graphics file :file sor_ranger_vimp.png
+plot_vimp(rtemp,2)
+#+end_src
+
+#+RESULTS:
+[[file:sor_ranger_vimp.png]]
+
+#+begin_src R
+mip = rtemp %>% arrange(desc(ranger)) %>% slice(1:6)
+
+mdx = which(colnames(dx) %in% row.names(mip))
+right = data.frame(name = row.names(mip), vimp = mip[,1])
+left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+
+mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R :results code graphics file :file sor_aleplot.png
+## Define the predictive function
+yhat <- function(X.model, newdata) {
+  as.numeric(predict(X.model, newdata)$predictions)
+}
+
+dfx = as.data.frame(dx)
+
+## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
+par(mfrow = c(3,3))
+ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
+ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
+ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
+ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
+ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
+ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
+ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
+ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
+#+end_src
+
+#+RESULTS:
+[[file:sor_aleplot.png]]
+
+#+begin_src R :results code graphics file :file sor_pdplot.png
+## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
+par(mfrow = c(3,3))
+PD.1=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30)
+PD.2=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30)
+PD.3=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30)
+PD.4=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30)
+PD.5=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30)
+PD.6=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30)
+PD.12=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20)
+PD.23=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
+PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
+#+end_src
+
+#+RESULTS:
+[[file:sor_pdplot.png]]
+
+* ToExport - COR [2021-03-03 Wed]                                                    :export:
+:PROPERTIES:
+:header-args:R: :exports results :noweb yes
+:END:
+
+A prediction target variable: $y = 1$ if $\log COR > 0$; 0 otherwise, where
+\[
+COR = \frac{\text{original amounts} + \text{modified amounts}}{\text{original amounts}}
+\]
+We use the random forest to train the prediction model. The =R= package =ranger= is used for the training.
+Moving average (three years backward from a project start year) covariates are generated and substituted with time series covariates.
+#+begin_src R :results none
+source('prerequisite.R')
+source('custom_function.R')
+source('preprocess.R')
+y = 1 * (df$logy > 0)
+#+end_src
+
+** Logistic regression                                             :noexport:
+Variables are selected by LASSO. The accuracy is 67%.
+#+begin_src R :results code :exports both
+mm = glm(y ~ orig_days + orig_amounts + hhd_avg_size + ind_agri,
+         data = dx, family="binomial")
+coef(mm) %>% knitr::kable()
+pred = predict(mm,newx=dx)
+tab = table(pred>0,y)
+##tab
+sum(diag(tab)) / sum(tab)
+#+end_src
+
+#+RESULTS:
+#+begin_src R
+
+
+|             |          x|
+|:------------|----------:|
+|(Intercept)  |  1.5617775|
+|orig_days    |  0.0019859|
+|orig_amounts |  0.0000003|
+|hhd_avg_size | -0.9898076|
+|ind_agri     | -0.0087161|
+[1] 0.6748971
+#+end_src
+
+** RF (trained using =ranger=)
+The OOB accuracy is 78.3% at the optimal threshold (0.5-ish?). The variable importance is listed below:
+#+begin_src R :results drawer
+ranger_final = readRDS("cor_ranger_final.rds")
+ranger_imp = ranger_final$variable.importance
+rtemp = data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) = names(ranger_imp)
+rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:10)
+rrtemp %>% knitr::kable()
+#+end_src
+
+#+RESULTS:
+:results:
+
+
+|                    |  ranger_imp |
+| :----------------- | ----------: |
+| orig_amounts       |   16.765130 |
+| orig_days          |    9.236459 |
+| comm_out_state     |    3.736345 |
+| aadt               |    2.854666 |
+| ind_agri           |    2.632328 |
+| pop_16yrover       |    2.301763 |
+| comm_pubtransport  |    2.169907 |
+| gdp                |    2.070973 |
+| comm_etc           |    2.019489 |
+| inde_ed_meds       |    2.011766 |
+:end:
+
+Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
+
+#+begin_quote
+'prediction.error': Overall out of bag prediction error. For
+          classification this is the fraction of missclassified
+          samples, for probability estimation the Brier score, for
+          regression the mean squared error and for survival one minus
+          Harrell's C-index.
+#+end_quote
+
+#+begin_src R
+ranger_final$prediction.error
+#+end_src
+
+#+RESULTS:
+: [1] 0.2169273
+
+#+begin_src R :results code graphics file :file cor_ranger_vimp.png
+plot_vimp(rrtemp,2)
+#+end_src
+
+#+RESULTS:
+[[file:cor_ranger_vimp.png]]
+
+** optimal threshold                                              :noexport:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+threshold = 0.5, we expect the weighted F1 = 0.934.
+#+begin_src R
+set.seed(1)
+resample_stats <- thresholder(ranger_tune,
+                              threshold = seq(0.2, 0.8, by = 0.01),
+                              final = TRUE)
+
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+#+RESULTS:
+: Error in thresholder(ranger_tune, threshold = seq(0.2, 0.8, by = 0.01),  :
+:   object 'ranger_tune' not found
+: Error: object 'resample_stats' not found
+: Error: object 'resample_stats' not found
+: Error: object 'ot' not found
+
+** main effects
+#+begin_src R
+mip = rtemp %>% arrange(desc(ranger_imp)) %>% slice(1:8)
+
+mdx = which(colnames(dx) %in% row.names(mip))
+right = data.frame(name = row.names(mip), vimp = mip[,1])
+left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+
+mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+#+end_src
+
+#+RESULTS:
+
+Since the prediction model is not easily interpretable, we visualize main effects of eight covariates using accumulated local effects (ALE) and partial dependence (PD) plots proposed in https://arxiv.org/pdf/1612.08468;Visualizing
+The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to have COR. The last one describes interaction effects of =orig_amount= and =orig_days=.
+#+begin_src R :results code graphics file :file cor_aleplot.png
+## Define the predictive function
+yhat <- function(X.model, newdata) {
+  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
+  eps <- .Machine$double.eps
+  out <- log(pp + eps / (1 - pp + eps))
+  return(out)
+  }
+
+dfx = as.data.frame(dx)
+
+## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
+par(mfrow = c(3,3))
+ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
+ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
+ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
+ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
+ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
+ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
+ALE.7=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30, NA.plot = TRUE)
+ALE.8=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30, NA.plot = TRUE)
+ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
+## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
+#+end_src
+
+#+RESULTS:
+[[file:cor_aleplot.png]]
+
+The below is a matrix of PD plot.
+#+begin_src R :results code graphics file :file cor_pdplot.png
+## Calculate and plot the Asecond-order interaction effx2, x3
+par(mfrow = c(3,3))
+PD.1=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30)
+PD.2=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30)
+PD.3=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30)
+PD.4=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30)
+PD.5=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30)
+PD.6=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30)
+PD.7=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30)
+PD.8=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30)
+PD.12=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20)
+## PD.23=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
+## PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
+#+end_src
+
+#+RESULTS:
+[[file:cor_pdplot.png]]
+
+** mapping high COR events                                         :noexport:
+#+begin_quote
+'predictions': Predicted classes/values, based on out of bag samples
+          (classification and regression only).
+#+end_quote
+
+#+begin_src R
+ff = df %>% mutate(pred = ranger_final$predictions[, 2]) %>%
+  filter((orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0])) | (orig_amounts <= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days <= min(ALE.2$x.values[ALE.2$f.values > 0])))
+
+df$oram_hl = 1 * (df$orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]))
+df$orda_hl = 1 * (df$orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0]))
+
+pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+mis = df[pred != y, ]
+hit = df[pred == y, ]
+
+
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+xmin = min(df$x)
+ymin = min(df$y)
+xmax = max(df$x)
+ymax = max(df$y)
+
+par(mfrow = c(2,2))
+plot(df$x, df$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(mis$x, mis$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(ff$x, ff$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(hit$x, hit$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+
+pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+sum(pred != y) / length(y)
+
+#+end_src
+
+#+RESULTS:
+: [1] 0.5349794
+
+=comm_out_state= can take account for the spatial effect. It has high values when the site is located along with the state border. =com_low= contains high and low =comm_out_state=. high / low surfix is about the prediction value, not the variable value
+#+begin_src R
+xeq = ALE.3$x.values[ALE.3$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+com_high <- df %>% filter(comm_out_state <= maxx & comm_out_state >= minx)
+com_low <- df %>% filter(comm_out_state > maxx | comm_out_state < minx)
+df$com_hl <- 1 * (df$comm_out_state <= maxx & df$comm_out_state >= minx)
+
+par(mfrow = c(2, 2))
+plot(com_high$x, com_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(com_low$x, com_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+=aadt= might be associated with the location as well. high =aadt= nearby big cities / highway hub?
+#+begin_src R
+aadt_high = df %>% filter(aadt > min(ALE.4$x.values[ALE.4$f.values > 0]))
+aadt_low = df %>% filter(aadt <= min(ALE.4$x.values[ALE.4$f.values > 0]))
+df$aadt_hl = with(df, 1 * (aadt > min(ALE.4$x.values[ALE.4$f.values > 0])))
+
+par(mfrow=c(2,2))
+plot(aadt_high$x, aadt_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(aadt_low$x, aadt_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+=gdp= would also be highly associated with city / county level factor
+#+begin_src R
+xeq = ALE.8$x.values[ALE.8$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+gdp_high <- df %>% filter(gdp <= maxx & gdp >= minx)
+gdp_low <- df %>% filter(gdp > maxx | gdp < minx)
+df$gdp_hl = with(df, 1 * (gdp <= maxx & gdp >= minx))
+
+par(mfrow = c(2, 2))
+plot(gdp_high$x, gdp_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+
+** spatial pattern
+:PROPERTIES:
+:header-args:R: :exports results :width 672 :height 672
+:END:
+
+Questions to answer:
+- Are there spatial pattern in COR?
+- Are there spatial pattern in covariates?
+- Does the prediction model take some spatial pattern into account?
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R :results none
+pred = 1 * (pred > 0.5)
+df$mis = 1 * (pred != y)
+df %>% filter(y > min(y))
+
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+#+END_SRC
+
+#+begin_src R
+gg_base = gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+load("col.pal.RData")
+temp = col.pal(10)
+col_pal = c(temp[1:2])
+
+ov_map = function(df, vname) {
+gg = gg_base +
+  geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var) , size = 2, alpha = 0.5)+
+  scale_colour_manual(values=cbPalette) +
+  labs(color = paste0(vname,"\n")) +
+  ## scale_fill_gradient2() +
+  theme_bw() +
+  ditch_the_axes
+print(gg)
+return(gg)
+}
+
+# The palette with grey:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# The palette with black:
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# To use for fills, add
+  ## scale_fill_manual(values=cbPalette)
+
+# To use for line and point colors, add
+  ## scale_colour_manual(values=cbPalette)
+
+
+#+end_src
+
+#+RESULTS:
+
+*** misclassified projects
+
+The spatial plot of mis-classification of the prediction model is presented below; violet: incorrect vs white: correct.
+#+begin_src R :results graphics file :file mis_map.png
+var = factor(df$mis, label = c("miss","hit"))
+df %>% mutate(var = var) %>% ov_map("classification")
+#+END_SRC
+
+#+RESULTS:
+[[file:mis_map.png]]
+
+*** spatial main effect
+The below are a list of spatial plots for two sets of locations separated by the direction of covariate's main effect: violet: positive main effect vs white: negative main effect. The "positive" means the chance of COR is greater than 0.5.
+**** high main effect: =orig_amount=
+#+begin_src R :results graphics file :file oram_map.png
+df %>% mutate(var = factor(df$oram_hl, label = c("high","low"))) %>% ov_map("orgi_amount")
+#+end_src
+
+#+RESULTS:
+[[file:oram_map.png]]
+
+
+**** high main effect: =orig_day=
+#+begin_src R :results graphics file :file orda_map.png
+df %>% mutate(var = factor(df$orda_hl, label = c("high","low"))) %>% ov_map("orig_day")
+#+end_src
+
+#+RESULTS:
+[[file:orda_map.png]]
+
+
+
+**** high main effect: =comm_out_state=
+#+begin_src R :results graphics file :file com_map.png
+df %>% mutate(var = factor(df$com_hl, label = c("high","low"))) %>% ov_map("comm_out_state")
+#+end_src
+
+#+RESULTS:
+[[file:com_map.png]]
+
+
+**** high main effect: =gdp=
+#+begin_src R :results graphics file :file gdp_map.png
+df %>% mutate(var = factor(df$gdp_hl, label = c("high","low"))) %>% ov_map("gdp")
+#+end_src
+
+#+RESULTS:
+[[file:gdp_map.png]]
+
+**** high main effect: =aadt=
+#+begin_src R :results graphics file :file aadt_map.png
+df %>% mutate(var = factor(df$aadt_hl, label = c("high","low"))) %>% ov_map("aadt")
+#+end_src
+
+#+RESULTS:
+[[file:aadt_map.png]]
+
+* COMMENT Local Variables
+# Local Variables:
+# org-babel-default-header-args:R: ((:session . "*R-COR*") (:export . "both") (:results . "output replace"))
+# eval: (flyspell-mode -1)
+# eval: (spell-fu-mode -1)
+# End:
