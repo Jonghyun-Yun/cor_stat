@@ -12,7 +12,7 @@
 # comment out for reveal.js
 # #+SETUPFILE: ~/setup/my-theme-readtheorg.setup
 
-# #+PROPERTY: header-args :eval never-export
+#+PROPERTY: header-args :eval never-export
 #+PROPERTY: header-args:R :exports both :noweb yes
 #+property: header-args:matlab :session *MATLAB* :exports results :results output :noweb yes
 
@@ -404,7 +404,7 @@ plot(var.mod)
 #+END_SRC
 
 * FDOT_10mi_Coordinates
-#+BEGIN_SRC R 
+#+BEGIN_SRC R
 library('magrittr')
 library(dplyr)
 dpro <- readr::read_csv(file = "FDOT_10mi_Coordinates.csv", col_names = T) %>% data.frame()
@@ -414,7 +414,7 @@ dpro$bridge[is.na(dpro$bridge)] = 0
 dpro <- na.omit(dpro)
 #+END_SRC
 
-#+BEGIN_SRC R 
+#+BEGIN_SRC R
 ## FIX: long and lat are switched.
 ## dd = dd %>%
 ##   mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
@@ -433,7 +433,7 @@ dd = dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
 #+END_SRC
 
-#+BEGIN_SRC R 
+#+BEGIN_SRC R
 cnames = names(dd)
 
 no_drop = !grepl("gdp_.", cnames) &
@@ -447,7 +447,7 @@ df = dd[no_drop]
 df$logy = log(df$modified_amounts) - log(df$orig_amounts)
 #+END_SRC
 
-#+begin_src R 
+#+begin_src R
 df$access_con[df$access_con != 3] = 0
 df$pjt_type = as.factor(df$pjt_type)
 df$road_side = as.factor(df$road_side)
@@ -464,7 +464,7 @@ df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
 w = 1/as.matrix(dist(df[,-1]))
 #+END_SRC
 ** GLM NET
-#+begin_src R 
+#+begin_src R
 library(glmnet)
 dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts))
 x = model.matrix(~0+., dx)
@@ -1395,16 +1395,16 @@ require(ggplot2)
 plot_vimp = function(vimp, cutoff = 1) {
 
    tryCatch({
-      
+
       if(dim(vimp)[1] < dim(vimp)[2]) vimp <- t(vimp)
-      
+
     }, error = function(e)
       {
       stop('vimp should be a p by 1 matrix, array, or data.frame.')
       }
 
     )
-    
+
   ## Get the relative importance
   mval = max(vimp[,1])
   vimp[,2] = ( vimp[,1]/mval ) * 100
@@ -1423,7 +1423,7 @@ plot_vimp = function(vimp, cutoff = 1) {
     scale_fill_discrete(guide=FALSE) +
     theme_bw() +
     theme(axis.line = element_line(colour = "black"),
-          text = element_text(size=10),
+          text = element_text(size=20),
           ##panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           ##panel.border = element_blank()
@@ -1431,6 +1431,18 @@ plot_vimp = function(vimp, cutoff = 1) {
           )
   return(gg)
 }
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+## Define the predictive function
+yhat <- function(X.model, newdata) {
+  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
+  eps <- .Machine$double.eps
+  out <- log((pp + eps) / (1 - pp + eps))
+  return(out)
+  }
 #+end_src
 
 #+RESULTS:
@@ -1447,9 +1459,6 @@ names(dpro) <- make.names(names(dpro))
 
 dgis <- readr::read_csv(file = "data/FDOT_10mi_Coordinates_coordinate_tab.csv", col_names = T)
 names(dgis) <- make.names(names(dgis))
-
-drural <- readr::read_csv(file = "data/FDOT_10mi_Coordinates_coordinate_rural.csv", col_names = T)
-names(drural) <- make.names(names(drural))
 
 if (identical(dpro$pjt_id, dgis$Contract_ID)) {
   dpro$x = dgis$Longitude;
@@ -1527,6 +1536,213 @@ cory = 1 * (df$logy > 0)
 sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
 #+end_src
 
+* Preprocess V2
+:PROPERTIES:
+:header-args:R: :tangle preprocess_V2.R
+:END:
+
+This pre-processing includes a new data set for landuse and other infomation. Also, it includes contract type and vendor name as covariates.
+
+#+begin_src R :results none
+library('magrittr')
+library(dplyr)
+dpro <- readr::read_csv(file = "data/FDOT_10mi_Coordinates.csv", col_names = T)
+names(dpro) <- make.names(names(dpro))
+
+dgis <- readr::read_csv(file = "data/FDOT_10mi_Coordinates_coordinate_tab.csv", col_names = T)
+names(dgis) <- make.names(names(dgis))
+
+drural <- readr::read_csv(file = "data/FDOT_10mi_Coordinate_03022021_rural.csv", col_names = T)
+names(drural) <- make.names(names(drural))
+
+if (identical(dpro$pjt_id, dgis$Contract_ID)) {
+  dpro$x = dgis$Longitude;
+  dpro$y = dgis$Latitude
+}
+
+if (identical(dpro$pjt_id, drural$Contract_ID)) {
+  temp  <- drural %>% mutate(pjt_id = Contract_ID) %>% select(pjt_id,  u_r, Contract_Type, landuse_code, Landuse_lv_1,  Landuse_lv_2, ROAD_DIREC, DISTRICT, COUNTYDOT, MNG_DIST, Vendor_Name)
+  dpro = plyr::join(dpro, temp)
+}
+
+dpro$railcross[is.na(dpro$railcross)] <- 0
+dpro$bridge[is.na(dpro$bridge)] <- 0
+dpro <- na.omit(dpro)
+
+## dd <- dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
+##   mutate(mov_unemp = 0.6*unemp_2019 + 0.3*unemp_2018 + 0.1*unemp_2017 ) %>%
+##   mutate(mov_avg_temp = 0.6*avg_temp_2019 + 0.3*avg_temp_2018 + 0.1*avg_temp_2017 ) %>%
+##   mutate(mov_max_temp = 0.6*max_temp_2019 + 0.3*max_temp_2018 + 0.1*max_temp_2017 ) %>%
+##   mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
+##   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
+
+coef <- exp(c(0,  -1/2,  -1))
+coef <- coef / sum(coef)
+
+dd <- dpro %>%
+  mutate(unemp = coef[1] * get(paste0("unemp_", start_yr)) +
+coef[2] * get(paste0("unemp_", start_yr - 1)) +
+coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
+    mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
+coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
+coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
+  mutate(max_temp = coef[1] * get(paste0("max_temp_", start_yr)) +
+coef[2] * get(paste0("max_temp_", start_yr - 1)) +
+coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
+  mutate(prec = coef[1] * get(paste0("prec_", start_yr)) +
+coef[2] * get(paste0("prec_", start_yr - 1)) +
+coef[3] * get(paste0("prec_", start_yr - 2))) %>%
+  mutate(gdp = coef[1] * get(paste0("gdp_", start_yr)) +
+coef[2] * get(paste0("gdp_", start_yr - 1)) +
+coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
+select(-c(roadway, start_yr,  end_yr))
+
+cnames = names(dd)
+
+no_drop <- !grepl("gdp_.", cnames) &
+ !grepl("prec_.", cnames) &
+ !grepl("max_temp_.", cnames) &
+ !grepl("avg_temp_.", cnames) &
+ !grepl("unemp_.", cnames)
+#+end_src
+
+#+begin_src R :results none
+## df = dd[no_drop] %>% filter(pjt_type=="X3-Resurfacing")
+df <- dd[no_drop]
+df$logy <- log(df$modified_amounts) - log(df$orig_amounts)
+
+df$pjt_type <- as.factor(df$pjt_type)
+df$road_side <- as.factor(df$road_side)
+df$funclass <- as.factor(df$funclass)
+df$access_con <- as.factor(df$access_con)
+df$Contract_Type  <- as.factor(df$Contract_Type)
+df$Vendor_Name  <- as.factor(df$Vendor_Name)
+cat_df <- df %>% select(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name)
+
+df <- df %>%
+  mutate(ncat_pjt_type = as.numeric(pjt_type)) %>%
+  mutate(ncat_road_side = as.numeric(road_side)) %>%
+  mutate(ncat_funclass = as.numeric(funclass)) %>%
+  mutate(ncat_access_con = as.numeric(access_con)) %>%
+  mutate(ncat_Contract_Type = as.numeric(Contract_Type)) %>%
+  mutate(ncat_Vendor_Name = as.numeric(Vendor_Name)) %>%
+  select(-c(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name))
+
+dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts))
+dxx = dx %>% select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con, ncat_Contract_Type,  ncat_Vendor_Name)) %>%
+  cbind(cat_df)
+
+X = model.matrix(~ 0 + ., dxx)
+vn <- colnames(X) <- colnames(X) %>% make.names()
+
+cory = 1 * (df$logy > 0)
+sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
+#+end_src
+
+* Preprocess Rural
+:PROPERTIES:
+:header-args:R: :tangle preprocess_rural.R
+:END:
+
+This pre-processing aims to predict =urban_rural= varible.
+
+#+begin_src R :results none
+library('magrittr')
+library(dplyr)
+dpro <- readr::read_csv(file = "data/FDOT_10mi_Coordinates.csv", col_names = T)
+names(dpro) <- make.names(names(dpro))
+
+dgis <- readr::read_csv(file = "data/FDOT_10mi_Coordinates_coordinate_tab.csv", col_names = T)
+names(dgis) <- make.names(names(dgis))
+
+drural <- readr::read_csv(file = "data/FDOT_10mi_Coordinate_03022021_rural.csv", col_names = T)
+names(drural) <- make.names(names(drural))
+
+if (identical(dpro$pjt_id, dgis$Contract_ID)) {
+  dpro$x = dgis$Longitude;
+  dpro$y = dgis$Latitude
+}
+
+if (identical(dpro$pjt_id, drural$Contract_ID)) {
+  temp  <- drural %>% mutate(pjt_id = Contract_ID) %>% select(pjt_id, u_r, Contract_Type, landuse_code, Landuse_lv_1,  Landuse_lv_2, ROAD_DIREC, DISTRICT, COUNTYDOT, MNG_DIST, Vendor_Name)
+  dpro = plyr::join(dpro, temp)
+}
+
+dpro$railcross[is.na(dpro$railcross)] <- 0
+dpro$bridge[is.na(dpro$bridge)] <- 0
+dpro <- na.omit(dpro)
+
+## dd <- dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
+##   mutate(mov_unemp = 0.6*unemp_2019 + 0.3*unemp_2018 + 0.1*unemp_2017 ) %>%
+##   mutate(mov_avg_temp = 0.6*avg_temp_2019 + 0.3*avg_temp_2018 + 0.1*avg_temp_2017 ) %>%
+##   mutate(mov_max_temp = 0.6*max_temp_2019 + 0.3*max_temp_2018 + 0.1*max_temp_2017 ) %>%
+##   mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
+##   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
+
+coef <- exp(c(0,  -1/2,  -1))
+coef <- coef / sum(coef)
+
+dd <- dpro %>%
+  mutate(unemp = coef[1] * get(paste0("unemp_", start_yr)) +
+coef[2] * get(paste0("unemp_", start_yr - 1)) +
+coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
+    mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
+coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
+coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
+  mutate(max_temp = coef[1] * get(paste0("max_temp_", start_yr)) +
+coef[2] * get(paste0("max_temp_", start_yr - 1)) +
+coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
+  mutate(prec = coef[1] * get(paste0("prec_", start_yr)) +
+coef[2] * get(paste0("prec_", start_yr - 1)) +
+coef[3] * get(paste0("prec_", start_yr - 2))) %>%
+  mutate(gdp = coef[1] * get(paste0("gdp_", start_yr)) +
+coef[2] * get(paste0("gdp_", start_yr - 1)) +
+coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
+select(-c(roadway, start_yr,  end_yr))
+
+cnames = names(dd)
+
+no_drop <- !grepl("gdp_.", cnames) &
+ !grepl("prec_.", cnames) &
+ !grepl("max_temp_.", cnames) &
+ !grepl("avg_temp_.", cnames) &
+ !grepl("unemp_.", cnames)
+#+end_src
+
+#+begin_src R :results none
+## df = dd[no_drop] %>% filter(pjt_type=="X3-Resurfacing")
+df <- dd[no_drop]
+df$logy <- log(df$modified_amounts) - log(df$orig_amounts)
+
+df$pjt_type <- as.factor(df$pjt_type)
+df$road_side <- as.factor(df$road_side)
+df$funclass <- as.factor(df$funclass)
+df$access_con <- as.factor(df$access_con)
+df$Contract_Type  <- as.factor(df$Contract_Type)
+df$Vendor_Name  <- as.factor(df$Vendor_Name)
+cat_df <- df %>% select(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name)
+
+df <- df %>%
+  mutate(ncat_pjt_type = as.numeric(pjt_type)) %>%
+  mutate(ncat_road_side = as.numeric(road_side)) %>%
+  mutate(ncat_funclass = as.numeric(funclass)) %>%
+  mutate(ncat_access_con = as.numeric(access_con)) %>%
+  mutate(ncat_Contract_Type = as.numeric(Contract_Type)) %>%
+  mutate(ncat_Vendor_Name = as.numeric(Vendor_Name)) %>%
+  select(-c(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name))
+
+dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts, u_r))
+dxx = dx %>% select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con, ncat_Contract_Type, ncat_Vendor_Name)) %>%
+  cbind(cat_df)
+
+X = model.matrix(~ 0 + ., dxx)
+vn <- colnames(X) <- colnames(X) %>% make.names()
+
+cory = 1 * (df$logy > 0)
+sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
+y = df$u_r
+#+end_src
+
 * GLM classification models
 
 The ridge, lasso, and elastic net penalty can be used along with the
@@ -1547,7 +1763,7 @@ error measure can be used as well (eg. deviance, AUC, etc.).
 
 #+BEGIN_SRC R
 set.seed(1)
-y = 1 * (df$logy > 0)
+## y = 1 * (df$logy > 0)
 cvlasso = cv.glmnet(X,y,alpha=1,family="binomial",type.measure="class")
 cvlasso$lambda.min
 cvlasso$lambda.1se
@@ -1563,8 +1779,8 @@ abline(v = log(cvlasso$lambda.1se),lty="dotted")
 #+END_SRC
 
 #+RESULTS:
-: [1] 0.01035686
-: [1] 0.05036127
+: [1] 0.03525019
+: [1] 0.08143251
 
 The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
 
@@ -1576,90 +1792,17 @@ pred = predict(lmlasso,newx=X)
 
 #+RESULTS:
 #+begin_example
-82 x 1 sparse Matrix of class "dgCMatrix"
-                                                 s0
-(Intercept)                            5.058176e-01
-orig_days                              1.485495e-03
-orig_amounts                           9.667955e-08
-aadt                                   .           
-aadt_truck                             .           
-speedlimit                             .           
-access_cla                             .           
-pav_cond                               .           
-no_lane                                .           
-bridge                                 .           
-railcross                              .           
-pop_tot                                .           
-pop_16yrover                           .           
-med_age                                .           
-med_ind_income                         .           
-pop_16yrover_worker                    .           
-comm_car_tot                           .           
-comm_car_alone                         .           
-comm_car_carpool                       .           
-comm_workers_per_car                   .           
-comm_pubtransport                      .           
-comm_walk                              .           
-comm_bike                              .           
-comm_etc                               .           
-comm_workhome                          .           
-comm_in_county                         .           
-comm_out_county                        .           
-comm_out_state                         .           
-mean_travel_time                       .           
-hhd_no                                 .           
-hhd_avg_size                          -4.670758e-01
-hhd_med_income                         .           
-hhd_mean_income                        .           
-mean_per_capita_income                 .           
-poverty_below                          .           
-poverty_above                          .           
-work_hours_mean                        .           
-worker_med_age                         .           
-Ind_tot                                .           
-ind_agri                               .           
-ind_const                              .           
-ind_manuf                              .           
-ind_whole                              .           
-ind_retail                             .           
-ind_transport                          .           
-ind_info                               .           
-ind_fin                                .           
-ind_pro                                .           
-inde_ed_meds                           .           
-ind_art                                .           
-ind_other                              .           
-ind_public                             .           
-unemp                                  .           
-avg_temp                               .           
-max_temp                               .           
-prec                                   .           
-gdp                                    .           
-pjt_typeX1.New.Construction            .           
-pjt_typeX2.Reconstruction              .           
-pjt_typeX3.Resurfacing                 .           
-pjt_typeX4.Widening...Resurfacing      .           
-pjt_typeX5.Bridge.Construction         .           
-pjt_typeX6.Bridge.Repair               .           
-pjt_typeX7.Traffic.Operations         -4.133097e-01
-pjt_typeX8.Miscellaneous.Construction  .           
-pjt_typeZ.Other                        .           
-road_sideL                             .           
-road_sideR                             .           
-funclass2                              .           
-funclass4                              .           
-funclass6                             -1.198668e-01
-funclass7                              .           
-funclass8                              6.417499e-02
-funclass9                              .           
-funclass11                             .           
-funclass12                             .           
-funclass14                             .           
-funclass16                             .           
-funclass17                             .           
-funclass18                             .           
-access_con2                            .           
-access_con3                            .
+93 x 1 sparse Matrix of class "dgCMatrix"
+                                                            s0
+(Intercept)                                       1.081534e+00
+aadt                                              9.622195e-06
+speedlimit                                       -1.893966e-02
+comm_in_county                                    1.027538e-02
+ind_agri                                         -9.970658e-03
+ind_info                                          8.308577e-04
+ind_fin                                           1.254383e-03
+ind_public                                       -5.071632e-03
+funclass4                                        -3.728327e-01
 #+end_example
 
 #+begin_src R
@@ -1820,13 +1963,13 @@ funclass18                             .
 access_con2                            .
 access_con3                            .
 #+end_example
-** COR stepwise                                                      :export:
+** COR stepwise
 The logistic model is used to predict COR events (whether COR occurs or not). The forward selection is used for the model selection.
 #+begin_src R
 ds = as.data.frame(X)
 lcor = log(df$cor)
 lsor = log(df$sor)
-y = 1 * (lcor > 0)
+## y = 1 * (lcor > 0)
 N = log(length(y)) # number of observations
 
 fmod = glm(y~.,data = ds, family = "binomial") # full model
@@ -1842,29 +1985,6 @@ cat("\nAIC: ")
 AIC(fstep)
 #+end_src
 
-#+RESULTS:
-#+begin_example
-                              Step Df  Deviance Resid. Df Resid. Dev      AIC
-1                                  NA        NA       242   333.8633 335.5668
-2                   + orig_amounts -1 31.539901       241   302.3234 305.7304
-3                       + ind_agri -1  8.720837       240   293.6026 298.7130
-4                      + funclass8 -1  5.360178       239   288.2424 295.0564
-5                 + comm_out_state -1  4.152764       238   284.0896 292.6071
-6                   + hhd_avg_size -1  6.761601       237   277.3280 287.5490
-7  + pjt_typeX7.Traffic.Operations -1  4.705979       236   272.6221 284.5465
-8                     + road_sideL -1  4.724540       235   267.8975 281.5254
-9                      + ind_const -1  2.788538       234   265.1090 280.4404
-10                  + inde_ed_meds -1  3.422632       233   261.6864 278.7212
-11               + pjt_typeZ.Other -1  1.856042       232   259.8303 278.5687
-12                    + funclass18 -1  1.897502       231   257.9328 278.3746
-
-BIC:
-[1] 323.8495
-
-AIC:
-[1] 281.9328
-#+end_example
-
 The below is the summary of the model we selected. It is advised to use p-value = 0.04 to find significant variables.
 #+begin_src R
 summary(fstep)
@@ -1874,46 +1994,110 @@ summary(fstep)
 #+begin_example
 
 Call:
-glm(formula = y ~ orig_amounts + ind_agri + funclass8 + comm_out_state +
-    hhd_avg_size + pjt_typeX7.Traffic.Operations + road_sideL +
-    ind_const + inde_ed_meds + pjt_typeZ.Other + funclass18,
+glm(formula = y ~ ind_agri + ind_public + funclass4 + Landuse_lv_2 +
+    Vendor_NameEXCAVATION.POINT..INC. + Vendor_NameCONCRETE.SERVICES..LLC +
+    speedlimit + aadt + MNG_DIST + Vendor_NameMIDWESTERN.CONSTRUCTION..INC +
+    prec + comm_pubtransport + Vendor_NameCOMMUNITY.ASPHALT.CORP. +
+    Vendor_NameBURNETT.CIVIL.CONTRACTING.OF.FL + Vendor_NameHEAVY.CIVIL.INC +
+    Vendor_NameGOSALIA.CONCRETE.CONSTRUCTORS..INC. + Vendor_NameHALIFAX.PAVING..INC. +
+    Vendor_NameDUVAL.ASPHALT.PRODUCTS..INC. + funclass2 + funclass14 +
+    Vendor_NameWHITEHURST..V..E....SONS..INC. + comm_workers_per_car +
+    bridge + Vendor_NameATLANTIC.CIVIL.CONSTRUCTORS.CORP + Vendor_NameWIRETEK.SOLUTIONS.LLC +
+    Vendor_NameP...S.PAVING..INC. + Vendor_NameDP.DEVELOPMENT.LLC +
+    Vendor_NameTRAFFIC.CONTROL.DEVICES..INC. + Vendor_NameUNITED.SIGNS...SIGNALS..INC. +
+    Vendor_NamePREFERRED.MATERIALS.INC. + funclass16 + DISTRICT,
     family = "binomial", data = ds)
 
 Deviance Residuals:
-    Min       1Q   Median       3Q      Max
--2.5312  -0.8265  -0.3873   0.9577   2.0794
+       Min          1Q      Median          3Q         Max
+-3.722e-04  -2.000e-08   2.000e-08   2.000e-08   3.946e-04
 
 Coefficients:
-                                Estimate Std. Error z value Pr(>|z|)
-(Intercept)                    6.899e+00  2.051e+00   3.363 0.000771
-orig_amounts                   3.502e-07  7.619e-08   4.597 4.29e-06
-ind_agri                      -1.487e-02  5.466e-03  -2.721 0.006499
-funclass8                      2.449e+01  1.212e+03   0.020 0.983872
-comm_out_state                -5.552e-01  1.755e-01  -3.164 0.001558
-hhd_avg_size                  -2.644e+00  8.145e-01  -3.247 0.001168
-pjt_typeX7.Traffic.Operations -1.070e+00  4.881e-01  -2.193 0.028305
-road_sideL                    -1.708e+01  1.676e+03  -0.010 0.991871
-ind_const                      1.038e-02  4.369e-03   2.375 0.017553
-inde_ed_meds                  -3.033e-03  1.573e-03  -1.928 0.053836
-pjt_typeZ.Other                8.755e-01  6.392e-01   1.370 0.170786
-funclass18                     1.706e+01  2.400e+03   0.007 0.994329
+                                                 Estimate Std. Error z value
+(Intercept)                                    -2.858e+04  2.100e+06  -0.014
+ind_agri                                       -1.970e+01  1.149e+03  -0.017
+ind_public                                     -8.466e+00  4.677e+02  -0.018
+funclass4                                      -3.803e+02  2.383e+04  -0.016
+Landuse_lv_2                                   -4.154e-02  5.281e+00  -0.008
+Vendor_NameEXCAVATION.POINT..INC.               2.135e+03  3.799e+05   0.006
+Vendor_NameCONCRETE.SERVICES..LLC               6.924e+02  3.589e+05   0.002
+speedlimit                                     -2.945e+01  1.511e+03  -0.019
+aadt                                            2.564e-02  1.475e+00   0.017
+MNG_DIST                                       -1.605e+01  1.016e+05   0.000
+Vendor_NameMIDWESTERN.CONSTRUCTION..INC        -1.760e+03  3.666e+05  -0.005
+prec                                            6.810e+01  3.751e+03   0.018
+comm_pubtransport                               1.097e+02  1.564e+04   0.007
+Vendor_NameCOMMUNITY.ASPHALT.CORP.              1.110e+03  2.731e+06   0.000
+Vendor_NameBURNETT.CIVIL.CONTRACTING.OF.FL     -1.682e+02  3.612e+05   0.000
+Vendor_NameHEAVY.CIVIL.INC                      7.049e+02  2.168e+05   0.003
+Vendor_NameGOSALIA.CONCRETE.CONSTRUCTORS..INC.  2.858e+02  1.937e+05   0.001
+Vendor_NameHALIFAX.PAVING..INC.                 1.670e+03  1.013e+05   0.016
+Vendor_NameDUVAL.ASPHALT.PRODUCTS..INC.         1.201e+03  1.487e+05   0.008
+funclass2                                       8.886e+02  4.281e+05   0.002
+funclass14                                      7.413e+02  3.635e+04   0.020
+Vendor_NameWHITEHURST..V..E....SONS..INC.      -1.838e+03  1.738e+05  -0.011
+comm_workers_per_car                            2.687e+04  1.959e+06   0.014
+bridge                                         -9.605e+02  6.101e+04  -0.016
+Vendor_NameATLANTIC.CIVIL.CONSTRUCTORS.CORP    -1.510e+03  4.745e+07   0.000
+Vendor_NameWIRETEK.SOLUTIONS.LLC               -1.284e+03  3.685e+05  -0.003
+Vendor_NameP...S.PAVING..INC.                  -1.077e+03  6.718e+05  -0.002
+Vendor_NameDP.DEVELOPMENT.LLC                  -6.662e+02  3.663e+05  -0.002
+Vendor_NameTRAFFIC.CONTROL.DEVICES..INC.       -6.313e+02  5.062e+05  -0.001
+Vendor_NameUNITED.SIGNS...SIGNALS..INC.         6.978e+02  2.144e+05   0.003
+Vendor_NamePREFERRED.MATERIALS.INC.            -6.130e+02  3.193e+04  -0.019
+funclass16                                      3.112e+02  5.066e+04   0.006
+DISTRICT                                       -1.767e+02  1.021e+05  -0.002
+                                               Pr(>|z|)
+(Intercept)                                       0.989
+ind_agri                                          0.986
+ind_public                                        0.986
+funclass4                                         0.987
+Landuse_lv_2                                      0.994
+Vendor_NameEXCAVATION.POINT..INC.                 0.996
+Vendor_NameCONCRETE.SERVICES..LLC                 0.998
+speedlimit                                        0.984
+aadt                                              0.986
+MNG_DIST                                          1.000
+Vendor_NameMIDWESTERN.CONSTRUCTION..INC           0.996
+prec                                              0.986
+comm_pubtransport                                 0.994
+Vendor_NameCOMMUNITY.ASPHALT.CORP.                1.000
+Vendor_NameBURNETT.CIVIL.CONTRACTING.OF.FL        1.000
+Vendor_NameHEAVY.CIVIL.INC                        0.997
+Vendor_NameGOSALIA.CONCRETE.CONSTRUCTORS..INC.    0.999
+Vendor_NameHALIFAX.PAVING..INC.                   0.987
+Vendor_NameDUVAL.ASPHALT.PRODUCTS..INC.           0.994
+funclass2                                         0.998
+funclass14                                        0.984
+Vendor_NameWHITEHURST..V..E....SONS..INC.         0.992
+comm_workers_per_car                              0.989
+bridge                                            0.987
+Vendor_NameATLANTIC.CIVIL.CONSTRUCTORS.CORP       1.000
+Vendor_NameWIRETEK.SOLUTIONS.LLC                  0.997
+Vendor_NameP...S.PAVING..INC.                     0.999
+Vendor_NameDP.DEVELOPMENT.LLC                     0.999
+Vendor_NameTRAFFIC.CONTROL.DEVICES..INC.          0.999
+Vendor_NameUNITED.SIGNS...SIGNALS..INC.           0.997
+Vendor_NamePREFERRED.MATERIALS.INC.               0.985
+funclass16                                        0.995
+DISTRICT                                          0.999
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 333.86  on 242  degrees of freedom
-Residual deviance: 257.93  on 231  degrees of freedom
-AIC: 281.93
+    Null deviance: 3.2609e+02  on 242  degrees of freedom
+Residual deviance: 1.1866e-06  on 210  degrees of freedom
+AIC: 66
 
-Number of Fisher Scoring iterations: 15
+Number of Fisher Scoring iterations: 25
 #+end_example
-
+                     
 * Tune&Train base models
 We have three base models. Each model has been tuned using 4 fold-cross
 validation. Since we aim to train a super learner instead of simple blend of
 base models, predctions collected from CV should be passed to the super learner.
 The CV-folds should be consistent for all models.
 
-#+begin_src R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_base_prepro.R
 xtrain = model.matrix(~ 0 + ., data = dx)
 ytrain = 1 * (y > 0)
 weights = rep(1,length(y)) / length(y)
@@ -1963,6 +2147,8 @@ logloss = wlogloss(outy, prob, outw)
 return(list(prob = prob, logloss = logloss, catmod = catmod))
 }
 #+end_src
+
+#+RESULTS:
 
 #+begin_src R :results none :tangle train_base.R
 cat_features = which(stringr::str_detect(colnames(xtrain), "ncat_"))
@@ -2474,9 +2660,12 @@ R> cname[c(4,17,10,19,5,39,13,1,20,18,30,9,23,3,6,2,8)]
 [17] "marital stat"
 
 ** ranger
+:PROPERTIES:
+:ID:       1ca7e343-cebd-4315-82c7-336e1960bd5b
+:END:
 An R package ranger is used to train the random forest. An R pacakge caret is a
 wrapper of many R packages, which we will use for training. The below is caret's model training parameters.
-#+begin_src R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_ranger.R
 my_tr = trainControl(
 method = 'cv',
 number = nfold,
@@ -2497,7 +2686,7 @@ indexOut = data_folds
 
 Unlike CatBoost or XGBoost, ranger doesn't have an internal handling mecahnism
 of missing values.
-#+begin_src R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_ranger.R
 ## imputation needs for ranger
 ixtrain = xtrain
 ixtrain[is.na(ixtrain)] = -99
@@ -2511,7 +2700,7 @@ levels(fytrain) = c("no_cor", "cor")
 #+RESULTS:
 
 - Tuned hyperparameters of ranger.
-#+begin_src R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_ranger.R
 ranger_grid <- expand.grid(
   mtry = c(20),
   splitrule = "gini",
@@ -2522,7 +2711,7 @@ ranger_grid <- expand.grid(
 #+RESULTS:
 
 The below is for CV and saving a final model.
-#+begin_src R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_ranger.R
 set.seed(1)
 ranger_tune <- train(x = ixtrain, y = fytrain,
                      method = "ranger",
@@ -2544,21 +2733,73 @@ ranger_imp = varImp(ranger_tune)$importance
 #+RESULTS:
 #+begin_example
 Fold1: mtry=20, splitrule=gini, min.node.size=10
+Error: mtry can not be larger than number of variables in data. Ranger will EXIT now.
+model fit failed for Fold1: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
 - Fold1: mtry=20, splitrule=gini, min.node.size=10
-+ Fold2: mtry=20, splitrule=gini, min.node.size=10
+Fold2: mtry=20, splitrule=gini, min.node.size=10
+Error: mtry can not be larger than number of variables in data. Ranger will EXIT now.
+model fit failed for Fold2: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
 - Fold2: mtry=20, splitrule=gini, min.node.size=10
-+ Fold3: mtry=20, splitrule=gini, min.node.size=10
+Fold3: mtry=20, splitrule=gini, min.node.size=10
+Error: mtry can not be larger than number of variables in data. Ranger will EXIT now.
+model fit failed for Fold3: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
 - Fold3: mtry=20, splitrule=gini, min.node.size=10
-+ Fold4: mtry=20, splitrule=gini, min.node.size=10
+Fold4: mtry=20, splitrule=gini, min.node.size=10
+Error: mtry can not be larger than number of variables in data. Ranger will EXIT now.
+model fit failed for Fold4: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
 - Fold4: mtry=20, splitrule=gini, min.node.size=10
 Aggregating results
-Fitting final model on full training set
-Warning message:
-In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
+Something is wrong; all the logLoss metric values are missing:
+    logLoss
+ Min.   : NA
+ 1st Qu.: NA
+ Median : NA
+ Mean   :NaN
+ 3rd Qu.: NA
+ Max.   : NA
+ NA's   :1
+Error: Stopping
+In addition: Warning messages:
+1: In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
   The metric "Accuracy" was not in the result set. logLoss will be used instead.
+2: model fit failed for Fold1: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
+3: model fit failed for Fold2: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
+4: model fit failed for Fold3: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
+5: model fit failed for Fold4: mtry=20, splitrule=gini, min.node.size=10 Error in ranger::ranger(dependent.variable.name = ".outcome", data = x,  :
+  User interrupt or internal error.
+
+6: In nominalTrainWorkflow(x = x, y = y, wts = weights, info = trainInfo,  :
+  There were missing values in resampled performance measures.
+Error: object 'ranger_tune' not found
+Error: object 'ranger_tune' not found
+Error in order(ranger_id) : object 'ranger_id' not found
+Error: object 'ranger_tune' not found
+Error in varImp(ranger_tune) : object 'ranger_tune' not found
 #+end_example
 
 =ranger= gives the confusion matrix if =probability= is set to =FALSE=.
+yhat <- function(X.model, newdata) {
+  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
+  eps <- .Machine$double.eps
+  out <- log((pp + eps) / (1 - pp + eps))
+  return(out)
+  }
+
+#+name: ranger_full_training
 #+begin_src R
 ranger_final = ranger(x = ixtrain, y = fytrain,
                       num.trees = 500,mtry = 20,importance = "impurity",
@@ -2570,20 +2811,20 @@ ranger_final = ranger(x = ixtrain, y = fytrain,
 
 #+RESULTS:
 
-#+begin_src R :tangle cor_train_base.R
-saveRDS(ranger_final, "cor_ranger_final.rds")
+#+begin_src R :tangle cor_train_ranger.R
+saveRDS(ranger_final, "cor_ranger_pred_rural.rds")
 #+end_src
 
 #+RESULTS:
 
-#+begin_src R :results replace
+#+begin_src R :results replace :tangle no
 caret_wlogloss(ranger_tune$pred)
 #+end_src
 
 #+RESULTS:
 : [1] 0.316729
 
-#+begin_src R :results replace
+#+begin_src R :results replace :tangle no
 mean(ranger_tune$resample[,1]) # incorrect. not using weight
 #+end_src
 
@@ -3127,7 +3368,7 @@ plot_prob(orig_amounts, orig_days, 0.2, "amounts", "days", prob = super_prob)
 #+end_src
 
 #+RESULTS:
-: Error in UseMethod("depth") : 
+: Error in UseMethod("depth") :
 :   no applicable method for 'depth' applied to an object of class "NULL"
 
 #+begin_src R
@@ -4742,18 +4983,18 @@ rrtemp %>% knitr::kable()
 :results:
 
 
-|                    |  ranger_imp |
-| :----------------- | ----------: |
-| orig_amounts       |   16.765130 |
-| orig_days          |    9.236459 |
-| comm_out_state     |    3.736345 |
-| aadt               |    2.854666 |
-| ind_agri           |    2.632328 |
-| pop_16yrover       |    2.301763 |
-| comm_pubtransport  |    2.169907 |
-| gdp                |    2.070973 |
-| comm_etc           |    2.019489 |
-| inde_ed_meds       |    2.011766 |
+|                  | ranger_imp|
+|:-----------------|----------:|
+|orig_amounts      |  16.765130|
+|orig_days         |   9.236459|
+|comm_out_state    |   3.736345|
+|aadt              |   2.854666|
+|ind_agri          |   2.632328|
+|pop_16yrover      |   2.301763|
+|comm_pubtransport |   2.169907|
+|gdp               |   2.070973|
+|comm_etc          |   2.019489|
+|inde_ed_meds      |   2.011766|
 :end:
 
 Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
@@ -4817,14 +5058,6 @@ mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
 Since the prediction model is not easily interpretable, we visualize main effects of eight covariates using accumulated local effects (ALE) and partial dependence (PD) plots proposed in https://arxiv.org/pdf/1612.08468;Visualizing
 The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to have COR. The last one describes interaction effects of =orig_amount= and =orig_days=.
 #+begin_src R :results code graphics file :file cor_aleplot.png
-## Define the predictive function
-yhat <- function(X.model, newdata) {
-  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
-  eps <- .Machine$double.eps
-  out <- log(pp + eps / (1 - pp + eps))
-  return(out)
-  }
-
 dfx = as.data.frame(dx)
 
 ## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
@@ -4952,7 +5185,6 @@ plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
 
 #+RESULTS:
 
-
 ** spatial pattern
 :PROPERTIES:
 :header-args:R: :exports results :width 672 :height 672
@@ -5014,6 +5246,8 @@ gg = gg_base +
   labs(color = paste0(vname,"\n")) +
   ## scale_fill_gradient2() +
   theme_bw() +
+  theme(text = element_text(size = 20)) +
+  ## theme(legend.text = element_text(size = 10)) +
   ditch_the_axes
 print(gg)
 return(gg)
@@ -5236,7 +5470,7 @@ PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
 #+RESULTS:
 [[file:sor_pdplot.png]]
 
-* ToExport - COR [2021-03-03 Wed]                                                    :export:
+* ToExport - COR [021-03-03 Wed]                                   :noexport:
 :PROPERTIES:
 :header-args:R: :exports results :noweb yes
 :END:
@@ -5250,44 +5484,29 @@ Moving average (three years backward from a project start year) covariates are g
 #+begin_src R :results none
 source('prerequisite.R')
 source('custom_function.R')
-source('preprocess.R')
+source('preprocess_rural.R')
 y = 1 * (df$logy > 0)
 #+end_src
 
-** Logistic regression                                             :noexport:
-Variables are selected by LASSO. The accuracy is 67%.
-#+begin_src R :results code :exports both
-mm = glm(y ~ orig_days + orig_amounts + hhd_avg_size + ind_agri,
-         data = dx, family="binomial")
-coef(mm) %>% knitr::kable()
-pred = predict(mm,newx=dx)
-tab = table(pred>0,y)
-##tab
-sum(diag(tab)) / sum(tab)
-#+end_src
+** Dr. Ham
+- 맨마지막 탭의 AZ열부터 landuse 정보가 있습니다. Level 1 (BB열)만 우선 써보시고 더 상세한 Level 2나 AZ열 쓰시면 되지 않을까 싶습니다. 참고로 해당도로의 centeroid를 중심으로 추출한 거라 주변부에 대한 고려는 없어요. 이 데이터로 안 나오면 도로 끝단의 landuse를 보는 방법도 생각해 봐야 할 거 같습니다.
 
-#+RESULTS:
-#+begin_src R
+- Level 1이 상위라서 그것부터 쓰셔야 할 거 같아요 그 이상 상세하게 넘어가면 너무 카테고리가 많아져서요. 예를 든다면 인종이 Level 1이면 Level 2는 성별 연령별 신체별 상세하게 들어가는 거라 보시면 됩니다. BB > BD > AZ 순으로 디테일해집니다 그런데 너무 디테일하면 분석이 되게 어려우실 거에요 사실 Level 1만 해도 8가지에요 (1000, 2000, 3000, ....,  8000). 어떻게 나오는지 알려주세요.
 
+- 추가로 urban/rural 지역구분 자료드립니다. BK열 "u_r"을 참고하시기 바랍니다. 해당 프로젝트의 centroid가 urban일 경우 1, rural이면 0입니다. 도시지역에 속한 애들이 다수d입니다. . rural이더라도 urban 인근에 있는 애들도 다수 있지만 대부분 무시했습니다.
+- 저번 분석 때 project type과 contract type도 포함되었었나요? 아니라면 지금 보내드리는 파일의 AL열 (project type)과 AN열 (contract type)을 넣어서 분석해 보실 수 있을까요? 참고로 Project Type에는: 3R (Reconstruction, Resurfacing, and Rehabilitation & Add Lanes), Bridge (Bridge New Construction & Bridge Repair), New (New construction), Others (Signal operation, sidewalk, etc)으로 나눴고 Contract Type에는: Conv (Conventional Contract), LS (Lump Sum), DB (Design Build), Others (Traffic Operations, etc.)으로 나눠져 있습니다
 
-|             |          x|
-|:------------|----------:|
-|(Intercept)  |  1.5617775|
-|orig_days    |  0.0019859|
-|orig_amounts |  0.0000003|
-|hhd_avg_size | -0.9898076|
-|ind_agri     | -0.0087161|
-[1] 0.6748971
-#+end_src
+The previous model considered a project type variable, but not a contract type variable.
+None of variables considered above show significant.
 
 ** RF (trained using =ranger=)
 The OOB accuracy is 78.3% at the optimal threshold (0.5-ish?). The variable importance is listed below:
 #+begin_src R :results drawer
-ranger_final = readRDS("cor_ranger_final.rds")
+ranger_final = readRDS("cor_ranger_rural.rds")
 ranger_imp = ranger_final$variable.importance
 rtemp = data.frame(ranger_imp = ranger_imp)
 row.names(rtemp) = names(ranger_imp)
-rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:10)
+rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:20)
 rrtemp %>% knitr::kable()
 #+end_src
 
@@ -5295,18 +5514,28 @@ rrtemp %>% knitr::kable()
 :results:
 
 
-|                    |  ranger_imp |
-| :----------------- | ----------: |
-| orig_amounts       |   16.765130 |
-| orig_days          |    9.236459 |
-| comm_out_state     |    3.736345 |
-| aadt               |    2.854666 |
-| ind_agri           |    2.632328 |
-| pop_16yrover       |    2.301763 |
-| comm_pubtransport  |    2.169907 |
-| gdp                |    2.070973 |
-| comm_etc           |    2.019489 |
-| inde_ed_meds       |    2.011766 |
+|                  | ranger_imp|
+|:-----------------|----------:|
+|orig_amounts      |  15.016280|
+|orig_days         |   9.471696|
+|comm_out_state    |   3.168628|
+|ncat_Vendor_Name  |   2.597194|
+|aadt              |   2.512943|
+|ind_agri          |   2.112944|
+|ind_other         |   2.009395|
+|pop_16yrover      |   1.966654|
+|ncat_pjt_type     |   1.963808|
+|comm_pubtransport |   1.747768|
+|ind_manuf         |   1.691092|
+|prec              |   1.683530|
+|comm_etc          |   1.677634|
+|comm_car_carpool  |   1.655172|
+|aadt_truck        |   1.654663|
+|med_ind_income    |   1.600780|
+|inde_ed_meds      |   1.590019|
+|mean_travel_time  |   1.533613|
+|ind_transport     |   1.511111|
+|ind_public        |   1.475403|
 :end:
 
 Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
@@ -5320,13 +5549,13 @@ Roughly speaking, the variable importance indicates the contribution of each cov
 #+end_quote
 
 #+begin_src R
-ranger_final$prediction.error
+1 - ranger_final$prediction.error
 #+end_src
 
 #+RESULTS:
-: [1] 0.2169273
+: [1] 0.7814154
 
-#+begin_src R :results code graphics file :file cor_ranger_vimp.png
+#+begin_src R :results code graphics file :file cor_ranger_vimp.png :width 700 :height 700
 plot_vimp(rrtemp,2)
 #+end_src
 
@@ -5348,11 +5577,8 @@ ot
 #+end_src
 
 #+RESULTS:
-: Error in thresholder(ranger_tune, threshold = seq(0.2, 0.8, by = 0.01),  :
-:   object 'ranger_tune' not found
-: Error: object 'resample_stats' not found
-: Error: object 'resample_stats' not found
-: Error: object 'ot' not found
+: [1] 0.9343246
+: [1] 0.5
 
 ** main effects
 #+begin_src R
@@ -5369,15 +5595,8 @@ mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
 
 Since the prediction model is not easily interpretable, we visualize main effects of eight covariates using accumulated local effects (ALE) and partial dependence (PD) plots proposed in https://arxiv.org/pdf/1612.08468;Visualizing
 The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to have COR. The last one describes interaction effects of =orig_amount= and =orig_days=.
-#+begin_src R :results code graphics file :file cor_aleplot.png
+#+begin_src R :results code graphics file :file cor_aleplot.png :width 700 :height 700
 ## Define the predictive function
-yhat <- function(X.model, newdata) {
-  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
-  eps <- .Machine$double.eps
-  out <- log(pp + eps / (1 - pp + eps))
-  return(out)
-  }
-
 dfx = as.data.frame(dx)
 
 ## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
@@ -5399,7 +5618,7 @@ ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.pl
 [[file:cor_aleplot.png]]
 
 The below is a matrix of PD plot.
-#+begin_src R :results code graphics file :file cor_pdplot.png
+#+begin_src R :results code graphics file :file cor_pdplot.png :width 700 :height 700
 ## Calculate and plot the Asecond-order interaction effx2, x3
 par(mfrow = c(3,3))
 PD.1=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30)
@@ -5458,7 +5677,7 @@ sum(pred != y) / length(y)
 #+end_src
 
 #+RESULTS:
-: [1] 0.5349794
+: [1] 0.473251
 
 =comm_out_state= can take account for the spatial effect. It has high values when the site is located along with the state border. =com_low= contains high and low =comm_out_state=. high / low surfix is about the prediction value, not the variable value
 #+begin_src R
@@ -5505,8 +5724,801 @@ plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
 
 #+RESULTS:
 
+** spatial pattern
+:PROPERTIES:
+:header-args:R: :exports results :width 672 :height 672
+:END:
+
+Questions to answer:
+- Are there spatial pattern in COR?
+- Are there spatial pattern in covariates?
+- Does the prediction model take some spatial pattern into account?
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R :results none
+pred = 1 * (pred > 0.5)
+df$mis = 1 * (pred != y)
+df %>% filter(y > min(y))
+
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+#+END_SRC
+
+#+begin_src R
+gg_base = gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+load("col.pal.RData")
+temp = col.pal(10)
+col_pal = c(temp[1:2])
+
+ov_map = function(df, vname) {
+gg = gg_base +
+  geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var) , size = 2, alpha = 0.5)+
+  scale_colour_manual(values=cbPalette) +
+  labs(color = paste0(vname,"\n")) +
+  ## scale_fill_gradient2() +
+  theme_bw() +
+  ditch_the_axes
+print(gg)
+return(gg)
+}
+
+# The palette with grey:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# The palette with black:
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# To use for fills, add
+  ## scale_fill_manual(values=cbPalette)
+
+# To use for line and point colors, add
+  ## scale_colour_manual(values=cbPalette)
+
+
+#+end_src
+
+*** misclassified projects
+
+The spatial plot of mis-classification of the prediction model is presented below; violet: incorrect vs white: correct.
+#+begin_src R :results graphics file :file mis_map.png
+var = factor(df$mis, label = c("miss","hit"))
+df %>% mutate(var = var) %>% ov_map("classification")
+#+END_SRC
+
+#+RESULTS:
+[[file:mis_map.png]]
+
+*** spatial main effect
+The below are a list of spatial plots for two sets of locations separated by the direction of covariate's main effect: violet: positive main effect vs white: negative main effect. The "positive" means the chance of COR is greater than 0.5.
+**** high main effect: =orig_amount=
+#+begin_src R :results graphics file :file oram_map.png
+df %>% mutate(var = factor(df$oram_hl, label = c("high","low"))) %>% ov_map("orgi_amount")
+#+end_src
+
+#+RESULTS:
+[[file:oram_map.png]]
+
+
+**** high main effect: =orig_day=
+#+begin_src R :results graphics file :file orda_map.png
+df %>% mutate(var = factor(df$orda_hl, label = c("high","low"))) %>% ov_map("orig_day")
+#+end_src
+
+#+RESULTS:
+[[file:orda_map.png]]
+
+
+
+**** high main effect: =comm_out_state=
+#+begin_src R :results graphics file :file com_map.png
+df %>% mutate(var = factor(df$com_hl, label = c("high","low"))) %>% ov_map("comm_out_state")
+#+end_src
+
+#+RESULTS:
+[[file:com_map.png]]
+
+
+**** high main effect: =gdp=
+#+begin_src R :results graphics file :file gdp_map.png
+df %>% mutate(var = factor(df$gdp_hl, label = c("high","low"))) %>% ov_map("gdp")
+#+end_src
+
+#+RESULTS:
+[[file:gdp_map.png]]
+
+**** high main effect: =aadt=
+#+begin_src R :results graphics file :file aadt_map.png
+df %>% mutate(var = factor(df$aadt_hl, label = c("high","low"))) %>% ov_map("aadt")
+#+end_src
+
+#+RESULTS:
+[[file:aadt_map.png]]
+
+* ToExport - Urban [2021-03-03 Wed]                                :noexport:
+:PROPERTIES:
+:header-args:R: :exports results :noweb yes :eval never-export
+:END:
+** Intro
+A variable ~u_r~ indicates whether a project site is located in urban or rural area. It doesn't have significant contribution in our COR prediction model. Our current hypothesis is there exists some pathways that ~u_r~ affects the COR event.
+Let $y = 1$ if ~u_r = 1~; 0 therwise. We will build a prediction model for $y$ to see if there exists dependency between =u_r= and other covariates in the COR prediction model. This could help us understand how COR depends on ~u_r~ thorugh other covariates. The same data analytic pipe line will be used as one empolyed for the COR prediction model.
+** TL;DR
+In the random forest (non-linear) model, =ind_agri=, =gdp=, =aadt= are covariates strongly assoicated with ~u_r~. In the logistic (linear) model, =aadt=, =speedlimit=, =comm_in_county=, =ind_agri=, =ind_info=, =ind_fin=, =ind_public=, =funclass4= are strongly associated.
+
+** random forest (trained using =ranger=)
+#+begin_src R :results none :async yes
+source('prerequisite.R')
+source('custom_function.R')
+source('preprocess_rural.R')
+y = df$u_r
+#+end_src
+
+The OOB accuracy is 88.5% at the optimal threshold (0.48). The variable importance is listed below:
+#+begin_src R :results drawer
+ranger_final = readRDS("cor_ranger_pred_rural.rds")
+ranger_imp = ranger_final$variable.importance
+rtemp = data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) = names(ranger_imp)
+rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:20)
+rrtemp %>% knitr::kable()
+#+end_src
+
+#+RESULTS:
+:results:
+
+
+|                       | ranger_imp|
+|:----------------------|----------:|
+|ind_agri               |  10.644862|
+|mean_per_capita_income |  10.032323|
+|landuse_code           |   8.503915|
+|Landuse_lv_2           |   7.454759|
+|Landuse_lv_1           |   6.530188|
+|med_ind_income         |   5.588089|
+|gdp                    |   3.409578|
+|aadt                   |   3.282648|
+|comm_bike              |   3.086364|
+|hhd_med_income         |   2.308874|
+|ind_public             |   2.089788|
+|ind_manuf              |   2.018978|
+|hhd_mean_income        |   2.001834|
+|ind_fin                |   1.881349|
+|ncat_funclass          |   1.859067|
+|ind_info               |   1.707055|
+|comm_workers_per_car   |   1.601287|
+|comm_workhome          |   1.571071|
+|comm_pubtransport      |   1.461341|
+|med_age                |   1.360138|
+:end:
+
+|                          | =ranger imp= |
+|--------------------------+--------------|
+| =ind_agri=               |    10.644862 |
+| =mean_per_capita_income= |    10.032323 |
+| =landuse_code=           |     8.503915 |
+| =Landuse_lv_2=           |     7.454759 |
+| =Landuse_lv_1=           |     6.530188 |
+| =med_ind_income=         |     5.588089 |
+| =gdp=                    |     3.409578 |
+| =aadt=                   |     3.282648 |
+| =comm_bike=              |     3.086364 |
+| =hhd_med_income=         |     2.308874 |
+| =ind_public=             |     2.089788 |
+| =ind_manuf=              |     2.018978 |
+| =hhd_mean_income=        |     2.001834 |
+| =ind_fin=                |     1.881349 |
+| =ncat_funclass=          |     1.859067 |
+| =ind_info=               |     1.707055 |
+| =comm_workers_per_car=   |     1.601287 |
+| =comm_workhome=          |     1.571071 |
+| =comm_pubtransport=      |     1.461341 |
+| =med_age=                |     1.360138 |
+
+
+Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
+Three landuse variables are highly associated with the response. However, it doesn't appear significant in the COR model.
+
+#+begin_quote :export none
+'prediction.error': Overall out of bag prediction error. For
+          classification this is the fraction of missclassified
+          samples, for probability estimation the Brier score, for
+          regression the mean squared error and for survival one minus
+          Harrell's C-index.
+#+end_quote
+
+This below is the prediction error.
+
+#+begin_src R
+ranger_final$prediction.error
+#+end_src
+
+#+RESULTS:
+: [1] 0.1150858
+
+#+begin_src R :results code graphics file :file cor_ranger_vimp.png :width 700 :height 700
+plot_vimp(rrtemp,2)
+#+end_src
+
+#+RESULTS:
+[[file:cor_ranger_vimp.png]]
+
+** optimal threshold                                              :noexport:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+threshold = 0.5, we expect the weighted F1 = 0.934.
+#+begin_src R
+set.seed(1)
+resample_stats <- thresholder(ranger_tune,
+                              threshold = seq(0.2, 0.8, by = 0.01),
+                              final = TRUE)
+
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+#+RESULTS:
+: [1] 0.9580882
+: [1] 0.48
+
+** random forest: main effects
+#+begin_src R
+mip = rtemp %>% arrange(desc(ranger_imp)) %>% slice(1:8)
+
+mdx = which(colnames(dx) %in% row.names(mip))
+right = data.frame(name = row.names(mip), vimp = mip[,1])
+left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+
+mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+#+end_src
+
+#+RESULTS:
+
+Since the prediction model is not easily interpretable, we visualize main effects of eight covariates using accumulated local effects (ALE) proposed in https://arxiv.org/pdf/1612.08468;Visualizing
+The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to be urban.
+#+begin_src R :results code graphics file :file cor_aleplot.png :width 700 :height 700
+## Define the predictive function
+dfx = as.data.frame(dx)
+
+## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
+par(mfrow = c(3,3))
+ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
+ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
+ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
+ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
+ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
+ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
+ALE.7=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30, NA.plot = TRUE)
+ALE.8=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30, NA.plot = TRUE)
+ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
+## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
+#+end_src
+
+#+RESULTS:
+[[file:cor_aleplot.png]]
+
+** mapping high COR events                                         :noexport:
+
+#+begin_src R
+xeq = ALE.1$x.values[ALE.1$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+df$ind_agri_hl <- 1 * (df$ind_agri >= minx)
+#+end_src
+
+#+RESULTS:
+
+=aadt= might be associated with the location as well. high =aadt= nearby big cities / highway hub?
+#+begin_src R
+xeq = ALE.7$x.values[ALE.7$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+df$aadt_hl = with(df, 1 * (aadt >= minx))
+#+end_src
+
+#+RESULTS:
+
+=gdp= would also be highly associated with city / county level factor
+#+begin_src R
+xeq = ALE.8$x.values[ALE.8$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+df$gdp_hl = with(df, 1 * (gdp >= minx))
+#+end_src
+
+#+RESULTS:
 
 ** spatial pattern
+:PROPERTIES:
+:header-args:R: :exports results :width 672 :height 672
+:END:
+
+#+BEGIN_SRC R
+  library(maps)
+  library(mapdata)
+  library(ggplot2)
+  states = map_data("state")
+  counties = map_data("county")
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC R :results none
+pred = 1 * (pred > 0.5)
+df$mis = 1 * (pred != y)
+df %>% filter(y > min(y))
+
+fl_df = subset(states, region == "florida")
+fl_county = subset(counties, region == "florida")
+
+ditch_the_axes = theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+#+END_SRC
+
+#+begin_src R
+gg_base = gg_base +
+  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(color = "black", fill = NA)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+# The palette with grey:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# The palette with black:
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# To use for fills, add
+  ## scale_fill_manual(values=cbPalette)
+
+# To use for line and point colors, add
+  ## scale_colour_manual(values=cbPalette)
+
+#+end_src
+
+#+RESULTS:
+
+
+#+begin_src R :results none
+load("col.pal.RData")
+temp = col.pal(10)
+col_pal = c(temp[1:2])
+
+ov_map = function(df, vname) {
+gg = gg_base +
+  geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var) , size = 2, alpha = 0.5)+
+  scale_colour_manual(values=cbPalette) +
+  labs(color = paste0(vname,"\n")) +
+  ## scale_fill_gradient2() +
+  theme_bw() +
+  theme(text = element_text(size = 20)) +
+  ## theme(legend.text = element_text(size = 10)) +
+  ditch_the_axes
+print(gg)
+return(gg)
+}
+#+end_src
+
+#+begin_src R :results none
+ov_cont_map = function(df, vname) {
+gg = gg_base +
+  geom_point(data = df, mapping = aes(x = x, y = y, group = NULL, colour = var) , size = 2, alpha = 0.5)+
+  scale_colour_gradientn(colours = rev(rainbow(3))) +
+  ## scale_fill_manual(colours = cbPalette) +
+  ## scale_colour_gradient2() +
+  labs(color = paste0(vname,"\n")) +
+  ## scale_colour_gradient2()+
+  theme_bw() +
+  theme(text = element_text(size = 20)) +
+  ## theme(legend.text = element_text(size = 10)) +
+  ## theme(legend.position="top") +
+  ditch_the_axes
+print(gg)
+return(gg)
+}
+#+end_src
+
+#+RESULTS:
+
+*** urban sites
+
+#+begin_src R :results graphics file :file urb_map.png
+var = factor(y, label = c("rural","urban"))
+df %>% mutate(var = var) %>% ov_map("classification")
+#+END_SRC
+
+#+RESULTS:
+[[file:urb_map.png]]
+
+
+*** main effect: =ind_agri=
+
+#+begin_src R :results graphics file :file ind_agri_map.png
+df %>% mutate(var = (281.5 - ind_agri)) %>% ov_cont_map("281.5 - ind_agri")
+#+end_src
+
+#+RESULTS:
+[[file:ind_agri_map.png]]
+
+*** main effect: =gdp=
+#+begin_src R :results graphics file :file gdp_map.png
+df %>% mutate(var = log(gdp)) %>% ov_cont_map("log(gdp)")
+
+#+end_src
+
+#+RESULTS:
+[[file:gdp_map.png]]
+
+*** main effect: =aadt=
+#+begin_src R :results graphics file :file aadt_map.png
+df %>% mutate(var = log(aadt)) %>% ov_cont_map("log(aadt)")
+#+end_src
+
+#+RESULTS:
+[[file:aadt_map.png]]
+
+** Logistic regression
+In this section, the LASSO is used to select covariates. Then, the logistic regression to predict ~u_r~ is performed on the selected covariates. This is a generalized linear model. Roughly speaking, the log odds of =urban= is increased by "coefficient" when we increase the covariate by one unit. Please find covariates highly related to ~u_r~ and their "coefficient" values in the table below. This simple model shows decent accurary (86%) at 0.5 thereshold.
+
+#+begin_src R :results drawer
+m2 = glm(y ~ aadt+ speedlimit+ comm_in_county+ ind_agri+ ind_info+ ind_fin+ ind_public+ funclass4, data = as.data.frame(X), family = "binomial")
+coef(m2) %>% knitr::kable()
+#+end_src
+
+|                  |          x |
+|------------------+------------|
+| (Intercept)      |  1.0836081 |
+| =aadt=           |  0.0000467 |
+| =speedlimit=     | -0.0764798 |
+| =comm_in_county= |  0.0423719 |
+| =ind_agri=       | -0.0182894 |
+| =ind_info=       | -0.0007169 |
+| =ind_fin=        |  0.0051434 |
+| =ind_public=     | -0.0117294 |
+| =funclass4=      | -1.3995172 |
+
+#+begin_src R
+pred = predict(m2,newx=as.data.frame(X))
+tab = table(pred>0,y)
+##tab
+print("Accuracy:")
+sum(diag(tab)) / sum(tab)
+#+end_src
+
+#+RESULTS:
+: [1] "Accuracy:"
+: [1] 0.8600823
+
+* Meeting [2021-03-24 Wed]
+Run COR model with C1-6 variable from Dr. Ryu, pop density, my Urban index (prob).
+Next meeting, we will choose a target journal, structure of paper and authors' contribution in writing.
+    
+* Meeting [2021-04-01 Thu]                                           :export:
+:PROPERTIES:
+:header-args:R: :exports results :noweb yes
+:END:
+A prediction target variable: $y = 1$ if $\log COR > 0$; 0 otherwise, where
+\[
+COR = \frac{\text{original amounts} + \text{modified amounts}}{\text{original amounts}}
+\]
+We use the random forest to train the prediction model. The =R= package =ranger= is used for the training.
+Moving average (three years backward from a project start year) covariates are generated and substituted with time series covariates.
+#+begin_src R :results none 
+source('prerequisite.R')
+source('custom_function.R')
+source('preprocess_rural.R')
+## to create urbanization index
+y = df$u_r
+## y = 1 * (df$logy > 0)
+#+end_src
+
+The urban classification based on =landuse_lv_2= is not exclusive, so it cannot be used for the COR prediction model.
+#+begin_src R :eval no
+tt = readr::read_csv("data/urban_index.csv")
+udex = numeric(nrow(df))
+for (dd in 1:nrow(df)) {
+  for (cc in 1:6) {
+    if (df$Landuse_lv_2[dd] %in% unlist(tt[,cc]))
+      udex[dd] = cc}
+}
+#+end_src
+
+Instead we the prediction probability of urbanization obtained from our earlier prediction model. The urbanization index training is done using RF with full training set. See [[id:1ca7e343-cebd-4315-82c7-336e1960bd5b][ranger]]
+#+begin_src R
+ranger_final = readRDS("cor_ranger_pred_rural.rds")
+urban_ranger = ranger_final$predictions[, 2]
+y = 1 * (df$logy > 0)
+dx[,'ncat_Vendor_Name'] = NULL
+dx = cbind(dx, urban_ranger)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+source("cor_train_base_prepro.R")
+source("cor_train_ranger.R")
+#+end_src
+
+In a previous COR prediction model, an urbaniztion binary index has no significant effect in the model.
+\[
+P(urban_i = 1 | x_i) = f(x_i)
+\]
+\[\hat f(\mathbf{x}) > 0.5 \text{ you predict a site is "urban". } \] $\hat f(x)$ might be thought as an approximation of C1 - C6 stages in the urbanization.
+$\hat f(\mathbf{x})$ is a function of existing covariates.
+$x_{i}$, covariates (indenpendent variables), is used for both COR and urban prediction model.
+$urban_i$, response (dependent variable), is a target variable for the urban prediction model. It is not included in $x_{i}$.
+
+Now, we append the prediction probability into the original data set $\mathbf{x}$, and use $(\mathbf{x}, \hat f(\mathbf{x}))$ as covariate of the COR prediction model. Feature engineering!
+
+** RF (trained using =ranger=)
+We trained the COR prediction model using the appended data set (with feature engineering).
+The OOB accuracy is 77.9% at the optimal threshold (0.5-ish?). The variable importance is listed below:
+#+begin_src R :results drawer
+ranger_imp = ranger_final$variable.importance
+rtemp = data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) = names(ranger_imp)
+rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:20)
+rrtemp %>% knitr::kable()
+#+end_src
+
+#+RESULTS:
+:results:
+
+
+|                  | ranger_imp|
+|:-----------------|----------:|
+|orig_amounts      |  14.431038|
+|orig_days         |   9.270561|
+|comm_out_state    |   3.204758|
+|urban_ranger      |   3.138669|
+|aadt              |   2.407906|
+|ind_agri          |   2.216914|
+|ind_other         |   2.200200|
+|pop_16yrover      |   2.108942|
+|inde_ed_meds      |   2.002321|
+|ncat_pjt_type     |   1.916931|
+|comm_pubtransport |   1.758638|
+|aadt_truck        |   1.703226|
+|comm_etc          |   1.646591|
+|comm_workhome     |   1.625028|
+|ind_transport     |   1.544732|
+|worker_med_age    |   1.489572|
+|ind_manuf         |   1.463474|
+|ind_public        |   1.461318|
+|no_lane           |   1.440432|
+|pop_tot           |   1.430140|
+:end:
+
+Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
+
+#+begin_quote
+'prediction.error': Overall out of bag prediction error. For
+          classification this is the fraction of missclassified
+          samples, for probability estimation the Brier score, for
+          regression the mean squared error and for survival one minus
+          Harrell's C-index.
+#+end_quote
+
+#+begin_src R
+1 - ranger_final$prediction.error
+#+end_src
+
+#+RESULTS:
+: [1] 0.7792794
+
+In the below, =urban_ranger= represents $\hat f(x)$.
+#+begin_src R :results code graphics file :file cor_ranger_vimp.png :width 700 :height 700
+plot_vimp(rrtemp,2)
+#+end_src
+
+#+RESULTS:
+[[file:cor_ranger_vimp.png]]
+
+** optimal threshold                                              :noexport:
+We use CV to estimate the weighted F1 score for each probability threshold. At
+threshold = 0.5, we expect the weighted F1 = 0.934.
+#+begin_src R
+set.seed(1)
+resample_stats <- thresholder(ranger_tune,
+                              threshold = seq(0.2, 0.8, by = 0.01),
+                              final = TRUE)
+
+ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+max(resample_stats$F1)
+ot
+#+end_src
+
+#+RESULTS:
+: Error in thresholder(ranger_tune, threshold = seq(0.2, 0.8, by = 0.01),  :
+:   object 'ranger_tune' not found
+: Error: object 'resample_stats' not found
+: Error: object 'resample_stats' not found
+: Error: object 'ot' not found
+
+** main effects
+#+begin_src R
+mip = rtemp %>% arrange(desc(ranger_imp)) %>% slice(1:8)
+
+mdx = which(colnames(dx) %in% row.names(mip))
+right = data.frame(name = row.names(mip), vimp = mip[,1])
+left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+
+mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+#+end_src
+
+#+RESULTS:
+
+Since the prediction model is not easily interpretable, we visualize main effects of eight covariates using accumulated local effects (ALE) and partial dependence (PD) plots proposed in https://arxiv.org/pdf/1612.08468;Visualizing
+The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to have COR. The last one describes interaction effects of =orig_amount= and =orig_days=.
+
+#+begin_src R :results code graphics file :file cor_aleplot.png :width 700 :height 700
+## Define the predictive function
+dfx = as.data.frame(dx)
+
+## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
+par(mfrow = c(3,3))
+ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
+ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
+ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
+ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
+ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
+ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
+ALE.7=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30, NA.plot = TRUE)
+ALE.8=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30, NA.plot = TRUE)
+ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
+## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
+#+end_src
+
+#+RESULTS:
+[[file:cor_aleplot.png]]
+
+The below is a matrix of PD plot.
+#+begin_src R :results code graphics file :file cor_pdplot.png :width 700 :height 700
+## Calculate and plot the Asecond-order interaction effx2, x3
+par(mfrow = c(3,3))
+PD.1=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30)
+PD.2=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30)
+PD.3=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30)
+PD.4=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30)
+PD.5=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30)
+PD.6=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30)
+PD.7=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30)
+PD.8=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30)
+PD.12=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20)
+## PD.23=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
+## PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
+#+end_src
+
+#+RESULTS:
+[[file:cor_pdplot.png]]
+
+** mapping high COR events                                         :noexport:
+#+begin_quote
+'predictions': Predicted classes/values, based on out of bag samples
+          (classification and regression only).
+#+end_quote
+
+#+begin_src R
+ff = df %>% mutate(pred = ranger_final$predictions[, 2]) %>%
+  filter((orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0])) | (orig_amounts <= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days <= min(ALE.2$x.values[ALE.2$f.values > 0])))
+
+df$oram_hl = 1 * (df$orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]))
+df$orda_hl = 1 * (df$orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0]))
+
+pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+mis = df[pred != y, ]
+hit = df[pred == y, ]
+
+
+#+end_src
+
+#+RESULTS:
+
+#+begin_src R
+xmin = min(df$x)
+ymin = min(df$y)
+xmax = max(df$x)
+ymax = max(df$y)
+
+par(mfrow = c(2,2))
+plot(df$x, df$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(mis$x, mis$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(ff$x, ff$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(hit$x, hit$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+
+pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+sum(pred != y) / length(y)
+
+#+end_src
+
+#+RESULTS:
+: [1] 0.473251
+
+=comm_out_state= can take account for the spatial effect. It has high values when the site is located along with the state border. =com_low= contains high and low =comm_out_state=. high / low surfix is about the prediction value, not the variable value
+#+begin_src R
+xeq = ALE.3$x.values[ALE.3$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+com_high <- df %>% filter(comm_out_state <= maxx & comm_out_state >= minx)
+com_low <- df %>% filter(comm_out_state > maxx | comm_out_state < minx)
+df$com_hl <- 1 * (df$comm_out_state <= maxx & df$comm_out_state >= minx)
+
+par(mfrow = c(2, 2))
+plot(com_high$x, com_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(com_low$x, com_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+=aadt= might be associated with the location as well. high =aadt= nearby big cities / highway hub?
+#+begin_src R
+aadt_high = df %>% filter(aadt > min(ALE.4$x.values[ALE.4$f.values > 0]))
+aadt_low = df %>% filter(aadt <= min(ALE.4$x.values[ALE.4$f.values > 0]))
+df$aadt_hl = with(df, 1 * (aadt > min(ALE.4$x.values[ALE.4$f.values > 0])))
+
+par(mfrow=c(2,2))
+plot(aadt_high$x, aadt_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(aadt_low$x, aadt_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+=gdp= would also be highly associated with city / county level factor
+#+begin_src R
+xeq = ALE.8$x.values[ALE.8$f.values > 0]
+minx <- min(xeq)
+maxx <- max(xeq)
+gdp_high <- df %>% filter(gdp <= maxx & gdp >= minx)
+gdp_low <- df %>% filter(gdp > maxx | gdp < minx)
+df$gdp_hl = with(df, 1 * (gdp <= maxx & gdp >= minx))
+
+par(mfrow = c(2, 2))
+plot(gdp_high$x, gdp_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#+end_src
+
+#+RESULTS:
+
+** spatial pattern                                                 :noexport:
 :PROPERTIES:
 :header-args:R: :exports results :width 672 :height 672
 :END:
@@ -5648,7 +6660,7 @@ df %>% mutate(var = factor(df$aadt_hl, label = c("high","low"))) %>% ov_map("aad
 
 * COMMENT Local Variables
 # Local Variables:
-# org-babel-default-header-args:R: ((:session . "*R-COR*") (:export . "both") (:results . "output replace"))
+# org-babel-default-header-args:R: ((:session . "*R-COR*") (:export . "both") (:results . "output replace") (:width . 700) (:height . 700))
 # eval: (flyspell-mode -1)
 # eval: (spell-fu-mode -1)
 # End:

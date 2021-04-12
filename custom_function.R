@@ -122,16 +122,16 @@ require(ggplot2)
 plot_vimp = function(vimp, cutoff = 1) {
 
    tryCatch({
-      
+
       if(dim(vimp)[1] < dim(vimp)[2]) vimp <- t(vimp)
-      
+
     }, error = function(e)
       {
       stop('vimp should be a p by 1 matrix, array, or data.frame.')
       }
 
     )
-    
+
   ## Get the relative importance
   mval = max(vimp[,1])
   vimp[,2] = ( vimp[,1]/mval ) * 100
@@ -150,7 +150,7 @@ plot_vimp = function(vimp, cutoff = 1) {
     scale_fill_discrete(guide=FALSE) +
     theme_bw() +
     theme(axis.line = element_line(colour = "black"),
-          text = element_text(size=10),
+          text = element_text(size=20),
           ##panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           ##panel.border = element_blank()
@@ -158,3 +158,11 @@ plot_vimp = function(vimp, cutoff = 1) {
           )
   return(gg)
 }
+
+## Define the predictive function
+yhat <- function(X.model, newdata) {
+  pp <- as.numeric(predict(X.model, newdata)$predictions[, 2])
+  eps <- .Machine$double.eps
+  out <- log((pp + eps) / (1 - pp + eps))
+  return(out)
+  }

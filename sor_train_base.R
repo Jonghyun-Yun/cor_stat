@@ -1,14 +1,14 @@
-xtrain = model.matrix(~ 0 +., data = dx)
+xtrain <- model.matrix(~ 0 + ., data = dx)
 ## y = log(df$sor)
 ytrain <- y <- sory
-weights = rep(1,length(y)) / length(y)
+weights <- rep(1, length(y)) / length(y)
 
 set.seed(1)
-nfold = 4
+nfold <- 4
 ## shu = sample(1:length(ytrain))
 ## xtrain = xtrain[shu,]
 ## ytrain = ytrain[shu]
-data_folds = caret::createFolds(ytrain, k=nfold)
+data_folds <- caret::createFolds(ytrain, k = nfold)
 
 cat1fold = function(outfold, xtrain, ytrain, cat_features, fit_params, weights) {
 
