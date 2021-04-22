@@ -1,149 +1,28 @@
-#+TITLE: Cost Overrun Codes
+#+title: Cost Overrun Codes
 # #+SUBTITLE: (Press ~?~ for help; ~n~ and ~p~ for next and previous slide)
-#+AUTHOR: Jonghyun Yun
-#+EMAIL: jonghyun.yun@gmail.com
+#+author: Jonghyun Yun
+#+email: jonghyun.yun@gmail.com
 
 # https://orgmode.org/manual/Export-Settings.html#Export-Settings
-#+OPTIONS: H:4 num:nil toc:nil pri:t ::t |:t f:t <:t -:t \n:nil ':t ^:{}
-#+OPTIONS: d:nil todo:t tags:not-in-toc tex:t
+#+options:   H:10 num:nil toc:nil \n:nil @:t ::t |:t ^:nil ^:{} -:t f:t *:t <:t ':nil -:nil pri:t
+#+options:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 
-#+STARTUP: overview inlineimages logdone
+#+startup: overview inlineimages logdone indent
 
 # comment out for reveal.js
-# #+SETUPFILE: ~/setup/my-theme-readtheorg.setup
+#+setupfile: ~/setup/my-theme-readtheorg.setup
+#+setupfile: ~/org/latex_header.setup
+#+setupfile: ~/org/orgmode_header.setup
 
-#+PROPERTY: header-args :eval never-export
-#+PROPERTY: header-args:R :exports both :noweb yes
+#+property: header-args :eval never-export
+#+property: header-args:R :exports both :noweb yes
 #+property: header-args:matlab :session *MATLAB* :exports results :results output :noweb yes
+#+property: header-args:jupyter-python :session *jupyter-cor* :kernel tf :async yes
 
-* OrgMode                                                          :noexport:
-#+INFOJS_OPT: view:nil toc:t ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
-
-** Reveal
-#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
-# slide/none/fade/convex/concave/zoom
-#+REVEAL_TRANS: slide
-# solarized/black/white/league/sky/beige/simple/serif/blood/night/moon
-#+REVEAL_THEME: solarized
-#+REVEAL_HLEVEL: 2
-#+REVEAL_PLUGINS: (highlight search zoom)
-#+REVEAL_EXTRA_CSS: ./reveal_firago.css
-
-#+OPTIONS: reveal_history:t reveal_fragmentinurl:t
-#+OPTIONS: reveal_mousewheel:t reveal_inter_presentation_links:t
-#+OPTIONS: reveal_width:1400 reveal_height:1000
-#+REVEAL_TITLE_SLIDE: <h2 class="title">%t</h2><h4 class="subtitle">%s</h4><h3 class="author">%a</h3><h3 class="date">%d</h3>
-
-** Hugo
-#+HUGO_BASE_DIR: ~/website
-#+HUGO_AUTO_SET_LASTMOD: t
-#+HUGO_DATE_FORMAT: %Y-%m-%dT%T%z
-#+HUGO_FRONT_MATTER_FORMAT: toml
-
-#+HUGO_SECTION:
-#+HUGO_BUNDLE:
-#+HUGO_CATEGORIES:
-
-#+HUGO_EXPORT_RMARKDOWN:
-
-** HTML
-#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
-#+OPTIONS: html-scripts:t html-style:t html5-fancy:t
-
-# #+HTML_MATHJAX: align: left indent: 5em tagside: right
-# #+HTML_MATHJAX: scale: 85 font: Asana-Math
-# MATHJAX font: MathJax TeX (default) Asana-Math Neo-Euler Latin-Modern Gyre-Pagella Gyre-Termes
-# #+OPTIONS: tex:dvipng tex:dvisvgm # use LaTeX to generate images for equations
-
-#+HTML_HEAD:  <!-- Global site tag (gtag.js) - Google Analytics -->
-#+HTML_HEAD:<script async src="https://www.googletagmanager.com/gtag/js?id=UA-128966866-1"></script>
-#+HTML_HEAD:<script>
-#+HTML_HEAD:  window.dataLayer = window.dataLayer || [];
-#+HTML_HEAD:  function gtag(){dataLayer.push(arguments);}
-#+HTML_HEAD:  gtag('js', new Date());
-#+HTML_HEAD:
-#+HTML_HEAD:  gtag('config', 'UA-128966866-1');
-#+HTML_HEAD:</script>
-
-# #+HTML_LINK_HOME: http://wweb.uta.edu/faculty/yunj/index.html
-# #+HTML_LINK_UP: http://wweb.uta.edu/faculty/yunj/index.html
-
-# https://scripter.co/latex-in-html/
-#+macro: latex @@html:<span class="latex">L<sup>a</sup>T<sub>e</sub>X</span>@@
-
-#+BEGIN_SRC emacs-lisp :eval no :results silent :exports none :tangle no
-(setq org-html-htmlize-output-type 'css)
-(setq org-html-htmlize-output-type 'inline-css)
-#+END_SRC
-
-#+begin_src emacs-lisp ::eval no results silent :exports none :tangle no
-(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
-(add-hook 'org-mode-hook 'org-display-inline-images)
-#+end_src
-* LaTeX Header                                                     :noexport:
-#+LATEX_CLASS: no-article
-#+LATEX_CLASS_OPTIONS: [letterpaper,11pt]
-
-#+LATEX_COMPILER: xelatex
-
-#+LATEX_HEADER: %% Margins
-#+LATEX_HEADER: \usepackage{geometry}
-#+LATEX_HEADER: \geometry{verbose,margin=1.5in}
-#+LATEX_HEADER: \setlength\parindent{0pt}
-#+LATEX_HEADER: \linespread{1.1}
-
-#+LATEX_HEADER: %% Typesetting
-#+LATEX_HEADER: \usepackage[stretch=10,babel=true]{microtype} % better typesetting. works w/ pdftex, not latex.
-#+LATEX_HEADER: %% \usepackage[english]{babel} % manages hyphenation patterns
-#+LATEX_HEADER: %% \usepackage{polyglossia} \setdefaultlanguage{english} % babel replacement for XeLaTex.
-#+LATEX_HEADER: \usepackage{csquotes} % Context sensitive quotation facilities
-
-#+LaTeX_HEADER: %% Biblio
-#+LATEX_HEADER: \usepackage[natbib=true, sorting=ynt, backend=biber, minbibnames=3, maxbibnames=3, doi=false, isbn=false, style=authoryear]{biblatex}
-#+LATEX_HEADER: \addbibresource{~/Zotero/myref.bib}
-#+LATEX_HEADER: \AtEveryBibitem{\clearfield{note}}
-#+LATEX_HEADER: \AtEveryBibitem{\clearfield{month}}
-#+LATEX_HEADER: \AtEveryBibitem{\clearfield{day}}
-#+LATEX_HEADER: \AtEveryBibitem{\clearfield{eprint}}
-
-#+LATEX_HEADER: %% Math
-#+LATEX_HEADER: \usepackage{amsmath} % \declareMathOperator
-# #+LATEX_HEADER: \usepackage{mathabx} % \widebar
-# #+LATEX_HEADER: \usepackage{amssymb}
-# #+LATEX_HEADER: \usepackage{amsbsy}  %\boldsymbol %\pbm (faked bold)
-# #+LATEX_HEADER: \usepackage{wasysym}
-#+LATEX_HEADER: \usepackage[mathbf=sym]{unicode-math}
-#+LATEX_HEADER: %% \usepackage{cool} % for math operators & symbols e.g. partial diff
-#+LATEX_HEADER: \usepackage{mathtools} % for math aligning & spacing
-#+LATEX_HEADER: \usepackage{physics} % derivative, dx, operators
-#+LATEX_HEADER: \usepackage{cancel}
-#+LATEX_HEADER: \allowdisplaybreaks % Allow new page within align
-
-#+LATEX_HEADER: %% Font
-# #+LATEX_HEADER: \usepackage{lmodern}
-# #+LATEX_HEADER: \setmathfont{latinmodern-math.otf}
-#+LATEX_HEADER: \setmainfont{XITS}
-#+LATEX_HEADER: \setmathfont{XITS Math} % \boldsymbol works
-#+LATEX_HEADER: \setmathfont[range={\mathcal,\mathbfcal},StylisticSet=1]{XITS Math}
-
-#+LATEX_HEADER: \usepackage[unicode,colorlinks]{hyperref}
-# #+LATEX_HEADER: \PassOptionsToPackage{unicode,colorlinks=true}{hyperref}
-
-# #+LATEX_HEADER: \usepackage[unicode]{hyperref}
-# #+LATEX_HEADER: \PassOptionsToPackage{unicode}{hyperref}
-# #+LATEX_HEADER: \hypersetup{colorlinks = true}
-# #+LATEX_HEADER:     linkcolor={red!50!black},
-# #+LATEX_HEADER:     citecolor={blue!50!black},
-# #+LATEX_HEADER:     urlcolor={blue!80!black}}
 * Prelim analysis
+#+include: dta2csv.py
 
-#+BEGIN_SRC python
-import pandas as pd
-data = pd.io.stata.read_stata('01_Socio-Geographic Factor Impacts.dta')
-data.to_csv('01_Socio-Geographic Factor Impacts.csv')
-#+END_SRC
-
-#+BEGIN_SRC R
+#+begin_src R
 library('magrittr')
 library(dplyr)
 dpro <- readr::read_csv(file = "04_Raw_ConstFDOT.csv", col_names = T) %>% data.frame()
@@ -159,56 +38,18 @@ dpro = dpro %>% filter(Work.Type == "3R") %>%
 dsoc = readr::read_csv(file = "01_Socio-Geographic Factor Impacts.csv", col_names = T)
 gis = readr::read_csv(file = "GIS.csv", col_names = t)
 names(gis) = make.names(names(gis))
-#+END_SRC
-
-#+RESULTS:
-: Error: '04_Raw_ConstFDOT.csv' does not exist in current working directory ('/Users/yunj/OneDrive/workspace/cor-code').
-: Error: Problem with `filter()` input `..1`.
-: [31m✖[39m object 'Work.Type' not found
-: [34mℹ[39m Input `..1` is `Work.Type == "3R"`.
-: [90mRun `rlang::last_error()` to see where the error occurred.[39m
-: Error: '01_Socio-Geographic Factor Impacts.csv' does not exist in current working directory ('/Users/yunj/OneDrive/workspace/cor-code').
-: Error: 'GIS.csv' does not exist in current working directory ('/Users/yunj/OneDrive/workspace/cor-code').
-: Error in make.names(names(gis)) : object 'gis' not found
+#+end_src
 
 
-#+BEGIN_SRC R
+#+begin_src R
 library('magrittr')
 library(dplyr)
 dd <- readr::read_csv(file = "data/Final_3R.csv", col_names = T) %>% data.frame()
 names(dd) = make.names(names(dd))
-#+END_SRC
+#+end_src
 
-#+RESULTS:
-#+begin_example
-
-[36m──[39m [1m[1mColumn specification[1m[22m [36m─────────────────────────────────────────────[39m
-cols(
-  .default = col_double(),
-  Contract_ID = [31mcol_character()[39m,
-  Cost_Overruns_Rate = [31mcol_character()[39m,
-  Schedule_Overrun_Rate = [31mcol_character()[39m,
-  TRAVELTIME = [31mcol_character()[39m,
-  Original_Contract_Amount = [32mcol_number()[39m,
-  Project_Type_Description = [31mcol_character()[39m,
-  County = [31mcol_character()[39m,
-  Contract_ID_X = [31mcol_character()[39m,
-  Contract_ID_Y = [31mcol_character()[39m,
-  Urban_Rural = [31mcol_character()[39m,
-  Primary_County_Description = [31mcol_character()[39m,
-  Work_Mix_Description = [31mcol_character()[39m,
-  Project_Work_Type_Description = [31mcol_character()[39m,
-  Status = [31mcol_character()[39m
-)
-[36mℹ[39m Use [30m[47m[30m[47m`spec()`[47m[30m[49m[39m for the full column specifications.
-
-Warning message:
-Duplicated column names deduplicated: 'District' =
-'District_1' [30]
-#+end_example
-
-#+BEGIN_SRC R
-## FIX: long and lat are switched.
+#+begin_src R
+## NOTE: long and lat are switched.
 dd = dd %>%
   mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
   mutate(travel_time = as.numeric(TRAVELTIME)) %>%
@@ -217,26 +58,19 @@ dd = dd %>%
   mutate(lcor = log(Current_Contract_Amount / Original_Contract_Amount)) %>%
   mutate(long = Latitude_GIS, lat = Longitude_GIS)
 dd = na.omit(dd)
-#+END_SRC
+#+end_src
 
-#+RESULTS:
-: Warning messages:
-: 1: Problem with `mutate()` input `travel_time`.
-: [34mℹ[39m NAs introduced by coercion
-: [34mℹ[39m Input `travel_time` is `as.numeric(TRAVELTIME)`.
-: 2: In mask$eval_all_mutate(dots[[i]]) : NAs introduced by coercion
-
-#+BEGIN_SRC R
+#+begin_src R
 mm = lm(lcor ~ travel_time + AADT + MIncome + PopDensity + log(Original_Contract_Amount) + Original_Contract_Days, data = dd)
 summary(mm)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
 w = 1/as.matrix(dist(df[,-1]))
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 library(ape)
 x = df[,1]
 diag(w) <- 0
@@ -244,17 +78,17 @@ diag(w) <- 0
 ##Moran.I(x, w, alt = "l")
 Moran.I(x, w, alt = "g")
 ##Moran.I(x, w, scaled = TRUE) # usualy the same
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 fl_df = subset(states, region == "florida")
 fl_county = subset(counties, region == "florida")
 
@@ -278,9 +112,9 @@ gg_base +
   scale_fill_gradient2() +
   theme_bw() +
   ditch_the_axes
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 library(gstat)
 library(sp)
 library(nlme)
@@ -289,7 +123,7 @@ coordinates(df)<-c('longitude','latitude')
 
 var.mod<-variogram(error ~ 1,data=df,alpha=c(0,45,90,135))
 plot(var.mod)
-#+END_SRC
+#+end_src
 
 ** FDOT 2020 data
 - [[file:PJT_Data_for_GIS_Join.csv]] & [[file:GIS_Join.csv]]
@@ -299,13 +133,13 @@ plot(var.mod)
 
     Data is not ready for the analysis? or some variables have discarded during CSV conversion?
 
-#+BEGIN_SRC R
+#+begin_src R
 library('magrittr')
 library(dplyr)
 dd <- readr::read_csv(file = "PJT_Data_for_GIS_Join.csv", col_names = T) %>% data.frame()
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 dpro = dpro %>% filter(Work.Type == "3R") %>%
    filter(Project.Work.Type.Description %in% c( "Reconstruction", "Resurfacing", "Widening & Resurfacing" )) %>%
    filter(Status %in% c("FINAL PAYMENT AUTHORIZED","FINAL PAYMENT MADE")) %>%
@@ -316,17 +150,17 @@ dpro = dpro %>% filter(Work.Type == "3R") %>%
 dsoc = readr::read_csv(file = "01_Socio-Geographic Factor Impacts.csv", col_names = T)
 gis = readr::read_csv(file = "GIS.csv", col_names = T)
 names(gis) = make.names(names(gis))
-#+END_SRC
+#+end_src
 
 
-#+BEGIN_SRC R
+#+begin_src R
 library('magrittr')
 library(dplyr)
 dd <- readr::read_csv(file = "Final_3R.csv", col_names = T) %>% data.frame()
 names(dd) = make.names(names(dd))
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 ## FIX: long and lat are switched.
 dd = dd %>%
   mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
@@ -336,19 +170,19 @@ dd = dd %>%
   mutate(lcor = log(Current_Contract_Amount / Original_Contract_Amount)) %>%
   mutate(long = Latitude_GIS, lat = Longitude_GIS)
 dd = na.omit(dd)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 mm = lm(lcor ~ travel_time + AADT + MIncome + PopDensity + log(Original_Contract_Amount) + Original_Contract_Days, data = dd)
 summary(mm)
-#+END_SR
+#+end_sr
 
-#+BEGIN_SRC R
+#+begin_src R
 df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
 w = 1/as.matrix(dist(df[,-1]))
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 library(ape)
 x = df[,1]
 diag(w) <- 0
@@ -356,17 +190,17 @@ diag(w) <- 0
 ##Moran.I(x, w, alt = "l")
 Moran.I(x, w, alt = "g")
 ##Moran.I(x, w, scaled = TRUE) # usualy the same
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 fl_df = subset(states, region == "florida")
 fl_county = subset(counties, region == "florida")
 
@@ -390,9 +224,9 @@ gg_base +
   scale_fill_gradient2() +
   theme_bw() +
   ditch_the_axes
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 library(gstat)
 library(sp)
 library(nlme)
@@ -401,10 +235,10 @@ coordinates(df)<-c('longitude','latitude')
 
 var.mod<-variogram(error ~ 1,data=df,alpha=c(0,45,90,135))
 plot(var.mod)
-#+END_SRC
+#+end_src
 
 * FDOT_10mi_Coordinates
-#+BEGIN_SRC R
+#+begin_src R
 library('magrittr')
 library(dplyr)
 dpro <- readr::read_csv(file = "FDOT_10mi_Coordinates.csv", col_names = T) %>% data.frame()
@@ -412,9 +246,9 @@ names(dpro) = make.names(names(dpro))
 dpro$railcross[is.na(dpro$railcross)] = 0
 dpro$bridge[is.na(dpro$bridge)] = 0
 dpro <- na.omit(dpro)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 ## FIX: long and lat are switched.
 ## dd = dd %>%
 ##   mutate(COR = (Current_Contract_Amount - Original_Contract_Amount) / Original_Contract_Amount) %>%
@@ -431,9 +265,9 @@ dd = dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
   mutate(mov_max_temp = 0.6*max_temp_2019 + 0.3*max_temp_2018 + 0.1*max_temp_2017 ) %>%
   mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 cnames = names(dd)
 
 no_drop = !grepl("gdp_.", cnames) &
@@ -445,7 +279,7 @@ no_drop = !grepl("gdp_.", cnames) &
 ## df = dd[no_drop] %>% filter(pjt_type=="X3-Resurfacing")
 df = dd[no_drop]
 df$logy = log(df$modified_amounts) - log(df$orig_amounts)
-#+END_SRC
+#+end_src
 
 #+begin_src R
 df$access_con[df$access_con != 3] = 0
@@ -454,15 +288,15 @@ df$road_side = as.factor(df$road_side)
 df$funclass = as.factor(df$funclass)
 #+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 mm = lm(logy ~ log(orig_amounts) + orig_days + aadt + aadt_truck + speedlimit + factor(access_con) + pav_cond + mov_unemp + mov_avg_temp + mov_max_temp + mov_prec + mov_gdp + poverty_below + pop_tot + comm_car_tot, data = df)
 summary(mm)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 df = data.frame(error = mm$residuals,  longitude = dd$long,  latitude = dd$lat)
 w = 1/as.matrix(dist(df[,-1]))
-#+END_SRC
+#+end_src
 ** GLM NET
 #+begin_src R
 library(glmnet)
@@ -482,7 +316,7 @@ vn = colnames(x)
 We set $\alpha=1$ for the LASSO. The implementation of the LASSO in R is
 quite similar to those for the ridge.
 
-#+BEGIN_SRC R
+#+begin_src R
     cvlasso = cv.glmnet(X,y,alpha=1)
     cvlasso$lambda.min
     cvlasso$lambda.1se
@@ -494,7 +328,7 @@ quite similar to those for the ridge.
     plot(lmlasso, xvar = "lambda", xlim=c(-7,0))
     axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
     abline(v = log(cvlasso$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 0.002188715
@@ -502,16 +336,16 @@ quite similar to those for the ridge.
 
 For the selected model, we have a *sparse* estimate of a coefficient vector. Which predictors are chosen by the model?
 
-#+BEGIN_SRC R
+#+begin_src R
 lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se)
 coef(lmlasso)
 pred = predict(lmlasso,newx=X)
 plot(y, pred)
-#+END_SRC
+#+end_src
 
 *** The elastic net
 
-#+BEGIN_SRC R
+#+begin_src R
 aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
 lena = length(aseq)
 
@@ -529,11 +363,11 @@ picka = which.min(mcvm)
 malpha = aseq[picka] # alpha for the best model
 malpha
 cv[[picka]]$lambda.1se
-#+END_SRC
+#+end_src
 
 Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha)
 vnat = coef(lmenet)
 vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
@@ -541,13 +375,13 @@ vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
 plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se)
 coef(lmenet)
 pred = predict(lmenet,newx=X)
-#+END_SRC
+#+end_src
 
 ** classification models
   :PROPERTIES:
@@ -563,16 +397,16 @@ In the =glmnet= package, a design matrix =X= should consist of numeric
 values. =famhist= is a factor variable, so we code =famhist==1 if
 present; 0 otherwise.
 
-#+BEGIN_SRC R
+#+begin_src R
 y = 1 * (y > 0)
-#+END_SRC
+#+end_src
 
 We here present the R code example for the logistic regression with the
 lasso penalty. In the cross validation, we estimate the
 misclassification error by specifying =type.measure="class"=. Some other
 error measure can be used as well (eg. deviance, AUC, etc.).
 
-#+BEGIN_SRC R
+#+begin_src R
 cvlasso = cv.glmnet(X,y,alpha=1,family="binomial",type.measure="class")
 cvlasso$lambda.min
 cvlasso$lambda.1se
@@ -586,15 +420,15 @@ plot(lmlasso, xvar = "lambda", xlim=c(-7.3,-1.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cvlasso$lambda.1se),lty="dotted")
 
-#+END_SRC
+#+end_src
 
 The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se, family="binomial")
 coef(lmlasso)
 pred = predict(lmlasso,newx=X)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 #+begin_example
@@ -618,7 +452,7 @@ mov_gdp            .
     :CUSTOM_ID: the-elastic-net
     :END:
 
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
 lena = length(aseq)
@@ -637,7 +471,7 @@ picka = which.min(mcvm)
 malpha = aseq[picka] # alpha for the best model
 malpha
 cv[[picka]]$lambda.1se
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 1
@@ -645,7 +479,7 @@ cv[[picka]]$lambda.1se
 
 Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, family="binomial")
 vnat = coef(lmenet)
 vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
@@ -653,16 +487,16 @@ vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
 plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se, family="binomial" )
 coef(lmenet)
 pred = 1*(predict(lmenet,newx=X) > 0)
 tab = table(pred,y)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 #+begin_example
@@ -694,7 +528,7 @@ dtrain = xgb.DMatrix(data = smxtrain, label = ytrain)
 #+RESULTS:
 
 - Tuned hyperparameters of XGBoost.
-#+BEGIN_SRC R
+#+begin_src R
 #default parameters
 xgb_params <- list(objective = "binary:logistic",
                    ## booster = "gbtree",
@@ -708,13 +542,13 @@ xgb_params <- list(objective = "binary:logistic",
                    # alpha = c(0),
                    # lambda = c(0)
                    )
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
 XGBoost has a CV function accepting fold indices.
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 set.seed(1)
 xgbcv <- xgb.cv(params = xgb_params,
                 weight = weights,
@@ -729,19 +563,19 @@ xgbcv <- xgb.cv(params = xgb_params,
 xgb = list(prob = xgbcv$pred,
            logloss =  wlogloss(y = ytrain, p = xgbcv$pred, w=weights),
            best_iter = xgbcv$best_ntreelimit)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
 The below is to save a model trained based on the full traing data.
 #+attr_ravel: eval=T
-#+BEGIN_SRC R
+#+begin_src R
 ##model training
 xgb_final = xgb.train (params = xgb_params, data = dtrain, nrounds = xgb$best_iter)
 xgb_imp = xgb.importance(model = xgb_final) # use Gain for importance
 # xgb.plot.importance(importance_matrix = xgb_imp[1:40])
 xgb.save(xgb_final, 'xgb_model')
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] TRUE
@@ -778,7 +612,7 @@ rf_params = list(
 #+RESULTS:
 
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 set.seed(1)
 rfcv <- xgb.cv(params = rf_params,
                weight = ww,
@@ -790,11 +624,11 @@ rfcv <- xgb.cv(params = rf_params,
                early_stopping_rounds = 20,
                metrics = c("logloss")
                 )
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 rf = list(prob = rfcv$pred, logloss = wlogloss(yy,rfcv$pred,ww), best_iter = rfcv$best_ntreelimit)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error: object 'rfcv' not found
@@ -823,10 +657,10 @@ Specify that we want to learn a binary classification. We can choose a
 performance metric for a learner. More parameters can be
 specified below.
 
-#+BEGIN_SRC R
+#+begin_src R
 #default parameters
 params <- list(objective = "binary:logistic")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
@@ -838,7 +672,7 @@ rearranges the data as to ensure each fold is a good representative of the whole
 training data.
 
 #+attr_ravel: eval=T
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 xgbcv <- xgb.cv(params = params,
                 weight=weights,
@@ -849,7 +683,7 @@ xgbcv <- xgb.cv(params = params,
 
 # best iteration
 xgbcv$best_iteration
-#+END_SRC
+#+end_src
 
 with numeric, with sparse model matrix
 #+begin_example
@@ -923,13 +757,13 @@ Stopping. Best iteration:
 #+end_example
 
 #+attr_ravel: eval=F
-#+BEGIN_SRC R
+#+begin_src R
   ##model training
   mm <- xgb.train (params = params, data = dtrain, nrounds = 72)
 
   xgb_imp <- xgb.importance (model = mm)
   xgb.plot.importance(importance_matrix = xgb_imp[1:20])
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error in check.booster.params(params, ...) : object 'params' not found
@@ -1112,7 +946,7 @@ ranger_test_prob = predict(ranger_final, ixtest)$predictions[,1]
 
 To create a meat-feature of the super learner for the test data.
 ** spatial
-#+BEGIN_SRC R
+#+begin_src R
 library(ape)
 x = df[,1]
 diag(w) <- 0
@@ -1120,17 +954,17 @@ diag(w) <- 0
 ##Moran.I(x, w, alt = "l")
 Moran.I(x, w, alt = "g")
 ##Moran.I(x, w, scaled = TRUE) # usualy the same
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 fl_df = subset(states, region == "florida")
 fl_county = subset(counties, region == "florida")
 
@@ -1154,9 +988,9 @@ gg_base +
   scale_fill_gradient2() +
   theme_bw() +
   ditch_the_axes
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 library(gstat)
 library(sp)
 library(nlme)
@@ -1165,7 +999,7 @@ coordinates(df)<-c('longitude','latitude')
 
 var.mod<-variogram(error ~ 1,data=df,alpha=c(0,45,90,135))
 plot(var.mod)
-#+END_SRC
+#+end_src
 * Prerequisite
 :PROPERTIES:
 :header-args:R:          :tangle prerequisite.R
@@ -1173,8 +1007,8 @@ plot(var.mod)
 
 This section contains code for global =knitr= options and installing and/or loading required packages.
 The options are meaningful only if you render this document; otherwise ignore them.
-#+NAME: global_option,include=F
-#+BEGIN_SRC R
+#+name: global_option,include=F
+#+begin_src R
   ## Need the knitr package to set chunk options
   library(knitr)
 
@@ -1191,7 +1025,7 @@ The options are meaningful only if you render this document; otherwise ignore th
                  fig.align="center",
                  fig.width=12, fig.height=9,
                  message=FALSE, warning=FALSE)
-#+END_SRC
+#+end_src
 
 ** CatBoost
 For installing ~CatBoost~, see https://catboost.ai/docs/installation/r-installation-binary-installation.html#r-installation-binary-installation.
@@ -1206,7 +1040,7 @@ The below is a list of required packages. All of them (except ~CatBoost~) can be
 
 #+name:load
 #+attr_ravel: message=F, warning=F
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 require(glmnet)
 require(ALEPlot)
 ## require(data.table)
@@ -1225,15 +1059,15 @@ require(nnet)
 require(ggplot2)
 require(WeightedROC)
 require(ranger)
-#+END_SRC
+#+end_src
 
 This is global options, which are included in my =.Rprofile=.
-#+BEGIN_SRC R
+#+begin_src R
 ## Don't convert text strings to factors with base read functions
 options(stringsAsFactors = FALSE)
 ## Dont' omit NA rows
 options(na.action='na.pass')
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
@@ -1761,7 +1595,7 @@ lasso penalty. In the cross validation, we estimate the
 misclassification error by specifying =type.measure="class"=. Some other
 error measure can be used as well (eg. deviance, AUC, etc.).
 
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 ## y = 1 * (df$logy > 0)
 cvlasso = cv.glmnet(X,y,alpha=1,family="binomial",type.measure="class")
@@ -1776,7 +1610,7 @@ vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the
 plot(lmlasso, xvar = "lambda", xlim=c(-7.3,-1.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cvlasso$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 0.03525019
@@ -1784,11 +1618,11 @@ abline(v = log(cvlasso$lambda.1se),lty="dotted")
 
 The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se, family="binomial")
 coef(lmlasso)
 pred = predict(lmlasso,newx=X)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 #+begin_example
@@ -1830,7 +1664,7 @@ sum(diag(tab)) / sum(tab)
     :CUSTOM_ID: the-elastic-net
     :END:
 
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
 lena = length(aseq)
@@ -1849,7 +1683,7 @@ picka = which.min(mcvm)
 malpha = aseq[picka] # alpha for the best model
 malpha
 cv[[picka]]$lambda.1se
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 0.3
@@ -1857,7 +1691,7 @@ cv[[picka]]$lambda.1se
 
 Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, family="binomial")
 vnat = coef(lmenet)
 vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
@@ -1865,16 +1699,16 @@ vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
 plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se, family="binomial" )
 coef(lmenet)
 pred = 1*(predict(lmenet,newx=X) > 0)
 tab = table(pred,y)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 #+begin_example
@@ -2090,7 +1924,7 @@ AIC: 66
 
 Number of Fisher Scoring iterations: 25
 #+end_example
-                     
+
 * Tune&Train base models
 We have three base models. Each model has been tuned using 4 fold-cross
 validation. Since we aim to train a super learner instead of simple blend of
@@ -2410,7 +2244,7 @@ dtrain = xgb.DMatrix(data = smxtrain, label = ytrain)
 #+RESULTS:
 
 - Tuned hyperparameters of XGBoost.
-#+BEGIN_SRC R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_base.R
 #default parameters
 xgb_params <- list(objective = "binary:logistic",
                    ## booster = "gbtree",
@@ -2424,13 +2258,13 @@ xgb_params <- list(objective = "binary:logistic",
                    # alpha = c(0),
                    # lambda = c(0)
                    )
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
 XGBoost has a CV function accepting fold indices.
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :results none :tangle cor_train_base.R
+#+begin_src R :results none :tangle cor_train_base.R
 set.seed(1)
 xgbcv <- xgb.cv(params = xgb_params,
                 weight = weights,
@@ -2445,17 +2279,17 @@ xgbcv <- xgb.cv(params = xgb_params,
 xgb = list(prob = xgbcv$pred,
            logloss =  wlogloss(y = ytrain, p = xgbcv$pred, w=weights),
            best_iter = xgbcv$best_ntreelimit)
-#+END_SRC
+#+end_src
 
 The below is to save a model trained based on the full traing data.
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :tangle cor_train_base.R
+#+begin_src R :tangle cor_train_base.R
 ##model training
 xgb_final = xgb.train (params = xgb_params, data = dtrain, nrounds = xgb$best_iter)
 xgb_imp = xgb.importance(model = xgb_final) # use Gain for importance
 # xgb.plot.importance(importance_matrix = xgb_imp[1:40])
 xgb.save(xgb_final, 'cor_xgb_model')
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] TRUE
@@ -2490,7 +2324,7 @@ rf_params = list(
 #+RESULTS:
 
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 set.seed(1)
 rfcv <- xgb.cv(params = rf_params,
                weight = ww,
@@ -2502,11 +2336,11 @@ rfcv <- xgb.cv(params = rf_params,
                early_stopping_rounds = 20,
                metrics = c("logloss")
                 )
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 rf = list(prob = rfcv$pred, logloss = wlogloss(yy,rfcv$pred,ww), best_iter = rfcv$best_ntreelimit)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error: object 'rfcv' not found
@@ -2535,10 +2369,10 @@ Specify that we want to learn a binary classification. We can choose a
 performance metric for a learner. More parameters can be
 specified below.
 
-#+BEGIN_SRC R
+#+begin_src R
 #default parameters
 params <- list(objective = "binary:logistic")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
@@ -2550,7 +2384,7 @@ rearranges the data as to ensure each fold is a good representative of the whole
 training data.
 
 #+attr_ravel: eval=T
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 xgbcv <- xgb.cv(params = params,
                 weight=weights,
@@ -2561,7 +2395,7 @@ xgbcv <- xgb.cv(params = params,
 
 # best iteration
 xgbcv$best_iteration
-#+END_SRC
+#+end_src
 
 with numeric, with sparse model matrix
 #+begin_example
@@ -2635,13 +2469,13 @@ Stopping. Best iteration:
 #+end_example
 
 #+attr_ravel: eval=F
-#+BEGIN_SRC R
+#+begin_src R
   ##model training
   mm <- xgb.train (params = params, data = dtrain, nrounds = 72)
 
   xgb_imp <- xgb.importance (model = mm)
   xgb.plot.importance(importance_matrix = xgb_imp[1:20])
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error in check.booster.params(params, ...) : object 'params' not found
@@ -3403,7 +3237,7 @@ lasso penalty. In the cross validation, we estimate the
 misclassification error by specifying =type.measure="class"=. Some other
 error measure can be used as well (eg. deviance, AUC, etc.).
 
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 cvlasso = cv.glmnet(X,y,alpha=1,family="gaussian")
 cvlasso$lambda.min
@@ -3417,7 +3251,7 @@ vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get the coefficients at the
 plot(lmlasso, xvar = "lambda", xlim=c(-7.3,-1.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cvlasso$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 0.02902478
@@ -3425,11 +3259,11 @@ abline(v = log(cvlasso$lambda.1se),lty="dotted")
 
 The coefficients in the selected model is below. The prediction can be made in the same manner as in the regularized regression.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmlasso = glmnet(X, y, alpha=1, lambda = cvlasso$lambda.1se, family="gaussian")
 coef(lmlasso)[coef(lmlasso) != 0]
 pred = predict(lmlasso,newx=X)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error in glmnet(X, y, alpha = 1, lambda = cvlasso$lambda.1se, family = "gaussian") :
@@ -3442,7 +3276,7 @@ pred = predict(lmlasso,newx=X)
     :CUSTOM_ID: the-elastic-net
     :END:
 
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 aseq = seq(0,1,0.05) # sequence of alpha 0,0.05,...,0.95,1
 lena = length(aseq)
@@ -3461,7 +3295,7 @@ picka = which.min(mcvm)
 malpha = aseq[picka] # alpha for the best model
 malpha
 cv[[picka]]$lambda.1se
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 1
@@ -3469,7 +3303,7 @@ cv[[picka]]$lambda.1se
 
 Once we choose the two parameters, one can generate the coefficient path and make prediction using the chosen model.
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, family="gaussian")
 vnat = coef(lmenet)
 vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
@@ -3477,16 +3311,16 @@ vnat=vnat[-1,ncol(vnat)] # remove the intercept, and get coefficient names
 plot(lmenet, xvar = "lambda", xlim=c(-6.3,2.5))
 axis(2,at=vnat,line=-4,label=vn,las=1,tick=FALSE, cex.axis=.7)
 abline(v = log(cv[[picka]]$lambda.1se),lty="dotted")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R
+#+begin_src R
 lmenet = glmnet(X, y, alpha = malpha, lambda = cv[[picka]]$lambda.1se, family="gaussian" )
 coef(lmenet)
 pred = 1*(predict(lmenet,newx=X) > 0)
 tab = table(pred,y)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 #+begin_example
@@ -4031,7 +3865,7 @@ dtrain = xgb.DMatrix(data = smxtrain, label = ytrain)
 #+RESULTS:
 
 - Tuned hyperparameters of XGBoost.
-#+BEGIN_SRC R :tangle sor_train_base.R
+#+begin_src R :tangle sor_train_base.R
 #default parameters
 xgb_params <- list(objective = "reg:squarederror",
                    ## booster = "gbtree",
@@ -4045,13 +3879,13 @@ xgb_params <- list(objective = "reg:squarederror",
                    # alpha = c(0),
                    # lambda = c(0)
                    )
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
 XGBoost has a CV function accepting fold indices.
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :results none :tangle sor_train_base.R
+#+begin_src R :results none :tangle sor_train_base.R
 set.seed(1)
 xgbcv <- xgb.cv(params = xgb_params,
                 weight = weights,
@@ -4066,23 +3900,23 @@ xgbcv <- xgb.cv(params = xgb_params,
 xgb = list(pred = xgbcv$pred,
            loss =  sqrt(mean((ytrain - xgbcv$pred)^2)),
            best_iter = xgbcv$best_ntreelimit)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
 The below is to save a model trained based on the full traing data.
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :tangle sor_train_base.R
+#+begin_src R :tangle sor_train_base.R
 ##model training
 xgb_final = xgb.train (params = xgb_params, data = dtrain, nrounds = xgb$best_iter)
 xgb_imp = xgb.importance(model = xgb_final) # use Gain for importance
 # xgb.plot.importance(importance_matrix = xgb_imp[1:40])
 xgb.save(xgb_final, 'sor_xgb.model')
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 cor(predict(xgb_final, dtrain), ytrain)^2
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : [1] 0.9126958
@@ -4117,7 +3951,7 @@ rf_params = list(
 #+RESULTS:
 
 #+attr_ravel: eval=T
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 set.seed(1)
 rfcv <- xgb.cv(params = rf_params,
                weight = ww,
@@ -4129,11 +3963,11 @@ rfcv <- xgb.cv(params = rf_params,
                early_stopping_rounds = 20,
                metrics = c("logloss")
                 )
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC R
+#+begin_src R
 rf = list(prob = rfcv$pred, logloss = wlogloss(yy,rfcv$pred,ww), best_iter = rfcv$best_ntreelimit)
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error: object 'rfcv' not found
@@ -4162,10 +3996,10 @@ Specify that we want to learn a binary classification. We can choose a
 performance metric for a learner. More parameters can be
 specified below.
 
-#+BEGIN_SRC R
+#+begin_src R
 #default parameters
 params <- list(objective = "binary:logistic")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
@@ -4177,7 +4011,7 @@ rearranges the data as to ensure each fold is a good representative of the whole
 training data.
 
 #+attr_ravel: eval=T
-#+BEGIN_SRC R
+#+begin_src R
 set.seed(1)
 xgbcv <- xgb.cv(params = params,
                 weight=weights,
@@ -4188,7 +4022,7 @@ xgbcv <- xgb.cv(params = params,
 
 # best iteration
 xgbcv$best_iteration
-#+END_SRC
+#+end_src
 
 with numeric, with sparse model matrix
 #+begin_example
@@ -4262,13 +4096,13 @@ Stopping. Best iteration:
 #+end_example
 
 #+attr_ravel: eval=F
-#+BEGIN_SRC R
+#+begin_src R
   ##model training
   mm <- xgb.train (params = params, data = dtrain, nrounds = 72)
 
   xgb_imp <- xgb.importance (model = mm)
   xgb.plot.importance(importance_matrix = xgb_imp[1:20])
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 : Error in check.booster.params(params, ...) : object 'params' not found
@@ -5195,17 +5029,17 @@ Questions to answer:
 - Are there spatial pattern in covariates?
 - Does the prediction model take some spatial pattern into account?
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 pred = 1 * (pred > 0.5)
 df$mis = 1 * (pred != y)
 df %>% filter(y > min(y))
@@ -5224,7 +5058,7 @@ ditch_the_axes = theme(
 
 gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
   coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
-#+END_SRC
+#+end_src
 
 #+begin_src R
 gg_base = gg_base +
@@ -5276,7 +5110,7 @@ The spatial plot of mis-classification of the prediction model is presented belo
 #+begin_src R :results graphics file :file mis_map.png
 var = factor(df$mis, label = c("miss","hit"))
 df %>% mutate(var = var) %>% ov_map("classification")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 [[file:mis_map.png]]
@@ -5734,17 +5568,17 @@ Questions to answer:
 - Are there spatial pattern in covariates?
 - Does the prediction model take some spatial pattern into account?
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 pred = 1 * (pred > 0.5)
 df$mis = 1 * (pred != y)
 df %>% filter(y > min(y))
@@ -5763,7 +5597,7 @@ ditch_the_axes = theme(
 
 gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
   coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
-#+END_SRC
+#+end_src
 
 #+begin_src R
 gg_base = gg_base +
@@ -5811,7 +5645,7 @@ The spatial plot of mis-classification of the prediction model is presented belo
 #+begin_src R :results graphics file :file mis_map.png
 var = factor(df$mis, label = c("miss","hit"))
 df %>% mutate(var = var) %>% ov_map("classification")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 [[file:mis_map.png]]
@@ -6060,17 +5894,17 @@ df$gdp_hl = with(df, 1 * (gdp >= minx))
 :header-args:R: :exports results :width 672 :height 672
 :END:
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 pred = 1 * (pred > 0.5)
 df$mis = 1 * (pred != y)
 df %>% filter(y > min(y))
@@ -6089,7 +5923,7 @@ ditch_the_axes = theme(
 
 gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
   coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
-#+END_SRC
+#+end_src
 
 #+begin_src R
 gg_base = gg_base +
@@ -6163,7 +5997,7 @@ return(gg)
 #+begin_src R :results graphics file :file urb_map.png
 var = factor(y, label = c("rural","urban"))
 df %>% mutate(var = var) %>% ov_map("classification")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 [[file:urb_map.png]]
@@ -6230,7 +6064,7 @@ sum(diag(tab)) / sum(tab)
 * Meeting [2021-03-24 Wed]
 Run COR model with C1-6 variable from Dr. Ryu, pop density, my Urban index (prob).
 Next meeting, we will choose a target journal, structure of paper and authors' contribution in writing.
-    
+
 * Meeting [2021-04-01 Thu]                                           :export:
 :PROPERTIES:
 :header-args:R: :exports results :noweb yes
@@ -6241,7 +6075,7 @@ COR = \frac{\text{original amounts} + \text{modified amounts}}{\text{original am
 \]
 We use the random forest to train the prediction model. The =R= package =ranger= is used for the training.
 Moving average (three years backward from a project start year) covariates are generated and substituted with time series covariates.
-#+begin_src R :results none 
+#+begin_src R :results none
 source('prerequisite.R')
 source('custom_function.R')
 source('preprocess_rural.R')
@@ -6528,17 +6362,17 @@ Questions to answer:
 - Are there spatial pattern in covariates?
 - Does the prediction model take some spatial pattern into account?
 
-#+BEGIN_SRC R
+#+begin_src R
   library(maps)
   library(mapdata)
   library(ggplot2)
   states = map_data("state")
   counties = map_data("county")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 
-#+BEGIN_SRC R :results none
+#+begin_src R :results none
 pred = 1 * (pred > 0.5)
 df$mis = 1 * (pred != y)
 df %>% filter(y > min(y))
@@ -6557,7 +6391,7 @@ ditch_the_axes = theme(
 
 gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
   coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
-#+END_SRC
+#+end_src
 
 #+begin_src R
 gg_base = gg_base +
@@ -6607,7 +6441,7 @@ The spatial plot of mis-classification of the prediction model is presented belo
 #+begin_src R :results graphics file :file mis_map.png
 var = factor(df$mis, label = c("miss","hit"))
 df %>% mutate(var = var) %>% ov_map("classification")
-#+END_SRC
+#+end_src
 
 #+RESULTS:
 [[file:mis_map.png]]
