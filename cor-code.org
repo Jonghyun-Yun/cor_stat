@@ -85,7 +85,7 @@ This is global options, which are included in my =.Rprofile=.
 ## Don't convert text strings to factors with base read functions
 options(stringsAsFactors = FALSE)
 ## Dont' omit NA rows
-options(na.action='na.pass')
+options(na.action = "na.pass")
 #+end_src
 
 #+RESULTS:
@@ -94,7 +94,7 @@ options(na.action='na.pass')
 :PROPERTIES:
 :header-args:R:          :tangle custom_function.R
 :END:
-This section contains custom R functions.
+This section contains custom R functions. These function can also be found in ~custom_function.R~.
 
 - =to_factor= is a function to convert a character vector to a factor vector whose levels are ordered by conditional proportions of =label=.
 - =find_continent= is a function to group contries by continents.
@@ -103,111 +103,131 @@ This section contains custom R functions.
 - =mylogit=: to do the logit transformation
 - =plot_vimp=: to plot the variable importance
 #+begin_src R
-wlogloss = function(y, p, w = rep(1,length(y)) / length(y)){
-# return weighted log loss
-# y: actual y
-# p: prediction prob
-# w: case weight
-eps = 1e-15
-p = pmax(pmin(p, 1 - eps), eps)
-w = w / sum(w)
-out = - sum(w*(y*log(p)+(1-y)*log(1-p)))
-return(out)
+wlogloss <- function(y, p, w = rep(1, length(y)) / length(y)) {
+  # return weighted log loss
+  # y: actual y
+  # p: prediction prob
+  # w: case weight
+  eps <- 1e-15
+  p <- pmax(pmin(p, 1 - eps), eps)
+  w <- w / sum(w)
+  out <- -sum(w * (y * log(p) + (1 - y) * log(1 - p)))
+  return(out)
 }
 
-order_level = function(x, label){
-tab = table(x,label)
-cp = tab / apply(tab,1,sum)
-ll = row.names(tab[order(cp[,2]),])
-return(ll)}
-
-to_factor = function(x, label = ytrain) {
-out = factor(x, levels = order_level(x,label))
-return(out)}
-
-find_continent = function(x) {
-if (x %in% c("Panama", "Guatemala", "Honduras", "Dominican-Republic", "El-Salvador", "Columbia", "Nicaragua", "Trinadad&Tobago", "Puerto-Rico", "Haiti", "Peru", "Ecuador", "Jamaica", "Cuba")){ out = "South.America"
-} else if (x %in% c("Japan", "Iran", "Laos", "India", "Outlying-U S (Guam USVI etc)", "Vietnam", "Taiwan", "China", "Cambodia", "Thailand", "South Korea", "Philippines", "Hong Kong")) {out = "Asia"
-} else if (x %in% c("Portugal", "Italy", "Yugoslavia", "Greece", "Poland", "Germany", "England", "Hungary", "Scotland", "France", "Ireland", "Holand-Netherlands")) {out = "Europe"
-} else if (x %in% c("United-States", "Canada", "Mexico")) {out = "North.America"
-} else out = NA
-return(out)
+order_level <- function(x, label) {
+  tab <- table(x, label)
+  cp <- tab / apply(tab, 1, sum)
+  ll <- row.names(tab[order(cp[, 2]), ])
+  return(ll)
 }
 
-plot_y = function(x1, x2, point_size = 0.2, x1lab = NULL, x2lab = NULL, label = ytrain){
-dd = data.frame(x1,x2,label)
-    pp =
-      ggplot(data = dd,aes(x = x1,y = x2,label = label, color = as.factor(label))) +
-      geom_point(size = point_size,position = "jitter")  +  theme_bw() +
-      theme(
-        legend.position = "none",
-        axis.line = element_line(colour = "black"),
-        #panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        #panel.border = element_blank()
-        panel.background = element_blank()) + labs(y= x2lab, x = x1lab)
-return(pp)}
+to_factor <- function(x, label = ytrain) {
+  out <- factor(x, levels = order_level(x, label))
+  return(out)
+}
 
-plot_prob = function(x1, x2, point_size = 0.2, x1lab = NULL, x2lab = NULL, prob){
-dd = data.frame(x1,x2,prob)
-    pp =
-      ggplot(data = dd,aes(x = x1,y = x2, color = prob)) +
-      geom_point(size = point_size, position = "jitter")  +  theme_bw() +
-      theme(
-        legend.position = "none",
-        axis.line = element_line(colour = "black"),
-        #panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        #panel.border = element_blank()
-        panel.background = element_blank()) + labs(y= x2lab, x = x1lab)
-return(pp)}
+find_continent <- function(x) {
+  if (x %in% c("Panama", "Guatemala", "Honduras", "Dominican-Republic", "El-Salvador", "Columbia", "Nicaragua", "Trinadad&Tobago", "Puerto-Rico", "Haiti", "Peru", "Ecuador", "Jamaica", "Cuba")) {
+    out <- "South.America"
+  } else if (x %in% c("Japan", "Iran", "Laos", "India", "Outlying-U S (Guam USVI etc)", "Vietnam", "Taiwan", "China", "Cambodia", "Thailand", "South Korea", "Philippines", "Hong Kong")) {
+    out <- "Asia"
+  } else if (x %in% c("Portugal", "Italy", "Yugoslavia", "Greece", "Poland", "Germany", "England", "Hungary", "Scotland", "France", "Ireland", "Holand-Netherlands")) {
+    out <- "Europe"
+  } else if (x %in% c("United-States", "Canada", "Mexico")) {
+    out <- "North.America"
+  } else {
+    out <- NA
+  }
+  return(out)
+}
 
-mylogit = function(x) {
-eps = 10^(-100)
-log(x + eps) / log(1 - x - eps)}
+plot_y <- function(x1, x2, point_size = 0.2, x1lab = NULL, x2lab = NULL, label = ytrain) {
+  dd <- data.frame(x1, x2, label)
+  pp <-
+    ggplot(data = dd, aes(x = x1, y = x2, label = label, color = as.factor(label))) +
+    geom_point(size = point_size, position = "jitter") +
+    theme_bw() +
+    theme(
+      legend.position = "none",
+      axis.line = element_line(colour = "black"),
+      # panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      # panel.border = element_blank()
+      panel.background = element_blank()
+    ) +
+    labs(y = x2lab, x = x1lab)
+  return(pp)
+}
+
+plot_prob <- function(x1, x2, point_size = 0.2, x1lab = NULL, x2lab = NULL, prob) {
+  dd <- data.frame(x1, x2, prob)
+  pp <-
+    ggplot(data = dd, aes(x = x1, y = x2, color = prob)) +
+    geom_point(size = point_size, position = "jitter") +
+    theme_bw() +
+    theme(
+      legend.position = "none",
+      axis.line = element_line(colour = "black"),
+      # panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      # panel.border = element_blank()
+      panel.background = element_blank()
+    ) +
+    labs(y = x2lab, x = x1lab)
+  return(pp)
+}
+
+mylogit <- function(x) {
+  eps <- 10^(-100)
+  log(x + eps) / log(1 - x - eps)
+}
 #+end_src
 
 #+RESULTS:
 
 This is a function to calculate weighted log loss using caret's train object.
 #+begin_src R
-caret_wlogloss = function (data, pos = "cor", neg = "no_cor", cut = 0.5)
-{
-ff = data$Resample
-obs = 1*(data$obs == pos)
-prob = data[[pos]]
-pred = 1 * (prob > cut)
-if (is.null(data$weights)) {
-  ww = rep(1,length(pred))
-  } else ww = data$weights
+caret_wlogloss <- function(data, pos = "cor", neg = "no_cor", cut = 0.5) {
+  ff <- data$Resample
+  obs <- 1 * (data$obs == pos)
+  prob <- data[[pos]]
+  pred <- 1 * (prob > cut)
+  if (is.null(data$weights)) {
+    ww <- rep(1, length(pred))
+  } else {
+    ww <- data$weights
+  }
 
-return(wlogloss(y=obs, p=prob, w=ww))}
-
+  return(wlogloss(y = obs, p = prob, w = ww))
+}
 #+end_src
 
 #+RESULTS:
 
 This is a function to calculate weighted F1 score using caret's train object.
 #+begin_src R
-caret_wf1 = function(data, cut = 0.5) {
-ff = data$Resample
-obs = 1*(data$obs == "above50k")
-prob = data$above50k
-pred = 1 * (prob > cut)
-if (is.null(data$weights)) {
-  ww = rep(1,length(pred))
-  } else ww = data$weights
+caret_wf1 <- function(data, cut = 0.5) {
+  ff <- data$Resample
+  obs <- 1 * (data$obs == "above50k")
+  prob <- data$above50k
+  pred <- 1 * (prob > cut)
+  if (is.null(data$weights)) {
+    ww <- rep(1, length(pred))
+  } else {
+    ww <- data$weights
+  }
 
-ww = ww / sum(ww)
-TP = sum(1* ww * (pred == 1 & obs == 1))
-FP = sum(1* ww * (pred == 1 & obs == 0))
-TN = sum(1* ww * (pred == 0 & obs == 0))
-FN = sum(1* ww * (pred == 0 & obs == 1))
+  ww <- ww / sum(ww)
+  TP <- sum(1 * ww * (pred == 1 & obs == 1))
+  FP <- sum(1 * ww * (pred == 1 & obs == 0))
+  TN <- sum(1 * ww * (pred == 0 & obs == 0))
+  FN <- sum(1 * ww * (pred == 0 & obs == 1))
 
-precision = TP / (TP + FP)
-recall = TP / (TP + FN)
-f1 = 2 * precision * recall / (precision + recall)
-return(list(precision = precision, recall = recall, f1 = f1))
+  precision <- TP / (TP + FP)
+  recall <- TP / (TP + FN)
+  f1 <- 2 * precision * recall / (precision + recall)
+  return(list(precision = precision, recall = recall, f1 = f1))
 }
 #+end_src
 
@@ -215,26 +235,29 @@ return(list(precision = precision, recall = recall, f1 = f1))
 
 - =ssbar=: to create a side by side barplot of a categorical variable for each cluster
 #+begin_src R
-ssbar = function(varn, cc){
-out = list()
-tf = wtd.table(cl, varn, weights = sweight) / gw
-wc = which(apply(tf,2,sum) < cc)
-Other = tf[,wc]
-Other = apply(Other,1,sum)
-if (length(wc) > 0) {
-tf = tf[,-wc]
-out$table = cbind(tf,Other)
-} else out$table = tf
+ssbar <- function(varn, cc) {
+  out <- list()
+  tf <- wtd.table(cl, varn, weights = sweight) / gw
+  wc <- which(apply(tf, 2, sum) < cc)
+  Other <- tf[, wc]
+  Other <- apply(Other, 1, sum)
+  if (length(wc) > 0) {
+    tf <- tf[, -wc]
+    out$table <- cbind(tf, Other)
+  } else {
+    out$table <- tf
+  }
 
-tf = as.data.frame(tf)
-of = data.frame(Var1 = 1:K, Var2 = rep("Other",K), Freq = Other)
-tf = rbind(tf, of)
+  tf <- as.data.frame(tf)
+  of <- data.frame(Var1 = 1:K, Var2 = rep("Other", K), Freq = Other)
+  tf <- rbind(tf, of)
 
-colnames(tf) = c("Cluster", "Category", "Conditional.Frequency")
-pp = ggplot(tf, aes(Cluster, Conditional.Frequency, fill=Category)) +
-  geom_bar(position="dodge",stat="identity")
-out$plot = pp
-return(out)}
+  colnames(tf) <- c("Cluster", "Category", "Conditional.Frequency")
+  pp <- ggplot(tf, aes(Cluster, Conditional.Frequency, fill = Category)) +
+    geom_bar(position = "dodge", stat = "identity")
+  out$plot <- pp
+  return(out)
+}
 #+end_src
 
 #+RESULTS:
@@ -245,44 +268,43 @@ return(out)}
 ## vimp should be p by 1 (matrix, array, or data.frame)
 
 require(ggplot2)
-plot_vimp = function(vimp, cutoff = 1) {
-
-   tryCatch({
-
-      if(dim(vimp)[1] < dim(vimp)[2]) vimp <- t(vimp)
-
-    }, error = function(e)
-      {
-      stop('vimp should be a p by 1 matrix, array, or data.frame.')
-      }
-
-    )
+plot_vimp <- function(vimp, cutoff = 1) {
+  tryCatch(
+    {
+      if (dim(vimp)[1] < dim(vimp)[2]) vimp <- t(vimp)
+    },
+    error = function(e) {
+      stop("vimp should be a p by 1 matrix, array, or data.frame.")
+    }
+  )
 
   ## Get the relative importance
-  mval = max(vimp[,1])
-  vimp[,2] = ( vimp[,1]/mval ) * 100
+  mval <- max(vimp[, 1])
+  vimp[, 2] <- (vimp[, 1] / mval) * 100
 
-  cid = vimp[,2] > cutoff
-  rnimp = vimp[,2][cid]
-  imp.var = row.names(vimp)[cid]
+  cid <- vimp[, 2] > cutoff
+  rnimp <- vimp[, 2][cid]
+  imp.var <- row.names(vimp)[cid]
 
-  imp.dat = data.frame(imp.var, rnimp)
+  imp.dat <- data.frame(imp.var, rnimp)
 
   ## barplot of relative importance
-  gg = ggplot(data=imp.dat, aes(x=reorder(imp.var,rnimp), y=rnimp, fill=TRUE)) +
+  gg <- ggplot(data = imp.dat, aes(x = reorder(imp.var, rnimp), y = rnimp, fill = TRUE)) +
     ylab("Relative importance") +
     xlab("Feature") +
-    geom_bar(stat="identity", size = 3, width = 0.5) + coord_flip() +
-    scale_fill_discrete(guide=FALSE) +
+    geom_bar(stat = "identity", size = 3, width = 0.5) +
+    coord_flip() +
+    scale_fill_discrete(guide = FALSE) +
     theme_bw() +
-    theme(axis.line = element_line(colour = "black"),
-          text = element_text(size=20),
-          axis.text = element_text(size = 15),
-          ##panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          ##panel.border = element_blank()
-          panel.background = element_blank()
-          )
+    theme(
+      axis.line = element_line(colour = "black"),
+      text = element_text(size = 20),
+      axis.text = element_text(size = 15),
+      ## panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      ## panel.border = element_blank()
+      panel.background = element_blank()
+    )
   return(gg)
 }
 #+end_src
@@ -296,7 +318,7 @@ yhat <- function(X.model, newdata) {
   eps <- .Machine$double.eps
   out <- log((pp + eps) / (1 - pp + eps))
   return(out)
-  }
+}
 #+end_src
 
 #+RESULTS:
@@ -309,7 +331,7 @@ yhat <- function(X.model, newdata) {
 This pre-processing includes a new data set for landuse and other infomation. Also, it includes contract type and vendor name as covariates.
 
 #+begin_src R :results none
-library('magrittr')
+library("magrittr")
 library(dplyr)
 dpro <- readr::read_csv(file = "data/FDOT_10mi_Coordinates.csv", col_names = T)
 names(dpro) <- make.names(names(dpro))
@@ -321,54 +343,49 @@ drural <- readr::read_csv(file = "data/FDOT_10mi_Coordinate_03022021_rural.csv",
 names(drural) <- make.names(names(drural))
 
 if (identical(dpro$pjt_id, dgis$Contract_ID)) {
-  dpro$x = dgis$Longitude;
-  dpro$y = dgis$Latitude
+  dpro$x <- dgis$Longitude
+  dpro$y <- dgis$Latitude
 }
 
 if (identical(dpro$pjt_id, drural$Contract_ID)) {
-  temp  <- drural %>% mutate(pjt_id = Contract_ID) %>% select(pjt_id,  u_r, Contract_Type, landuse_code, Landuse_lv_1,  Landuse_lv_2, ROAD_DIREC, DISTRICT, COUNTYDOT, MNG_DIST, Vendor_Name)
-  dpro = plyr::join(dpro, temp)
+  temp <- drural %>%
+    mutate(pjt_id = Contract_ID) %>%
+    select(pjt_id, u_r, Contract_Type, landuse_code, Landuse_lv_1, Landuse_lv_2, ROAD_DIREC, DISTRICT, COUNTYDOT, MNG_DIST, Vendor_Name)
+  dpro <- plyr::join(dpro, temp)
 }
 
 dpro$railcross[is.na(dpro$railcross)] <- 0
 dpro$bridge[is.na(dpro$bridge)] <- 0
 dpro <- na.omit(dpro)
 
-## dd <- dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
-##   mutate(mov_unemp = 0.6*unemp_2019 + 0.3*unemp_2018 + 0.1*unemp_2017 ) %>%
-##   mutate(mov_avg_temp = 0.6*avg_temp_2019 + 0.3*avg_temp_2018 + 0.1*avg_temp_2017 ) %>%
-##   mutate(mov_max_temp = 0.6*max_temp_2019 + 0.3*max_temp_2018 + 0.1*max_temp_2017 ) %>%
-##   mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
-##   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
-
-coef <- exp(c(0,  -1/2,  -1))
+coef <- exp(c(0, -1 / 2, -1))
 coef <- coef / sum(coef)
 
 dd <- dpro %>%
   mutate(unemp = coef[1] * get(paste0("unemp_", start_yr)) +
-coef[2] * get(paste0("unemp_", start_yr - 1)) +
-coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
-    mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
-coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
-coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
+    coef[2] * get(paste0("unemp_", start_yr - 1)) +
+    coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
+  mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
+    coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
+    coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
   mutate(max_temp = coef[1] * get(paste0("max_temp_", start_yr)) +
-coef[2] * get(paste0("max_temp_", start_yr - 1)) +
-coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
+    coef[2] * get(paste0("max_temp_", start_yr - 1)) +
+    coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
   mutate(prec = coef[1] * get(paste0("prec_", start_yr)) +
-coef[2] * get(paste0("prec_", start_yr - 1)) +
-coef[3] * get(paste0("prec_", start_yr - 2))) %>%
+    coef[2] * get(paste0("prec_", start_yr - 1)) +
+    coef[3] * get(paste0("prec_", start_yr - 2))) %>%
   mutate(gdp = coef[1] * get(paste0("gdp_", start_yr)) +
-coef[2] * get(paste0("gdp_", start_yr - 1)) +
-coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
-select(-c(roadway, start_yr,  end_yr))
+    coef[2] * get(paste0("gdp_", start_yr - 1)) +
+    coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
+  select(-c(roadway, start_yr, end_yr))
 
-cnames = names(dd)
+cnames <- names(dd)
 
 no_drop <- !grepl("gdp_.", cnames) &
- !grepl("prec_.", cnames) &
- !grepl("max_temp_.", cnames) &
- !grepl("avg_temp_.", cnames) &
- !grepl("unemp_.", cnames)
+  !grepl("prec_.", cnames) &
+  !grepl("max_temp_.", cnames) &
+  !grepl("avg_temp_.", cnames) &
+  !grepl("unemp_.", cnames)
 #+end_src
 
 #+begin_src R :results none
@@ -380,8 +397,8 @@ df$pjt_type <- as.factor(df$pjt_type)
 df$road_side <- as.factor(df$road_side)
 df$funclass <- as.factor(df$funclass)
 df$access_con <- as.factor(df$access_con)
-df$Contract_Type  <- as.factor(df$Contract_Type)
-df$Vendor_Name  <- as.factor(df$Vendor_Name)
+df$Contract_Type <- as.factor(df$Contract_Type)
+df$Vendor_Name <- as.factor(df$Vendor_Name)
 cat_df <- df %>% select(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name)
 
 df <- df %>%
@@ -393,14 +410,15 @@ df <- df %>%
   mutate(ncat_Vendor_Name = as.numeric(Vendor_Name)) %>%
   select(-c(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name))
 
-dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts))
-dxx = dx %>% select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con, ncat_Contract_Type,  ncat_Vendor_Name)) %>%
+dx <- df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts))
+dxx <- dx %>%
+  select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con, ncat_Contract_Type, ncat_Vendor_Name)) %>%
   cbind(cat_df)
 
-X = model.matrix(~ 0 + ., dxx)
+X <- model.matrix(~ 0 + ., dxx)
 vn <- colnames(X) <- colnames(X) %>% make.names()
 
-cory = 1 * (df$logy > 0)
+cory <- 1 * (df$logy > 0)
 sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
 #+end_src
 
@@ -412,7 +430,7 @@ sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
 This pre-processing aims to predict =urban_rural= varible.
 
 #+begin_src R :results none
-library('magrittr')
+library("magrittr")
 library(dplyr)
 dpro <- readr::read_csv(file = "data/FDOT_10mi_Coordinates.csv", col_names = T)
 names(dpro) <- make.names(names(dpro))
@@ -424,13 +442,15 @@ drural <- readr::read_csv(file = "data/FDOT_10mi_Coordinate_03022021_rural.csv",
 names(drural) <- make.names(names(drural))
 
 if (identical(dpro$pjt_id, dgis$Contract_ID)) {
-  dpro$x = dgis$Longitude;
-  dpro$y = dgis$Latitude
+  dpro$x <- dgis$Longitude
+  dpro$y <- dgis$Latitude
 }
 
 if (identical(dpro$pjt_id, drural$Contract_ID)) {
-  temp  <- drural %>% mutate(pjt_id = Contract_ID) %>% select(pjt_id, u_r, Contract_Type, landuse_code, Landuse_lv_1,  Landuse_lv_2, ROAD_DIREC, DISTRICT, COUNTYDOT, MNG_DIST, Vendor_Name)
-  dpro = plyr::join(dpro, temp)
+  temp <- drural %>%
+    mutate(pjt_id = Contract_ID) %>%
+    select(pjt_id, u_r, Contract_Type, landuse_code, Landuse_lv_1, Landuse_lv_2, ROAD_DIREC, DISTRICT, COUNTYDOT, MNG_DIST, Vendor_Name)
+  dpro <- plyr::join(dpro, temp)
 }
 
 dpro$railcross[is.na(dpro$railcross)] <- 0
@@ -444,34 +464,34 @@ dpro <- na.omit(dpro)
 ##   mutate(mov_prec = 0.6*prec_2019 + 0.3*prec_2018 + 0.1*prec_2017 ) %>%
 ##   mutate(mov_gdp = 0.6*gdp_2018 + 0.3*gdp_2017 + 0.1*gdp_2016 )
 
-coef <- exp(c(0,  -1/2,  -1))
+coef <- exp(c(0, -1 / 2, -1))
 coef <- coef / sum(coef)
 
 dd <- dpro %>%
   mutate(unemp = coef[1] * get(paste0("unemp_", start_yr)) +
-coef[2] * get(paste0("unemp_", start_yr - 1)) +
-coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
-    mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
-coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
-coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
+    coef[2] * get(paste0("unemp_", start_yr - 1)) +
+    coef[3] * get(paste0("unemp_", start_yr - 2))) %>%
+  mutate(avg_temp = coef[1] * get(paste0("avg_temp_", start_yr)) +
+    coef[2] * get(paste0("avg_temp_", start_yr - 1)) +
+    coef[3] * get(paste0("avg_temp_", start_yr - 2))) %>%
   mutate(max_temp = coef[1] * get(paste0("max_temp_", start_yr)) +
-coef[2] * get(paste0("max_temp_", start_yr - 1)) +
-coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
+    coef[2] * get(paste0("max_temp_", start_yr - 1)) +
+    coef[3] * get(paste0("max_temp_", start_yr - 2))) %>%
   mutate(prec = coef[1] * get(paste0("prec_", start_yr)) +
-coef[2] * get(paste0("prec_", start_yr - 1)) +
-coef[3] * get(paste0("prec_", start_yr - 2))) %>%
+    coef[2] * get(paste0("prec_", start_yr - 1)) +
+    coef[3] * get(paste0("prec_", start_yr - 2))) %>%
   mutate(gdp = coef[1] * get(paste0("gdp_", start_yr)) +
-coef[2] * get(paste0("gdp_", start_yr - 1)) +
-coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
-select(-c(roadway, start_yr,  end_yr))
+    coef[2] * get(paste0("gdp_", start_yr - 1)) +
+    coef[3] * get(paste0("gdp_", start_yr - 2))) %>%
+  select(-c(roadway, start_yr, end_yr))
 
-cnames = names(dd)
+cnames <- names(dd)
 
 no_drop <- !grepl("gdp_.", cnames) &
- !grepl("prec_.", cnames) &
- !grepl("max_temp_.", cnames) &
- !grepl("avg_temp_.", cnames) &
- !grepl("unemp_.", cnames)
+  !grepl("prec_.", cnames) &
+  !grepl("max_temp_.", cnames) &
+  !grepl("avg_temp_.", cnames) &
+  !grepl("unemp_.", cnames)
 #+end_src
 
 #+begin_src R :results none
@@ -483,8 +503,8 @@ df$pjt_type <- as.factor(df$pjt_type)
 df$road_side <- as.factor(df$road_side)
 df$funclass <- as.factor(df$funclass)
 df$access_con <- as.factor(df$access_con)
-df$Contract_Type  <- as.factor(df$Contract_Type)
-df$Vendor_Name  <- as.factor(df$Vendor_Name)
+df$Contract_Type <- as.factor(df$Contract_Type)
+df$Vendor_Name <- as.factor(df$Vendor_Name)
 cat_df <- df %>% select(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name)
 
 df <- df %>%
@@ -496,16 +516,17 @@ df <- df %>%
   mutate(ncat_Vendor_Name = as.numeric(Vendor_Name)) %>%
   select(-c(pjt_type, road_side, funclass, access_con, Contract_Type, Vendor_Name))
 
-dx = df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts, u_r))
-dxx = dx %>% select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con, ncat_Contract_Type, ncat_Vendor_Name)) %>%
+dx <- df %>% select(-c(pjt_id, x, y, cor, sor, modified_days, actual_days, modified_amounts, logy, actual_amounts, u_r))
+dxx <- dx %>%
+  select(-c(ncat_pjt_type, ncat_road_side, ncat_funclass, ncat_access_con, ncat_Contract_Type, ncat_Vendor_Name)) %>%
   cbind(cat_df)
 
-X = model.matrix(~ 0 + ., dxx)
+X <- model.matrix(~ 0 + ., dxx)
 vn <- colnames(X) <- colnames(X) %>% make.names()
 
-cory = 1 * (df$logy > 0)
+cory <- 1 * (df$logy > 0)
 sory <- log(df$modified_days - df$orig_days + 1) - log(df$orig_days)
-y = df$u_r
+y <- df$u_r
 #+end_src
 
 * Tune&Train base models
@@ -515,16 +536,16 @@ base models, predctions collected from CV should be passed to the super learner.
 The CV-folds should be consistent for all models.
 
 #+begin_src R :tangle cor_train_base_prepro.R
-xtrain = model.matrix(~ 0 + ., data = dx)
-ytrain = 1 * (y > 0)
-weights = rep(1,length(y)) / length(y)
+xtrain <- model.matrix(~ 0 + ., data = dx)
+ytrain <- 1 * (y > 0)
+weights <- rep(1, length(y)) / length(y)
 
 set.seed(1)
-nfold = 4
-shu = sample(1:length(ytrain))
-xtrain = xtrain[shu,]
-ytrain = ytrain[shu]
-data_folds = caret::createFolds(ytrain, k=nfold)
+nfold <- 4
+shu <- sample(1:length(ytrain))
+xtrain <- xtrain[shu, ]
+ytrain <- ytrain[shu]
+data_folds <- caret::createFolds(ytrain, k = nfold)
 #+end_src
 
 #+RESULTS:
@@ -536,19 +557,19 @@ data_folds = caret::createFolds(ytrain, k=nfold)
 An R package ranger is used to train the random forest. An R pacakge caret is a
 wrapper of many R packages, which we will use for training. The below is caret's model training parameters.
 #+begin_src R :tangle cor_train_ranger.R
-my_tr = trainControl(
-method = 'cv',
-number = nfold,
-classProbs = TRUE,
-savePredictions = "all",
-## summaryFunction = twoClassSummary, # AUC
-## ,summaryFunction = prSummary # PR-AUC
-## ,summaryFunction = fSummary # F1
-summaryFunction = mnLogLoss,
-search = "random",
-verboseIter = TRUE,
-allowParallel = TRUE,
-indexOut = data_folds
+my_tr <- trainControl(
+  method = "cv",
+  number = nfold,
+  classProbs = TRUE,
+  savePredictions = "all",
+  ## summaryFunction = twoClassSummary, # AUC
+  ## ,summaryFunction = prSummary # PR-AUC
+  ## ,summaryFunction = fSummary # F1
+  summaryFunction = mnLogLoss,
+  search = "random",
+  verboseIter = TRUE,
+  allowParallel = TRUE,
+  indexOut = data_folds
 )
 #+end_src
 
@@ -558,13 +579,13 @@ Unlike CatBoost or XGBoost, ranger doesn't have an internal handling mecahnism
 of missing values.
 #+begin_src R :tangle cor_train_ranger.R
 ## imputation needs for ranger
-ixtrain = xtrain
-ixtrain[is.na(ixtrain)] = -99
+ixtrain <- xtrain
+ixtrain[is.na(ixtrain)] <- -99
 
 ## above50k needs to be "positive"
 ## caret considers 1st class as "positive" class
-fytrain = factor(ytrain)
-levels(fytrain) = c("no_cor", "cor")
+fytrain <- factor(ytrain)
+levels(fytrain) <- c("no_cor", "cor")
 #+end_src
 
 #+RESULTS:
@@ -583,50 +604,36 @@ ranger_grid <- expand.grid(
 The below is for CV and saving a final model.
 #+begin_src R :tangle cor_train_ranger.R
 set.seed(1)
-ranger_tune <- train(x = ixtrain, y = fytrain,
-                     method = "ranger",
-                     trControl = my_tr,
-                     tuneGrid = ranger_grid,
-                     weights = weights,
-                     preProc = NULL,
-                     importance = 'impurity',
-                     num.trees = 500
-                     )
+ranger_tune <- train(
+  x = ixtrain, y = fytrain,
+  method = "ranger",
+  trControl = my_tr,
+  tuneGrid = ranger_grid,
+  weights = weights,
+  preProc = NULL,
+  importance = "impurity",
+  num.trees = 500
+)
 
-temp = ranger_tune$pred$co
-ranger_id = ranger_tune$pred$rowIndex
-ranger_prob = temp[order(ranger_id)]
-ranger_final = ranger_tune$finalModel
-ranger_imp = varImp(ranger_tune)$importance
+temp <- ranger_tune$pred$co
+ranger_id <- ranger_tune$pred$rowIndex
+ranger_prob <- temp[order(ranger_id)]
+ranger_final <- ranger_tune$finalModel
+ranger_imp <- varImp(ranger_tune)$importance
 #+end_src
-
-#+RESULTS:
-#+begin_example
-Fold1: mtry=20, splitrule=gini, min.node.size=10
-- Fold1: mtry=20, splitrule=gini, min.node.size=10
-Fold2: mtry=20, splitrule=gini, min.node.size=10
-- Fold2: mtry=20, splitrule=gini, min.node.size=10
-Fold3: mtry=20, splitrule=gini, min.node.size=10
-- Fold3: mtry=20, splitrule=gini, min.node.size=10
-Fold4: mtry=20, splitrule=gini, min.node.size=10
-- Fold4: mtry=20, splitrule=gini, min.node.size=10
-Aggregating results
-Fitting final model on full training set
-Warning message:
-In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
-  The metric "Accuracy" was not in the result set. logLoss will be used instead.
-#+end_example
 
 =ranger= gives the confusion matrix if =probability= is set to =FALSE=.
 
 #+name: ranger_full_training
 #+begin_src R :tangle cor_train_ranger_final.R
-ranger_ff = ranger(x = ixtrain, y = fytrain,
-                      num.trees = 500,mtry = 20,importance = "impurity",
-                      write.forest = TRUE,
-                      probability = TRUE,
-                      min.node.size = 10,
-                      class.weights = NULL, splitrule = "gini", classification = TRUE)
+ranger_ff <- ranger(
+  x = ixtrain, y = fytrain,
+  num.trees = 500, mtry = 20, importance = "impurity",
+  write.forest = TRUE,
+  probability = TRUE,
+  min.node.size = 10,
+  class.weights = NULL, splitrule = "gini", classification = TRUE
+)
 #+end_src
 
 #+RESULTS: ranger_full_training
@@ -647,7 +654,7 @@ caret_wlogloss(ranger_tune$pred)
 : [1] 0.316729
 
 #+begin_src R :results replace :tangle no
-mean(ranger_tune$resample[,1]) # incorrect. not using weight
+mean(ranger_tune$resample[, 1]) # incorrect. not using weight
 #+end_src
 
 #+RESULTS:
@@ -655,300 +662,15 @@ mean(ranger_tune$resample[,1]) # incorrect. not using weight
 
 *** test data
 #+begin_src R :tangle test_prediction.R
-if (TEST_SET){
-ranger_final = readRDS("ranger_final.rds")
-ixtest = xtest
-ixtest[is.na(ixtest)] = -99
-ranger_test_prob = predict(ranger_final, ixtest)$predictions[,1]
+if (TEST_SET) {
+  ranger_final <- readRDS("ranger_final.rds")
+  ixtest <- xtest
+  ixtest[is.na(ixtest)] <- -99
+  ranger_test_prob <- predict(ranger_final, ixtest)$predictions[, 1]
 }
 #+end_src
 
-#+RESULTS:
-
 To create a meat-feature of the super learner for the test data.
-
-* Summary
-This section is to generate summary statistics for the super learner. First, we present the variable importance.
-
-#+begin_src R
-temp = xgb_imp
-vimp = as.data.frame(temp[,c(1,2)])
-colnames(vimp)[2] = "xgb"
-#+end_src
-
-#+begin_src R :results value
-print(vimp)
-#+end_src
-
-#+RESULTS:
-: org_babel_R_eoe
-
-#+begin_src R
-ctemp = data.frame(Feature = colnames(xtrain), cat = cat_imp)
-rtemp = data.frame(Feature = row.names(ranger_imp), ranger = ranger_imp)
-colnames(rtemp)[2] = "ranger"
-vimp = inner_join(vimp, ctemp, by = "Feature")
-vimp = inner_join(vimp, rtemp, by = "Feature")
-
-row.names(vimp) = vimp[,1]
-vimp = vimp[,-1]
-ss = apply(vimp, 2, sum)
-vimp = t(t(vimp) / ss) * 100
-
-stemp = vimp %*% c(super_imp$Overall)
-
-stemp = stemp / sum(stemp) * 100
-vimp = cbind(vimp,stemp)
-colnames(vimp)[4] = "super"
-vimp = vimp[order(vimp[,4],decreasing = TRUE),]
-#+end_src
-
-#+RESULTS:
-
-#+begin_src R :results output
-rtemp = data.frame(ranger = ranger_imp[,1])
-row.names(rtemp) = row.names(ranger_imp)
-rtemp %>% arrange(-ranger)
-
-#+end_src
-
-#+RESULTS:
-#+begin_example
-                             ranger
-orig_amounts           100.00000000
-orig_days               55.28305498
-comm_out_state          23.81613322
-aadt                    17.08559024
-ind_agri                15.79437940
-pop_16yrover            14.00326701
-comm_etc                12.47300794
-comm_pubtransport       12.26704644
-inde_ed_meds            11.69747449
-mov_gdp                 11.61620270
-worker_med_age          11.52462634
-aadt_truck              11.09257977
-ind_other               10.26340801
-pop_tot                 10.09549874
-med_ind_income           9.89115641
-ncat_pjy_type            9.73022356
-no_lane                  9.54970994
-ind_transport            9.14557467
-comm_bike                9.06324908
-ind_manuf                8.91496511
-ind_public               8.80781755
-comm_workhome            8.75014271
-mean_travel_time         8.73241998
-med_age                  8.40942196
-work_hours_mean          8.09611812
-hhd_avg_size             7.91708015
-comm_workers_per_car     7.84304275
-ind_fin                  7.80778708
-poverty_below            7.67862348
-ind_whole                7.66380253
-mov_unemp                7.60964676
-poverty_above            7.49980825
-comm_car_carpool         7.44009042
-comm_walk                7.28567383
-ind_const                7.27869478
-ind_art                  6.97685239
-hhd_mean_income          6.82505798
-pop_16yrover_worker      6.62510531
-Ind_tot                  6.47569054
-mean_per_capita_income   6.31876309
-ind_retail               6.30799878
-ind_pro                  6.14584921
-hhd_med_income           6.09128794
-comm_in_county           5.95263106
-comm_car_tot             5.88498090
-mov_prec                 5.75859930
-mov_max_temp             5.69409065
-hhd_no                   5.51283191
-comm_car_alone           5.48561755
-comm_out_county          5.44256956
-ind_info                 5.37217002
-mov_avg_temp             4.83491927
-pav_cond                 4.34399075
-speedlimit               3.79827636
-access_cla               3.05447010
-ncat_funclass            2.83228411
-ncat_access_con          0.63886798
-bridge                   0.46895477
-ncat_road_sie            0.05283404
-railcross                0.00000000
-#+end_example
-
-#+begin_src R
-vimp
-fwrite(vimp, "vimp.csv")
-#+end_src
-
-#+RESULTS:
-#+begin_example
-                             Xgboost     cat     ranger      super
-orig_amounts           27.4569897 30.0696230 18.3006031 20.1294958
-orig_days               1.8507219  9.1362558 10.1171325  9.4300615
-comm_out_state          7.4948217  5.0429032  4.3584960  4.6503887
-aadt                    1.6722104  4.7692312  3.1267661  3.1873066
-pop_16yrover            4.7366100  2.2263515  2.5626823  2.6839644
-ind_agri                1.5505754  0.9589156  2.8904667  2.6019110
-comm_etc                2.8190786  3.0704058  2.2826357  2.3996070
-inde_ed_meds            3.5771710  1.7498496  2.1407084  2.2039919
-comm_pubtransport       0.2950515  1.9154870  2.2449435  2.0730714
-worker_med_age          1.6881325  1.8827348  2.1090761  2.0564563
-mov_gdp                 0.3918593  2.5745667  2.1258351  2.0471375
-med_ind_income          2.9641608  1.8319661  1.8101413  1.8945522
-no_lane                 4.6481355  1.1417909  1.7476545  1.8937639
-pop_tot                 1.5192778  2.5153978  1.8475372  1.8909080
-aadt_truck              0.4793345  1.6783236  2.0300090  1.8843609
-work_hours_mean         3.5925005  3.6569794  1.4816384  1.8494991
-comm_bike               0.4182232  3.5661551  1.6586292  1.7609250
-comm_workers_per_car    2.4811066  3.7979335  1.4353241  1.7460127
-ind_transport           2.1467643  1.6619982  1.6736953  1.7062344
-ind_manuf               1.3354985  2.2235216  1.6314924  1.6695820
-ncat_pjy_type           1.5273111  0.0000000  1.7806896  1.5846335
-mean_travel_time        1.4186935  0.0000000  1.5980855  1.4255548
-med_age                 2.0451135  0.0000000  1.5389749  1.4212003
-ind_public              0.8291065  0.0000000  1.6118837  1.3949797
-comm_workhome           0.7223356  0.0000000  1.6013289  1.3786241
-ind_whole               0.7668889  1.1707447  1.4025221  1.3340613
-mov_unemp               2.4454560  0.0000000  1.3926112  1.3284228
-hhd_avg_size            0.4582042  0.8105652  1.4488734  1.3144769
-ind_fin                 0.4194999  0.4705213  1.4288721  1.2611508
-poverty_below           0.2118142  0.6284849  1.4052344  1.2425520
-comm_car_carpool        0.7695091  0.0000000  1.3615814  1.1832868
-comm_walk               0.8076995  0.0000000  1.3333222  1.1625873
-comm_out_county         1.3641909  2.0782184  0.9960231  1.1304354
-hhd_no                  3.6311435  0.0000000  1.0088815  1.0948799
-ind_art                 0.3610848  0.0000000  1.2768061  1.0839243
-pop_16yrover_worker     0.9846100  0.0000000  1.2124342  1.0750031
-hhd_med_income          0.6836555  1.0107510  1.1147424  1.0736303
-mean_per_capita_income  1.4218588  0.0000000  1.1563718  1.0596954
-speedlimit              0.9048742  4.1260360  0.6951075  1.0530176
-pav_cond                1.2335819  2.9023589  0.7949765  1.0368878
-Ind_tot                 0.7602129  0.0000000  1.1850904  1.0363516
-mov_prec                0.4136822  1.3319293  1.0538584  1.0360394
-ind_retail              0.1813928  0.0000000  1.1544018  0.9696738
-comm_car_alone          1.5872516  0.0000000  1.0039011  0.9451154
-ind_info                0.7533413  0.0000000  0.9831395  0.8684885
-mov_avg_temp            0.1792639  0.0000000  0.8848194  0.7460967
-Error in fwrite(vimp, "vimp.csv") : could not find function "fwrite"
-#+end_example
-
-** weighted logloss
-- The super learner greatly improve weighted logloss of base ones.
-#+begin_src R
-wl = c(mean(cv_logloss),
-xgb$logloss,
-caret_wlogloss(ranger_tune$pred),
-caret_wlogloss(super_tune$pred)
-)
-wl
-mname = c("L0-CatBoost", "L0-XGBoost", "L0-RF", "L1-ANN")
-dw = data.frame(Learner = mname, Logloss = round(wl,4))
-#+end_src
-
-#+RESULTS:
-: [1] 0.6526904 0.6440919 0.3210542 0.6879376
-
-#+begin_src R :results graphics :file logloss.png
-# Outside bars
-gg =
-ggplot(data=dw, aes(x=Learner, y=Logloss)) +
-  geom_bar(stat="identity", fill="steelblue")+
-  geom_text(aes(label=Logloss), vjust=-0.3, size=3.5)+
-  theme_minimal()
-#+end_src
-
-#+RESULTS:
-
-** Similarity among three base learners
-
-#+begin_src R :results graphics :file threeprob.png
-library(GGally)
-bdf = data.frame(xgb = xgb$prob, catb = cat_prob, ranger = ranger_prob)
-ggpairs(bdf, mapping = aes(color = fytrain, alpha=0.4),
-    lower = list(
-    continuous = wrap("points", alpha = 0.3,    size=0.1),
-    ## continuous = "smooth",
-    combo = "facetdensity")) +
-    theme_bw() +
-    theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        ## panel.border = element_blank(),
-        panel.background = element_blank())
-#+end_src
-
-#+RESULTS:
-** features with high variable importance
-#+begin_src R :results graphics :file eda.png
-library(GGally)
-eda = data.frame(nX5 = xtrain$nX5,ICA2 = xtrain$ICA2, nX4 = xtrain$nX4, X1 = xtrain$X1, nX10 = xtrain$nX10, X13 = xtrain$X13, X62 = xtrain$X62, cPC1 = xtrain$cPC1)
-ggpairs(eda, mapping = aes(color = fytrain, alpha=0.4),
-    lower = list(
-    continuous = wrap("points", alpha = 0.3,    size=0.1),
-    ## continuous = "smooth",
-    combo = "facetdensity")) +
-    theme_bw() +
-    theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        ## panel.border = element_blank(),
-        panel.background = element_blank())
-#+end_src
-
-#+RESULTS:
-
-#+begin_src R :results graphics :file eda_ranger.png
-eda_ranger = xtrain[,colnames(xtrain) %in% row.names(ranger_imp)[order(ranger_imp, decreasing=T)][1:10]] %>% as.data.frame()
-ggpairs(eda_ranger, mapping = aes(color = fytrain, alpha=0.4),
-    lower = list(
-    continuous = wrap("points", alpha = 0.3,    size=0.1),
-    ## continuous = "smooth",
-    combo = "facetdensity")) +
-    theme_bw() +
-    theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        ## panel.border = element_blank(),
-        panel.background = element_blank())
-#+end_src
-
-#+RESULTS:
-
-** some figure
-#+begin_src R
-attach(dx)
-#+end_src
-
-#+RESULTS:
-
-#+begin_src R
-## super_final = readRDS("ranger_final.rds")
-super_prob = 1 - ranger_final$predictions[,2]
-super_pred = c(1 * (super_prob > 0.4122))
-plot_prob(orig_amounts, orig_days, 0.2, "amounts", "days", prob = super_prob)
-#+end_src
-
-#+RESULTS:
-: Error in UseMethod("depth") :
-:   no applicable method for 'depth' applied to an object of class "NULL"
-
-#+begin_src R
-super_final = readRDS("super_final.rds")
-super_prob = 1 - super_final$fitted.values
-super_pred = c(1 * (super_prob > 0.4122))
-plot_prob(comm_out_state, aadt, 0.5, "comm", "aadt", prob = super_prob)
-#+end_src
-
-#+RESULTS:
-
 * [2021-03-03 Wed] Urbanization :noexport:
 :PROPERTIES:
 :header-args:R: :exports results :noweb yes :eval never-export
@@ -961,22 +683,22 @@ In the random forest (non-linear) model, =ind_agri=, =gdp=, =aadt= are covariate
 
 ** random forest (trained using =ranger=)
 #+begin_src R :results none :async yes
-source('prerequisite.R')
-source('custom_function.R')
-source('preprocess_rural.R')
-y = df$u_r
+source("prerequisite.R")
+source("custom_function.R")
+source("preprocess_rural.R")
+y <- df$u_r
 #+end_src
 
 The OOB accuracy is 88.5% at the optimal threshold (0.48). The variable importance is listed below:
 #+begin_src R :results drawer
-ranger_final = readRDS("cor_ranger_pred_rural.rds")
-ranger_imp = ranger_final$variable.importance
-rtemp = data.frame(ranger_imp = ranger_imp)
-row.names(rtemp) = names(ranger_imp)
+ranger_final <- readRDS("cor_ranger_pred_rural.rds")
+ranger_imp <- ranger_final$variable.importance
+rtemp <- data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) <- names(ranger_imp)
 
-rrtemp = rtemp %>% arrange(-ranger_imp)
+rrtemp <- rtemp %>% arrange(-ranger_imp)
 readr::write_csv(data.frame(vname = row.names(rrtemp), importance = unlist(rrtemp)), "../urban_imp.csv")
-rrtemp=rrtemp %>% slice(1:20)
+rrtemp <- rrtemp %>% slice(1:20)
 rrtemp %>% knitr::kable()
 #+end_src
 
@@ -1065,10 +787,11 @@ threshold = 0.5, we expect the weighted F1 = 0.934.
 #+begin_src R
 set.seed(1)
 resample_stats <- thresholder(ranger_tune,
-                              threshold = seq(0.2, 0.8, by = 0.01),
-                              final = TRUE)
+  threshold = seq(0.2, 0.8, by = 0.01),
+  final = TRUE
+)
 
-ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+ot <- resample_stats$prob_threshold[which.max(resample_stats$F1)]
 max(resample_stats$F1)
 ot
 #+end_src
@@ -1079,13 +802,18 @@ ot
 
 ** random forest: main effects
 #+begin_src R
-mip = rtemp %>% arrange(desc(ranger_imp)) %>% slice(1:8)
+mip <- rtemp %>%
+  arrange(desc(ranger_imp)) %>%
+  slice(1:8)
 
-mdx = which(colnames(dx) %in% row.names(mip))
-right = data.frame(name = row.names(mip), vimp = mip[,1])
-left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+mdx <- which(colnames(dx) %in% row.names(mip))
+right <- data.frame(name = row.names(mip), vimp = mip[, 1])
+left <- data.frame(name = colnames(dx)[mdx], mdx = mdx)
 
-mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+mdx <- merge(right, left) %>%
+  arrange(desc(vimp)) %>%
+  select(mdx) %>%
+  unlist()
 #+end_src
 
 #+RESULTS:
@@ -1094,19 +822,19 @@ Since the prediction model is not easily interpretable, we visualize main effect
 The below is a matrix of ALE plots: covariates in x-axis, logit of prediction probabilities in y-axis; the larger, the more likely to be urban.
 #+begin_src R :results code graphics file :file cor_aleplot.png :width 700 :height 700
 ## Define the predictive function
-dfx = as.data.frame(dx)
+dfx <- as.data.frame(dx)
 
 ## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
-par(mfrow = c(3,3))
-ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
-ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
-ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
-ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
-ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
-ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
-ALE.7=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30, NA.plot = TRUE)
-ALE.8=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30, NA.plot = TRUE)
-ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+par(mfrow = c(3, 3))
+ALE.1 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[1], K = 30, NA.plot = TRUE)
+ALE.2 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[2], K = 30, NA.plot = TRUE)
+ALE.3 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[3], K = 30, NA.plot = TRUE)
+ALE.4 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[4], K = 30, NA.plot = TRUE)
+ALE.5 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[5], K = 30, NA.plot = TRUE)
+ALE.6 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[6], K = 30, NA.plot = TRUE)
+ALE.7 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[7], K = 30, NA.plot = TRUE)
+ALE.8 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[8], K = 30, NA.plot = TRUE)
+ALE.12 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20, NA.plot = TRUE)
 ## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
 ## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
 #+end_src
@@ -1117,7 +845,7 @@ ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.pl
 ** mapping high COR events                                         :noexport:
 
 #+begin_src R
-xeq = ALE.1$x.values[ALE.1$f.values > 0]
+xeq <- ALE.1$x.values[ALE.1$f.values > 0]
 minx <- min(xeq)
 maxx <- max(xeq)
 df$ind_agri_hl <- 1 * (df$ind_agri >= minx)
@@ -1127,20 +855,20 @@ df$ind_agri_hl <- 1 * (df$ind_agri >= minx)
 
 =aadt= might be associated with the location as well. high =aadt= nearby big cities / highway hub?
 #+begin_src R
-xeq = ALE.7$x.values[ALE.7$f.values > 0]
+xeq <- ALE.7$x.values[ALE.7$f.values > 0]
 minx <- min(xeq)
 maxx <- max(xeq)
-df$aadt_hl = with(df, 1 * (aadt >= minx))
+df$aadt_hl <- with(df, 1 * (aadt >= minx))
 #+end_src
 
 #+RESULTS:
 
 =gdp= would also be highly associated with city / county level factor
 #+begin_src R
-xeq = ALE.8$x.values[ALE.8$f.values > 0]
+xeq <- ALE.8$x.values[ALE.8$f.values > 0]
 minx <- min(xeq)
 maxx <- max(xeq)
-df$gdp_hl = with(df, 1 * (gdp >= minx))
+df$gdp_hl <- with(df, 1 * (gdp >= minx))
 #+end_src
 
 #+RESULTS:
@@ -1154,21 +882,21 @@ df$gdp_hl = with(df, 1 * (gdp >= minx))
   library(maps)
   library(mapdata)
   library(ggplot2)
-  states = map_data("state")
-  counties = map_data("county")
+  states <- map_data("state")
+  counties <- map_data("county")
 #+end_src
 
 #+RESULTS:
 
 #+begin_src R :results none
-pred = 1 * (pred > 0.5)
-df$mis = 1 * (pred != y)
+pred <- 1 * (pred > 0.5)
+df$mis <- 1 * (pred != y)
 df %>% filter(y > min(y))
 
-fl_df = subset(states, region == "florida")
-fl_county = subset(counties, region == "florida")
+fl_df <- subset(states, region == "florida")
+fl_county <- subset(counties, region == "florida")
 
-ditch_the_axes = theme(
+ditch_the_axes <- theme(
   axis.text = element_blank(),
   axis.line = element_blank(),
   axis.ticks = element_blank(),
@@ -1177,12 +905,13 @@ ditch_the_axes = theme(
   axis.title = element_blank()
 )
 
-gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
-  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+gg_base <- ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) +
+  geom_polygon(color = "black", fill = "gray")
 #+end_src
 
 #+begin_src R
-gg_base = gg_base +
+gg_base <- gg_base +
   geom_polygon(data = fl_county, fill = NA, color = "white") +
   geom_polygon(color = "black", fill = NA)
 #+end_src
@@ -1197,11 +926,10 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 # To use for fills, add
-  ## scale_fill_manual(values=cbPalette)
+## scale_fill_manual(values=cbPalette)
 
 # To use for line and point colors, add
-  ## scale_colour_manual(values=cbPalette)
-
+## scale_colour_manual(values=cbPalette)
 #+end_src
 
 #+RESULTS:
@@ -1209,40 +937,40 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 
 #+begin_src R :results none
 load("col.pal.RData")
-temp = col.pal(10)
-col_pal = c(temp[1:2])
+temp <- col.pal(10)
+col_pal <- c(temp[1:2])
 
-ov_map = function(df, vname) {
-gg = gg_base +
-  geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var) , size = 2, alpha = 0.5)+
-  scale_colour_manual(values=cbPalette) +
-  labs(color = paste0(vname,"\n")) +
-  ## scale_fill_gradient2() +
-  theme_bw() +
-  theme(text = element_text(size = 20)) +
-  ## theme(legend.text = element_text(size = 10)) +
-  ditch_the_axes
-print(gg)
-return(gg)
+ov_map <- function(df, vname) {
+  gg <- gg_base +
+    geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var), size = 2, alpha = 0.5) +
+    scale_colour_manual(values = cbPalette) +
+    labs(color = paste0(vname, "\n")) +
+    ## scale_fill_gradient2() +
+    theme_bw() +
+    theme(text = element_text(size = 20)) +
+    ## theme(legend.text = element_text(size = 10)) +
+    ditch_the_axes
+  print(gg)
+  return(gg)
 }
 #+end_src
 
 #+begin_src R :results none
-ov_cont_map = function(df, vname) {
-gg = gg_base +
-  geom_point(data = df, mapping = aes(x = x, y = y, group = NULL, colour = var) , size = 2, alpha = 0.5)+
-  scale_colour_gradientn(colours = rev(rainbow(3))) +
-  ## scale_fill_manual(colours = cbPalette) +
-  ## scale_colour_gradient2() +
-  labs(color = paste0(vname,"\n")) +
-  ## scale_colour_gradient2()+
-  theme_bw() +
-  theme(text = element_text(size = 20)) +
-  ## theme(legend.text = element_text(size = 10)) +
-  ## theme(legend.position="top") +
-  ditch_the_axes
-print(gg)
-return(gg)
+ov_cont_map <- function(df, vname) {
+  gg <- gg_base +
+    geom_point(data = df, mapping = aes(x = x, y = y, group = NULL, colour = var), size = 2, alpha = 0.5) +
+    scale_colour_gradientn(colours = rev(rainbow(3))) +
+    ## scale_fill_manual(colours = cbPalette) +
+    ## scale_colour_gradient2() +
+    labs(color = paste0(vname, "\n")) +
+    ## scale_colour_gradient2()+
+    theme_bw() +
+    theme(text = element_text(size = 20)) +
+    ## theme(legend.text = element_text(size = 10)) +
+    ## theme(legend.position="top") +
+    ditch_the_axes
+  print(gg)
+  return(gg)
 }
 #+end_src
 
@@ -1251,8 +979,10 @@ return(gg)
 *** urban sites
 
 #+begin_src R :results graphics file :file urb_map.png
-var = factor(y, label = c("rural","urban"))
-df %>% mutate(var = var) %>% ov_map("classification")
+var <- factor(y, label = c("rural", "urban"))
+df %>%
+  mutate(var = var) %>%
+  ov_map("classification")
 #+end_src
 
 #+RESULTS:
@@ -1262,7 +992,9 @@ df %>% mutate(var = var) %>% ov_map("classification")
 *** main effect: =ind_agri=
 
 #+begin_src R :results graphics file :file ind_agri_map.png
-df %>% mutate(var = (281.5 - ind_agri)) %>% ov_cont_map("281.5 - ind_agri")
+df %>%
+  mutate(var = (281.5 - ind_agri)) %>%
+  ov_cont_map("281.5 - ind_agri")
 #+end_src
 
 #+RESULTS:
@@ -1270,8 +1002,9 @@ df %>% mutate(var = (281.5 - ind_agri)) %>% ov_cont_map("281.5 - ind_agri")
 
 *** main effect: =gdp=
 #+begin_src R :results graphics file :file gdp_map.png
-df %>% mutate(var = log(gdp)) %>% ov_cont_map("log(gdp)")
-
+df %>%
+  mutate(var = log(gdp)) %>%
+  ov_cont_map("log(gdp)")
 #+end_src
 
 #+RESULTS:
@@ -1279,7 +1012,9 @@ df %>% mutate(var = log(gdp)) %>% ov_cont_map("log(gdp)")
 
 *** main effect: =aadt=
 #+begin_src R :results graphics file :file aadt_map.png
-df %>% mutate(var = log(aadt)) %>% ov_cont_map("log(aadt)")
+df %>%
+  mutate(var = log(aadt)) %>%
+  ov_cont_map("log(aadt)")
 #+end_src
 
 #+RESULTS:
@@ -1289,7 +1024,7 @@ df %>% mutate(var = log(aadt)) %>% ov_cont_map("log(aadt)")
 In this section, the LASSO is used to select covariates. Then, the logistic regression to predict ~u_r~ is performed on the selected covariates. This is a generalized linear model. Roughly speaking, the log odds of =urban= is increased by "coefficient" when we increase the covariate by one unit. Please find covariates highly related to ~u_r~ and their "coefficient" values in the table below. This simple model shows decent accurary (86%) at 0.5 thereshold.
 
 #+begin_src R :results drawer
-m2 = glm(y ~ aadt+ speedlimit+ comm_in_county+ ind_agri+ ind_info+ ind_fin+ ind_public+ funclass4, data = as.data.frame(X), family = "binomial")
+m2 <- glm(y ~ aadt + speedlimit + comm_in_county + ind_agri + ind_info + ind_fin + ind_public + funclass4, data = as.data.frame(X), family = "binomial")
 coef(m2) %>% knitr::kable()
 #+end_src
 
@@ -1306,9 +1041,9 @@ coef(m2) %>% knitr::kable()
 | =funclass4=      | -1.3995172 |
 
 #+begin_src R
-pred = predict(m2,newx=as.data.frame(X))
-tab = table(pred>0,y)
-##tab
+pred <- predict(m2, newx = as.data.frame(X))
+tab <- table(pred > 0, y)
+## tab
 print("Accuracy:")
 sum(diag(tab)) / sum(tab)
 #+end_src
@@ -1328,40 +1063,42 @@ COR = \frac{\text{original amounts} + \text{modified amounts}}{\text{original am
 We use the random forest to train the prediction model. The =R= package =ranger= is used for the training.
 Moving average (three years backward from a project start year) covariates are generated and substituted with time series covariates.
 #+begin_src R :results none :tangle cor-code-preproc.r
-source('prerequisite.R')
-source('custom_function.R')
-source('preprocess_rural.R')
+source("prerequisite.R")
+source("custom_function.R")
+source("preprocess_rural.R")
 ## to create urbanization index
-y = df$u_r
+y <- df$u_r
 ## y = 1 * (df$logy > 0)
 #+end_src
 
 The urban classification based on =landuse_lv_2= is not exclusive, so it cannot be used for the COR prediction model.
 #+begin_src R :eval no :tangle cor-code-preproc.r
-tt = readr::read_csv("data/urban_index.csv")
-udex = numeric(nrow(df))
+tt <- readr::read_csv("data/urban_index.csv")
+udex <- numeric(nrow(df))
 for (dd in 1:nrow(df)) {
   for (cc in 1:6) {
-    if (df$Landuse_lv_2[dd] %in% unlist(tt[,cc]))
-      udex[dd] = cc}
+    if (df$Landuse_lv_2[dd] %in% unlist(tt[, cc])) {
+      udex[dd] <- cc
+    }
+  }
 }
 #+end_src
 
 Instead we the prediction probability of urbanization obtained from our earlier prediction model. The urbanization index training is done using RF with full training set. See [[id:1ca7e343-cebd-4315-82c7-336e1960bd5b][ranger]]
 #+begin_src R :tangle cor-code-preproc.r
-ranger_final = readRDS("cor_ranger_pred_rural.rds")
-urban_ranger = ranger_final$predictions[, 2]
-y = 1 * (df$logy > 0)
-dx[,'ncat_Vendor_Name'] = NULL
-dx = cbind(dx, urban_ranger)
+ranger_final <- readRDS("cor_ranger_pred_rural.rds")
+urban_ranger <- ranger_final$predictions[, 2]
+y <- 1 * (df$logy > 0)
+dx[, "ncat_Vendor_Name"] <- NULL
+dx <- cbind(dx, urban_ranger)
 #+end_src
 
 #+RESULTS:
 
 - use vnames in col 2 and description in col 5-6
 #+begin_src R :results silent
-vdesc = readr::read_csv("data/vardesc.csv")
-vlist = readr::read_csv("data/varlist.csv")
+vdesc <- readr::read_csv("data/vardesc.csv")
+vlist <- readr::read_csv("data/varlist.csv")
 #+end_src
 
 #+begin_src R :results silent :tangle cor-code-preproc.r
@@ -1384,10 +1121,12 @@ Now, we append the prediction probability into the original data set $\mathbf{x}
 We trained the COR prediction model using the appended data set (with feature engineering).
 The OOB accuracy is 77.9% at the optimal threshold (0.5-ish?). The variable importance is listed below:
 #+begin_src R :results drawer
-ranger_imp = ranger_final$variable.importance
-rtemp = data.frame(ranger_imp = ranger_imp)
-row.names(rtemp) = names(ranger_imp)
-rrtemp = rtemp %>% arrange(-ranger_imp) %>% slice(1:10)
+ranger_imp <- ranger_final$variable.importance
+rtemp <- data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) <- names(ranger_imp)
+rrtemp <- rtemp %>%
+  arrange(-ranger_imp) %>%
+  slice(1:10)
 rrtemp %>% knitr::kable()
 #+end_src
 
@@ -1450,10 +1189,11 @@ threshold = 0.5, we expect the weighted F1 = 0.934.
 #+begin_src R
 set.seed(1)
 resample_stats <- thresholder(ranger_tune,
-                              threshold = seq(0.2, 0.8, by = 0.01),
-                              final = TRUE)
+  threshold = seq(0.2, 0.8, by = 0.01),
+  final = TRUE
+)
 
-ot = resample_stats$prob_threshold[which.max(resample_stats$F1)]
+ot <- resample_stats$prob_threshold[which.max(resample_stats$F1)]
 max(resample_stats$F1)
 ot
 #+end_src
@@ -1467,13 +1207,18 @@ ot
 
 ** main effects
 #+begin_src R
-mip = rtemp %>% arrange(desc(ranger_imp)) %>% slice(1:8)
+mip <- rtemp %>%
+  arrange(desc(ranger_imp)) %>%
+  slice(1:8)
 
-mdx = which(colnames(dx) %in% row.names(mip))
-right = data.frame(name = row.names(mip), vimp = mip[,1])
-left = data.frame(name = colnames(dx)[mdx], mdx = mdx)
+mdx <- which(colnames(dx) %in% row.names(mip))
+right <- data.frame(name = row.names(mip), vimp = mip[, 1])
+left <- data.frame(name = colnames(dx)[mdx], mdx = mdx)
 
-mdx = merge(right, left) %>% arrange(desc(vimp)) %>% select(mdx) %>% unlist()
+mdx <- merge(right, left) %>%
+  arrange(desc(vimp)) %>%
+  select(mdx) %>%
+  unlist()
 #+end_src
 
 #+RESULTS:
@@ -1483,19 +1228,19 @@ The below is a matrix of ALE plots: covariates in x-axis, logit of prediction pr
 
 #+begin_src R :results code graphics file :file cor_aleplot.png :width 700 :height 700
 ## Define the predictive function
-dfx = as.data.frame(dx)
+dfx <- as.data.frame(dx)
 
 ## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
-par(mfrow = c(3,3))
-ALE.1=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30, NA.plot = TRUE)
-ALE.2=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30, NA.plot = TRUE)
-ALE.3=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30, NA.plot = TRUE)
-ALE.4=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30, NA.plot = TRUE)
-ALE.5=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30, NA.plot = TRUE)
-ALE.6=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30, NA.plot = TRUE)
-ALE.7=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30, NA.plot = TRUE)
-ALE.8=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30, NA.plot = TRUE)
-ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.plot = TRUE)
+par(mfrow = c(3, 3))
+ALE.1 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[1], K = 30, NA.plot = TRUE)
+ALE.2 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[2], K = 30, NA.plot = TRUE)
+ALE.3 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[3], K = 30, NA.plot = TRUE)
+ALE.4 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[4], K = 30, NA.plot = TRUE)
+ALE.5 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[5], K = 30, NA.plot = TRUE)
+ALE.6 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[6], K = 30, NA.plot = TRUE)
+ALE.7 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[7], K = 30, NA.plot = TRUE)
+ALE.8 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[8], K = 30, NA.plot = TRUE)
+ALE.12 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20, NA.plot = TRUE)
 ## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
 ## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
 #+end_src
@@ -1506,16 +1251,16 @@ ALE.12=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20, NA.pl
 The below is a matrix of PD plot.
 #+begin_src R :results code graphics file :file cor_pdplot.png :width 700 :height 700
 ## Calculate and plot the Asecond-order interaction effx2, x3
-par(mfrow = c(3,3))
-PD.1=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[1], K=30)
-PD.2=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[2], K=30)
-PD.3=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[3], K=30)
-PD.4=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[4], K=30)
-PD.5=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[5], K=30)
-PD.6=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[6], K=30)
-PD.7=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[7], K=30)
-PD.8=PDPlot(dfx, ranger_final, pred.fun=yhat, J=mdx[8], K=30)
-PD.12=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20)
+par(mfrow = c(3, 3))
+PD.1 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[1], K = 30)
+PD.2 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[2], K = 30)
+PD.3 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[3], K = 30)
+PD.4 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[4], K = 30)
+PD.5 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[5], K = 30)
+PD.6 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[6], K = 30)
+PD.7 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[7], K = 30)
+PD.8 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[8], K = 30)
+PD.12 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20)
 ## PD.23=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
 ## PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
 #+end_src
@@ -1530,36 +1275,34 @@ PD.12=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[1],mdx[2]), K=20)
 #+end_quote
 
 #+begin_src R
-ff = df %>% mutate(pred = ranger_final$predictions[, 2]) %>%
+ff <- df %>%
+  mutate(pred = ranger_final$predictions[, 2]) %>%
   filter((orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0])) | (orig_amounts <= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days <= min(ALE.2$x.values[ALE.2$f.values > 0])))
 
-df$oram_hl = 1 * (df$orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]))
-df$orda_hl = 1 * (df$orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0]))
+df$oram_hl <- 1 * (df$orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]))
+df$orda_hl <- 1 * (df$orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0]))
 
-pred = 1 * (ranger_final$predictions[, 2] > 0.5)
-mis = df[pred != y, ]
-hit = df[pred == y, ]
-
-
+pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
+mis <- df[pred != y, ]
+hit <- df[pred == y, ]
 #+end_src
 
 #+RESULTS:
 
 #+begin_src R
-xmin = min(df$x)
-ymin = min(df$y)
-xmax = max(df$x)
-ymax = max(df$y)
+xmin <- min(df$x)
+ymin <- min(df$y)
+xmax <- max(df$x)
+ymax <- max(df$y)
 
-par(mfrow = c(2,2))
-plot(df$x, df$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-plot(mis$x, mis$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-plot(ff$x, ff$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-plot(hit$x, hit$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+par(mfrow = c(2, 2))
+plot(df$x, df$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+plot(mis$x, mis$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+plot(ff$x, ff$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+plot(hit$x, hit$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 
-pred = 1 * (ranger_final$predictions[, 2] > 0.5)
+pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
 sum(pred != y) / length(y)
-
 #+end_src
 
 #+RESULTS:
@@ -1567,7 +1310,7 @@ sum(pred != y) / length(y)
 
 =comm_out_state= can take account for the spatial effect. It has high values when the site is located along with the state border. =com_low= contains high and low =comm_out_state=. high / low surfix is about the prediction value, not the variable value
 #+begin_src R
-xeq = ALE.3$x.values[ALE.3$f.values > 0]
+xeq <- ALE.3$x.values[ALE.3$f.values > 0]
 minx <- min(xeq)
 maxx <- max(xeq)
 com_high <- df %>% filter(comm_out_state <= maxx & comm_out_state >= minx)
@@ -1575,37 +1318,37 @@ com_low <- df %>% filter(comm_out_state > maxx | comm_out_state < minx)
 df$com_hl <- 1 * (df$comm_out_state <= maxx & df$comm_out_state >= minx)
 
 par(mfrow = c(2, 2))
-plot(com_high$x, com_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-plot(com_low$x, com_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(com_high$x, com_high$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+plot(com_low$x, com_low$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 #+end_src
 
 #+RESULTS:
 
 =aadt= might be associated with the location as well. high =aadt= nearby big cities / highway hub?
 #+begin_src R
-aadt_high = df %>% filter(aadt > min(ALE.4$x.values[ALE.4$f.values > 0]))
-aadt_low = df %>% filter(aadt <= min(ALE.4$x.values[ALE.4$f.values > 0]))
-df$aadt_hl = with(df, 1 * (aadt > min(ALE.4$x.values[ALE.4$f.values > 0])))
+aadt_high <- df %>% filter(aadt > min(ALE.4$x.values[ALE.4$f.values > 0]))
+aadt_low <- df %>% filter(aadt <= min(ALE.4$x.values[ALE.4$f.values > 0]))
+df$aadt_hl <- with(df, 1 * (aadt > min(ALE.4$x.values[ALE.4$f.values > 0])))
 
-par(mfrow=c(2,2))
-plot(aadt_high$x, aadt_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-plot(aadt_low$x, aadt_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+par(mfrow = c(2, 2))
+plot(aadt_high$x, aadt_high$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+plot(aadt_low$x, aadt_low$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 #+end_src
 
 #+RESULTS:
 
 =gdp= would also be highly associated with city / county level factor
 #+begin_src R
-xeq = ALE.8$x.values[ALE.8$f.values > 0]
+xeq <- ALE.8$x.values[ALE.8$f.values > 0]
 minx <- min(xeq)
 maxx <- max(xeq)
 gdp_high <- df %>% filter(gdp <= maxx & gdp >= minx)
 gdp_low <- df %>% filter(gdp > maxx | gdp < minx)
-df$gdp_hl = with(df, 1 * (gdp <= maxx & gdp >= minx))
+df$gdp_hl <- with(df, 1 * (gdp <= maxx & gdp >= minx))
 
 par(mfrow = c(2, 2))
-plot(gdp_high$x, gdp_high$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+plot(gdp_high$x, gdp_high$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
+plot(gdp_low$x, gdp_low$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 #+end_src
 
 #+RESULTS:
@@ -1624,21 +1367,21 @@ Questions to answer:
   library(maps)
   library(mapdata)
   library(ggplot2)
-  states = map_data("state")
-  counties = map_data("county")
+  states <- map_data("state")
+  counties <- map_data("county")
 #+end_src
 
 #+RESULTS:
 
 #+begin_src R :results none
-pred = 1 * (ranger_final$predictions[,2] > 0.5)
-df$mis = 1 * (pred != y)
+pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
+df$mis <- 1 * (pred != y)
 ## df %>% filter(y > min(y))
 
-fl_df = subset(states, region == "florida")
-fl_county = subset(counties, region == "florida")
+fl_df <- subset(states, region == "florida")
+fl_county <- subset(counties, region == "florida")
 
-ditch_the_axes = theme(
+ditch_the_axes <- theme(
   axis.text = element_blank(),
   axis.line = element_blank(),
   axis.ticks = element_blank(),
@@ -1647,12 +1390,13 @@ ditch_the_axes = theme(
   axis.title = element_blank()
 )
 
-gg_base = ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
-  coord_fixed(1.3) + geom_polygon(color = "black", fill = "gray")
+gg_base <- ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
+  coord_fixed(1.3) +
+  geom_polygon(color = "black", fill = "gray")
 #+end_src
 
 #+begin_src R
-gg_base = gg_base +
+gg_base <- gg_base +
   geom_polygon(data = fl_county, fill = NA, color = "white") +
   geom_polygon(color = "black", fill = NA)
 #+end_src
@@ -1661,53 +1405,53 @@ gg_base = gg_base +
 
 #+begin_src R
 load("col.pal.RData")
-temp = col.pal(10)
-col_pal = c(temp[1:2])
+temp <- col.pal(10)
+col_pal <- c(temp[1:2])
 
-ov_map = function(df, vname) {
-gg = gg_base +
-  geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var) , size = 2, alpha = 0.5)+
-  scale_colour_manual(values=cbPalette) +
-  labs(color = paste0(vname,"\n")) +
-  ## scale_fill_gradient2() +
-  theme_bw() +
-  ditch_the_axes +
-theme(
-    text = element_text(size = 15),
-    ## axis.title = element_text(size = 15),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank()
-    ##panel.border = element_blank()
-    ##panel.grid.major = element_blank()
-  )
-print(gg)
-return(gg)
+ov_map <- function(df, vname) {
+  gg <- gg_base +
+    geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var), size = 2, alpha = 0.5) +
+    scale_colour_manual(values = cbPalette) +
+    labs(color = paste0(vname, "\n")) +
+    ## scale_fill_gradient2() +
+    theme_bw() +
+    ditch_the_axes +
+    theme(
+      text = element_text(size = 15),
+      ## axis.title = element_text(size = 15),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank()
+      ## panel.border = element_blank()
+      ## panel.grid.major = element_blank()
+    )
+  print(gg)
+  return(gg)
 }
 #+end_src
 
 #+RESULTS:
 
 #+begin_src R
-ov_cts_map = function(df, vname) {
-gg = gg_base +
-  geom_point(data = df, mapping = aes(x = x, y = y, group = factor(var), color=var) , size = 2, alpha = 0.5)+
-  ## scale_colour_manual(values=cbPalette) +
-  labs(color = paste0(vname,"\n")) +
-  ## scale_color_continuous(type = "viridis")+
-  scale_color_gradientn(colors=cbPalette[c(1,2,3,4,6)])+
-  ## scale_fill_gradient2()+
-  theme_bw() +
-  ditch_the_axes +
-theme(
-    text = element_text(size = 15),
-    ## axis.title = element_text(size = 15),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank()
-    ##panel.border = element_blank()
-    ##panel.grid.major = element_blank()
-  )
-print(gg)
-return(gg)
+ov_cts_map <- function(df, vname) {
+  gg <- gg_base +
+    geom_point(data = df, mapping = aes(x = x, y = y, group = factor(var), color = var), size = 2, alpha = 0.5) +
+    ## scale_colour_manual(values=cbPalette) +
+    labs(color = paste0(vname, "\n")) +
+    ## scale_color_continuous(type = "viridis")+
+    scale_color_gradientn(colors = cbPalette[c(1, 2, 3, 4, 6)]) +
+    ## scale_fill_gradient2()+
+    theme_bw() +
+    ditch_the_axes +
+    theme(
+      text = element_text(size = 15),
+      ## axis.title = element_text(size = 15),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank()
+      ## panel.border = element_blank()
+      ## panel.grid.major = element_blank()
+    )
+  print(gg)
+  return(gg)
 }
 
 # The palette with grey:
@@ -1717,10 +1461,10 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 # To use for fills, add
-  ## scale_fill_manual(values=cbPalette)
+## scale_fill_manual(values=cbPalette)
 
 # To use for line and point colors, add
-  ## scale_colour_manual(values=cbPalette)
+## scale_colour_manual(values=cbPalette)
 #+end_src
 * COMMENT Local Variables
 # Local Variables:

@@ -37,4 +37,4 @@ require(ranger)
 ## Don't convert text strings to factors with base read functions
 options(stringsAsFactors = FALSE)
 ## Dont' omit NA rows
-options(na.action='na.pass')
+options(na.action = "na.pass")
