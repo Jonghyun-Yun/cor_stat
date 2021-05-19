@@ -1,2 +1,6 @@
+#+title: Cost Overrun Analysis
+#+author: Jonghyun Yun
+#+email: jonghyun.yun@gmail.com
+
 # cor_stat
 Building RF classifier to identify significant sources of cost-overrun in roadway construction projects.
