@@ -143,14 +143,15 @@ plot_vimp = function(vimp, cutoff = 1) {
   imp.dat = data.frame(imp.var, rnimp)
 
   ## barplot of relative importance
-  gg = ggplot(data=imp.dat, aes(x=reorder(imp.var,-rnimp), y=rnimp, fill=TRUE)) +
-    ylab("Relative variable importance") +
-    xlab("Important features") +
-    geom_bar(stat="identity") + coord_flip() +
+  gg = ggplot(data=imp.dat, aes(x=reorder(imp.var,rnimp), y=rnimp, fill=TRUE)) +
+    ylab("Relative importance") +
+    xlab("Feature") +
+    geom_bar(stat="identity", size = 3, width = 0.5) + coord_flip() +
     scale_fill_discrete(guide=FALSE) +
     theme_bw() +
     theme(axis.line = element_line(colour = "black"),
           text = element_text(size=20),
+          axis.text = element_text(size = 15),
           ##panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           ##panel.border = element_blank()
