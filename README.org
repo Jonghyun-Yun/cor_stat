@@ -1,6 +1,12 @@
-#+title: Cost Overrun Analysis
+#+title: Statistical data intelligence for cost-overrun in construction projects.
 #+author: Jonghyun Yun
 #+email: jonghyun.yun@gmail.com
 
-# cor_stat
-Building RF classifier to identify significant sources of cost-overrun in roadway construction projects.
+* Overview
+ Statistical data intelligence for cost-overrun in construction projects (DICO) is an R package to provide handy R functionality to build statistical models for an analysis of cost-overrun and to facilitate interpretation of results.
+* Installation
+#+begin_src R
+
+#+end_src
+* How to use
+Please find examples in ~cor-code.org~.
