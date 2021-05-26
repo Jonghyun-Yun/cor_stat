@@ -89,7 +89,7 @@ options(na.action = "na.pass")
 #+end_src
 
 #+RESULTS:
-
+# # # # # #
 * Custom functions
 :PROPERTIES:
 :header-args:R:          :tangle custom_function.R
@@ -612,8 +612,7 @@ ranger_tune <- train(
   weights = weights,
   preProc = NULL,
   importance = "impurity",
-  num.trees = 500
-)
+  num.trees = 500)
 
 temp <- ranger_tune$pred$co
 ranger_id <- ranger_tune$pred$rowIndex
