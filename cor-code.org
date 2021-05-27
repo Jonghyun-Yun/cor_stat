@@ -46,6 +46,8 @@ The options are meaningful only if you render this document; otherwise ignore th
                  message=FALSE, warning=FALSE)
 #+end_src
 
+#+RESULTS: global_option,include=F
+
 ** CatBoost
 For installing ~CatBoost~, see https://catboost.ai/docs/installation/r-installation-binary-installation.html#r-installation-binary-installation.
 #+attr_ravel: eval=F
@@ -456,7 +458,9 @@ if (identical(dpro$pjt_id, drural$Contract_ID)) {
 dpro$railcross[is.na(dpro$railcross)] <- 0
 dpro$bridge[is.na(dpro$bridge)] <- 0
 dpro <- na.omit(dpro)
+#+end_src
 
+#+begin_src R :results none
 ## dd <- dpro %>% select(-c(roadway, start_yr,  end_yr)) %>%
 ##   mutate(mov_unemp = 0.6*unemp_2019 + 0.3*unemp_2018 + 0.1*unemp_2017 ) %>%
 ##   mutate(mov_avg_temp = 0.6*avg_temp_2019 + 0.3*avg_temp_2018 + 0.1*avg_temp_2017 ) %>%
@@ -621,6 +625,23 @@ ranger_final <- ranger_tune$finalModel
 ranger_imp <- varImp(ranger_tune)$importance
 #+end_src
 
+#+RESULTS:
+#+begin_example
+Fold1: mtry=20, splitrule=gini, min.node.size=10
+- Fold1: mtry=20, splitrule=gini, min.node.size=10
+Fold2: mtry=20, splitrule=gini, min.node.size=10
+- Fold2: mtry=20, splitrule=gini, min.node.size=10
+Fold3: mtry=20, splitrule=gini, min.node.size=10
+- Fold3: mtry=20, splitrule=gini, min.node.size=10
+Fold4: mtry=20, splitrule=gini, min.node.size=10
+- Fold4: mtry=20, splitrule=gini, min.node.size=10
+Aggregating results
+Fitting final model on full training set
+Warning message:
+In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
+  The metric "Accuracy" was not in the result set. logLoss will be used instead.
+#+end_example
+
 =ranger= gives the confusion matrix if =probability= is set to =FALSE=.
 
 #+name: ranger_full_training
@@ -631,14 +652,19 @@ ranger_ff <- ranger(
   write.forest = TRUE,
   probability = TRUE,
   min.node.size = 10,
-  class.weights = NULL, splitrule = "gini", classification = TRUE
+  class.weights = NULL, splitrule = "gini", classification = TRUE,
+  seed = 3
 )
+saveRDS(ranger_ff, "cor_ranger_pred.rds")
+
+ranger_imp <- ranger_ff$variable.importance
+rtemp <- data.frame(ranger_imp = ranger_imp)
+row.names(rtemp) <- names(ranger_imp)
+rrtemp <- rtemp %>% arrange(-ranger_imp)
+rrtemp %>% slice(1:15)
 #+end_src
 
-#+RESULTS: ranger_full_training
-
-
-The below is to save urban prediction model. the predicted probablity will be used for cor prediction   !
+The below is to save urban prediction model. the predicted probablity will be used for cor prediction!
 #+begin_src R
 saveRDS(ranger_final, "cor_ranger_pred_rural.rds")
 #+end_src
@@ -1135,26 +1161,16 @@ rrtemp %>% knitr::kable()
 
 |                  | ranger_imp|
 |:-----------------|----------:|
-|orig_amounts      |  14.508817|
-|orig_days         |   9.289369|
-|comm_out_state    |   3.213527|
-|urban_ranger      |   3.040887|
-|aadt              |   2.432996|
-|ind_agri          |   2.174520|
-|ind_other         |   2.152676|
-|pop_16yrover      |   2.133395|
-|inde_ed_meds      |   2.042728|
-|ncat_pjt_type     |   1.944451|
-|comm_pubtransport |   1.800669|
-|aadt_truck        |   1.705871|
-|comm_etc          |   1.672032|
-|comm_workhome     |   1.589325|
-|ind_transport     |   1.565803|
-|worker_med_age    |   1.503183|
-|prec              |   1.449628|
-|med_ind_income    |   1.442140|
-|gdp               |   1.432951|
-|no_lane           |   1.430063|
+|orig_amounts      |  14.620791|
+|orig_days         |   9.289237|
+|comm_out_state    |   3.163966|
+|aadt              |   2.477838|
+|ind_agri          |   2.228688|
+|ind_other         |   2.159864|
+|pop_16yrover      |   2.143753|
+|inde_ed_meds      |   2.021736|
+|ncat_pjt_type     |   1.994667|
+|comm_pubtransport |   1.878972|
 :end:
 
 Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.

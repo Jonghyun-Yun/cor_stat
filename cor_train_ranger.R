@@ -28,7 +28,7 @@ ranger_grid <- expand.grid(
   min.node.size = c(10)
 )
 
-set.seed(1)
+set.seed(999999)
 ranger_tune <- train(
   x = ixtrain, y = fytrain,
   method = "ranger",
@@ -45,3 +45,4 @@ ranger_id <- ranger_tune$pred$rowIndex
 ranger_prob <- temp[order(ranger_id)]
 ranger_final <- ranger_tune$finalModel
 ranger_imp <- varImp(ranger_tune)$importance
+ranger_imp %>% arrange(-ranger_imp) %>% slice(1:15)
