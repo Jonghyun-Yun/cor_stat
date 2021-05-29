@@ -4,7 +4,7 @@
   states <- map_data("state")
   counties <- map_data("county")
 
-pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
+pred <- 1 * (pimp_rf$predictions[, 2] > 0.5)
 df$mis <- 1 * (pred != y)
 ## df %>% filter(y > min(y))
 

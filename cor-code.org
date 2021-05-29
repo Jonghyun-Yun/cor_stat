@@ -597,9 +597,9 @@ levels(fytrain) <- c("no_cor", "cor")
 - Tuned hyperparameters of ranger.
 #+begin_src R :tangle cor_train_ranger.R
 ranger_grid <- expand.grid(
-  mtry = c(20),
+  mtry = c(5,10,15,20,25,30),
   splitrule = "gini",
-  min.node.size = c(10)
+  min.node.size = c(5,10,15,20)
 )
 #+end_src
 
@@ -627,16 +627,201 @@ ranger_imp <- varImp(ranger_tune)$importance
 
 #+RESULTS:
 #+begin_example
+Fold1: mtry= 5, splitrule=gini, min.node.size= 5
+- Fold1: mtry= 5, splitrule=gini, min.node.size= 5
+Fold1: mtry=10, splitrule=gini, min.node.size= 5
+- Fold1: mtry=10, splitrule=gini, min.node.size= 5
+Fold1: mtry=15, splitrule=gini, min.node.size= 5
+- Fold1: mtry=15, splitrule=gini, min.node.size= 5
+Fold1: mtry=20, splitrule=gini, min.node.size= 5
+- Fold1: mtry=20, splitrule=gini, min.node.size= 5
+Fold1: mtry=25, splitrule=gini, min.node.size= 5
+- Fold1: mtry=25, splitrule=gini, min.node.size= 5
+Fold1: mtry=30, splitrule=gini, min.node.size= 5
+- Fold1: mtry=30, splitrule=gini, min.node.size= 5
+Fold1: mtry= 5, splitrule=gini, min.node.size=10
+- Fold1: mtry= 5, splitrule=gini, min.node.size=10
+Fold1: mtry=10, splitrule=gini, min.node.size=10
+- Fold1: mtry=10, splitrule=gini, min.node.size=10
+Fold1: mtry=15, splitrule=gini, min.node.size=10
+- Fold1: mtry=15, splitrule=gini, min.node.size=10
 Fold1: mtry=20, splitrule=gini, min.node.size=10
 - Fold1: mtry=20, splitrule=gini, min.node.size=10
+Fold1: mtry=25, splitrule=gini, min.node.size=10
+- Fold1: mtry=25, splitrule=gini, min.node.size=10
+Fold1: mtry=30, splitrule=gini, min.node.size=10
+- Fold1: mtry=30, splitrule=gini, min.node.size=10
+Fold1: mtry= 5, splitrule=gini, min.node.size=15
+- Fold1: mtry= 5, splitrule=gini, min.node.size=15
+Fold1: mtry=10, splitrule=gini, min.node.size=15
+- Fold1: mtry=10, splitrule=gini, min.node.size=15
+Fold1: mtry=15, splitrule=gini, min.node.size=15
+- Fold1: mtry=15, splitrule=gini, min.node.size=15
+Fold1: mtry=20, splitrule=gini, min.node.size=15
+- Fold1: mtry=20, splitrule=gini, min.node.size=15
+Fold1: mtry=25, splitrule=gini, min.node.size=15
+- Fold1: mtry=25, splitrule=gini, min.node.size=15
+Fold1: mtry=30, splitrule=gini, min.node.size=15
+- Fold1: mtry=30, splitrule=gini, min.node.size=15
+Fold1: mtry= 5, splitrule=gini, min.node.size=20
+- Fold1: mtry= 5, splitrule=gini, min.node.size=20
+Fold1: mtry=10, splitrule=gini, min.node.size=20
+- Fold1: mtry=10, splitrule=gini, min.node.size=20
+Fold1: mtry=15, splitrule=gini, min.node.size=20
+- Fold1: mtry=15, splitrule=gini, min.node.size=20
+Fold1: mtry=20, splitrule=gini, min.node.size=20
+- Fold1: mtry=20, splitrule=gini, min.node.size=20
+Fold1: mtry=25, splitrule=gini, min.node.size=20
+- Fold1: mtry=25, splitrule=gini, min.node.size=20
+Fold1: mtry=30, splitrule=gini, min.node.size=20
+- Fold1: mtry=30, splitrule=gini, min.node.size=20
+Fold2: mtry= 5, splitrule=gini, min.node.size= 5
+- Fold2: mtry= 5, splitrule=gini, min.node.size= 5
+Fold2: mtry=10, splitrule=gini, min.node.size= 5
+- Fold2: mtry=10, splitrule=gini, min.node.size= 5
+Fold2: mtry=15, splitrule=gini, min.node.size= 5
+- Fold2: mtry=15, splitrule=gini, min.node.size= 5
+Fold2: mtry=20, splitrule=gini, min.node.size= 5
+- Fold2: mtry=20, splitrule=gini, min.node.size= 5
+Fold2: mtry=25, splitrule=gini, min.node.size= 5
+- Fold2: mtry=25, splitrule=gini, min.node.size= 5
+Fold2: mtry=30, splitrule=gini, min.node.size= 5
+- Fold2: mtry=30, splitrule=gini, min.node.size= 5
+Fold2: mtry= 5, splitrule=gini, min.node.size=10
+- Fold2: mtry= 5, splitrule=gini, min.node.size=10
+Fold2: mtry=10, splitrule=gini, min.node.size=10
+- Fold2: mtry=10, splitrule=gini, min.node.size=10
+Fold2: mtry=15, splitrule=gini, min.node.size=10
+- Fold2: mtry=15, splitrule=gini, min.node.size=10
 Fold2: mtry=20, splitrule=gini, min.node.size=10
 - Fold2: mtry=20, splitrule=gini, min.node.size=10
+Fold2: mtry=25, splitrule=gini, min.node.size=10
+- Fold2: mtry=25, splitrule=gini, min.node.size=10
+Fold2: mtry=30, splitrule=gini, min.node.size=10
+- Fold2: mtry=30, splitrule=gini, min.node.size=10
+Fold2: mtry= 5, splitrule=gini, min.node.size=15
+- Fold2: mtry= 5, splitrule=gini, min.node.size=15
+Fold2: mtry=10, splitrule=gini, min.node.size=15
+- Fold2: mtry=10, splitrule=gini, min.node.size=15
+Fold2: mtry=15, splitrule=gini, min.node.size=15
+- Fold2: mtry=15, splitrule=gini, min.node.size=15
+Fold2: mtry=20, splitrule=gini, min.node.size=15
+- Fold2: mtry=20, splitrule=gini, min.node.size=15
+Fold2: mtry=25, splitrule=gini, min.node.size=15
+- Fold2: mtry=25, splitrule=gini, min.node.size=15
+Fold2: mtry=30, splitrule=gini, min.node.size=15
+- Fold2: mtry=30, splitrule=gini, min.node.size=15
+Fold2: mtry= 5, splitrule=gini, min.node.size=20
+- Fold2: mtry= 5, splitrule=gini, min.node.size=20
+Fold2: mtry=10, splitrule=gini, min.node.size=20
+- Fold2: mtry=10, splitrule=gini, min.node.size=20
+Fold2: mtry=15, splitrule=gini, min.node.size=20
+- Fold2: mtry=15, splitrule=gini, min.node.size=20
+Fold2: mtry=20, splitrule=gini, min.node.size=20
+- Fold2: mtry=20, splitrule=gini, min.node.size=20
+Fold2: mtry=25, splitrule=gini, min.node.size=20
+- Fold2: mtry=25, splitrule=gini, min.node.size=20
+Fold2: mtry=30, splitrule=gini, min.node.size=20
+- Fold2: mtry=30, splitrule=gini, min.node.size=20
+Fold3: mtry= 5, splitrule=gini, min.node.size= 5
+- Fold3: mtry= 5, splitrule=gini, min.node.size= 5
+Fold3: mtry=10, splitrule=gini, min.node.size= 5
+- Fold3: mtry=10, splitrule=gini, min.node.size= 5
+Fold3: mtry=15, splitrule=gini, min.node.size= 5
+- Fold3: mtry=15, splitrule=gini, min.node.size= 5
+Fold3: mtry=20, splitrule=gini, min.node.size= 5
+- Fold3: mtry=20, splitrule=gini, min.node.size= 5
+Fold3: mtry=25, splitrule=gini, min.node.size= 5
+- Fold3: mtry=25, splitrule=gini, min.node.size= 5
+Fold3: mtry=30, splitrule=gini, min.node.size= 5
+- Fold3: mtry=30, splitrule=gini, min.node.size= 5
+Fold3: mtry= 5, splitrule=gini, min.node.size=10
+- Fold3: mtry= 5, splitrule=gini, min.node.size=10
+Fold3: mtry=10, splitrule=gini, min.node.size=10
+- Fold3: mtry=10, splitrule=gini, min.node.size=10
+Fold3: mtry=15, splitrule=gini, min.node.size=10
+- Fold3: mtry=15, splitrule=gini, min.node.size=10
 Fold3: mtry=20, splitrule=gini, min.node.size=10
 - Fold3: mtry=20, splitrule=gini, min.node.size=10
+Fold3: mtry=25, splitrule=gini, min.node.size=10
+- Fold3: mtry=25, splitrule=gini, min.node.size=10
+Fold3: mtry=30, splitrule=gini, min.node.size=10
+- Fold3: mtry=30, splitrule=gini, min.node.size=10
+Fold3: mtry= 5, splitrule=gini, min.node.size=15
+- Fold3: mtry= 5, splitrule=gini, min.node.size=15
+Fold3: mtry=10, splitrule=gini, min.node.size=15
+- Fold3: mtry=10, splitrule=gini, min.node.size=15
+Fold3: mtry=15, splitrule=gini, min.node.size=15
+- Fold3: mtry=15, splitrule=gini, min.node.size=15
+Fold3: mtry=20, splitrule=gini, min.node.size=15
+- Fold3: mtry=20, splitrule=gini, min.node.size=15
+Fold3: mtry=25, splitrule=gini, min.node.size=15
+- Fold3: mtry=25, splitrule=gini, min.node.size=15
+Fold3: mtry=30, splitrule=gini, min.node.size=15
+- Fold3: mtry=30, splitrule=gini, min.node.size=15
+Fold3: mtry= 5, splitrule=gini, min.node.size=20
+- Fold3: mtry= 5, splitrule=gini, min.node.size=20
+Fold3: mtry=10, splitrule=gini, min.node.size=20
+- Fold3: mtry=10, splitrule=gini, min.node.size=20
+Fold3: mtry=15, splitrule=gini, min.node.size=20
+- Fold3: mtry=15, splitrule=gini, min.node.size=20
+Fold3: mtry=20, splitrule=gini, min.node.size=20
+- Fold3: mtry=20, splitrule=gini, min.node.size=20
+Fold3: mtry=25, splitrule=gini, min.node.size=20
+- Fold3: mtry=25, splitrule=gini, min.node.size=20
+Fold3: mtry=30, splitrule=gini, min.node.size=20
+- Fold3: mtry=30, splitrule=gini, min.node.size=20
+Fold4: mtry= 5, splitrule=gini, min.node.size= 5
+- Fold4: mtry= 5, splitrule=gini, min.node.size= 5
+Fold4: mtry=10, splitrule=gini, min.node.size= 5
+- Fold4: mtry=10, splitrule=gini, min.node.size= 5
+Fold4: mtry=15, splitrule=gini, min.node.size= 5
+- Fold4: mtry=15, splitrule=gini, min.node.size= 5
+Fold4: mtry=20, splitrule=gini, min.node.size= 5
+- Fold4: mtry=20, splitrule=gini, min.node.size= 5
+Fold4: mtry=25, splitrule=gini, min.node.size= 5
+- Fold4: mtry=25, splitrule=gini, min.node.size= 5
+Fold4: mtry=30, splitrule=gini, min.node.size= 5
+- Fold4: mtry=30, splitrule=gini, min.node.size= 5
+Fold4: mtry= 5, splitrule=gini, min.node.size=10
+- Fold4: mtry= 5, splitrule=gini, min.node.size=10
+Fold4: mtry=10, splitrule=gini, min.node.size=10
+- Fold4: mtry=10, splitrule=gini, min.node.size=10
+Fold4: mtry=15, splitrule=gini, min.node.size=10
+- Fold4: mtry=15, splitrule=gini, min.node.size=10
 Fold4: mtry=20, splitrule=gini, min.node.size=10
 - Fold4: mtry=20, splitrule=gini, min.node.size=10
+Fold4: mtry=25, splitrule=gini, min.node.size=10
+- Fold4: mtry=25, splitrule=gini, min.node.size=10
+Fold4: mtry=30, splitrule=gini, min.node.size=10
+- Fold4: mtry=30, splitrule=gini, min.node.size=10
+Fold4: mtry= 5, splitrule=gini, min.node.size=15
+- Fold4: mtry= 5, splitrule=gini, min.node.size=15
+Fold4: mtry=10, splitrule=gini, min.node.size=15
+- Fold4: mtry=10, splitrule=gini, min.node.size=15
+Fold4: mtry=15, splitrule=gini, min.node.size=15
+- Fold4: mtry=15, splitrule=gini, min.node.size=15
+Fold4: mtry=20, splitrule=gini, min.node.size=15
+- Fold4: mtry=20, splitrule=gini, min.node.size=15
+Fold4: mtry=25, splitrule=gini, min.node.size=15
+- Fold4: mtry=25, splitrule=gini, min.node.size=15
+Fold4: mtry=30, splitrule=gini, min.node.size=15
+- Fold4: mtry=30, splitrule=gini, min.node.size=15
+Fold4: mtry= 5, splitrule=gini, min.node.size=20
+- Fold4: mtry= 5, splitrule=gini, min.node.size=20
+Fold4: mtry=10, splitrule=gini, min.node.size=20
+- Fold4: mtry=10, splitrule=gini, min.node.size=20
+Fold4: mtry=15, splitrule=gini, min.node.size=20
+- Fold4: mtry=15, splitrule=gini, min.node.size=20
+Fold4: mtry=20, splitrule=gini, min.node.size=20
+- Fold4: mtry=20, splitrule=gini, min.node.size=20
+Fold4: mtry=25, splitrule=gini, min.node.size=20
+- Fold4: mtry=25, splitrule=gini, min.node.size=20
+Fold4: mtry=30, splitrule=gini, min.node.size=20
+- Fold4: mtry=30, splitrule=gini, min.node.size=20
 Aggregating results
-Fitting final model on full training set
+Selecting tuning parameters
+Fitting mtry = 25, splitrule = gini, min.node.size = 5 on full training set
 Warning message:
 In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
   The metric "Accuracy" was not in the result set. logLoss will be used instead.
@@ -646,23 +831,144 @@ In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,
 
 #+name: ranger_full_training
 #+begin_src R :tangle cor_train_ranger_final.R
-ranger_ff <- ranger(
-  x = ixtrain, y = fytrain,
-  num.trees = 500, mtry = 20, importance = "impurity",
+set.seed(9999)
+mydd = data.frame(y=fytrain, ixtrain)
+
+## to calulate importance p-value based on purmutation
+ranger_ff <- ranger(y~.,data = mydd,
+                       num.trees = 500, mtry = 25,
+  ## importance = "impurity_corrected",
+  importance = "permutation",
+  ## importance = "hold-out",
+  ## importance = "impurity",
   write.forest = TRUE,
   probability = TRUE,
-  min.node.size = 10,
+  min.node.size = 5,
   class.weights = NULL, splitrule = "gini", classification = TRUE,
-  seed = 3
+  seed = 99
 )
-saveRDS(ranger_ff, "cor_ranger_pred.rds")
 
+ranger_ho <- holdoutRF(y~.,data = mydd,
+                       num.trees = 500, mtry = 25,
+  ## importance = "impurity_corrected",
+  ## importance = "permutation",
+  ## importance = "hold-out",
+  ## importance = "impurity",
+  write.forest = TRUE,
+  probability = TRUE,
+  min.node.size = 5,
+  class.weights = NULL, splitrule = "gini", classification = TRUE,
+  seed = 99
+)
+#+end_src
+
+#+begin_src R :tangle cor_train_ranger_final.R
 ranger_imp <- ranger_ff$variable.importance
 rtemp <- data.frame(ranger_imp = ranger_imp)
 row.names(rtemp) <- names(ranger_imp)
-rrtemp <- rtemp %>% arrange(-ranger_imp)
-rrtemp %>% slice(1:15)
+rrtemp <- rtemp %>%
+  arrange(-ranger_imp) %>%
+  slice(1:15)
+rrtemp[,1] = rrtemp[,1] / rrtemp[1,1] * 100
+rrtemp %>% knitr::kable()
 #+end_src
+
+#+RESULTS:
+#+begin_example
+
+
+|                  | ranger_imp|
+|:-----------------|----------:|
+|orig_amounts      | 100.000000|
+|orig_days         |  31.882296|
+|comm_out_state    |   5.297970|
+|no_lane           |   3.310077|
+|ind_other         |   2.865495|
+|ind_agri          |   2.824632|
+|pop_16yrover      |   2.652817|
+|aadt              |   2.651760|
+|comm_pubtransport |   2.357990|
+|ind_manuf         |   2.231341|
+|inde_ed_meds      |   1.812139|
+|ind_transport     |   1.779970|
+|med_ind_income    |   1.724870|
+|worker_med_age    |   1.502841|
+|gdp               |   1.479755|
+#+end_example
+
+#+begin_src R :tangle cor_train_ranger_final.R
+set.seed(9999)
+im_pp = importance_pvalues(ranger_ff, method = "altmann", formula = y ~ ., data = mydd,
+                                  num.permutations = 200)
+pimp = sort(im_pp[,2])[1:15]
+pimp %>% knitr::kable()
+pimp_vv = names(pimp)[pimp < 0.1]
+#+end_src
+
+#+RESULTS:
+#+begin_example
+
+
+|                  |         x|
+|:-----------------|---------:|
+|orig_days         | 0.0049751|
+|orig_amounts      | 0.0049751|
+|no_lane           | 0.0248756|
+|comm_out_state    | 0.0447761|
+|MNG_DIST          | 0.0597015|
+|avg_temp          | 0.0696517|
+|ind_other         | 0.0746269|
+|pop_16yrover      | 0.0845771|
+|ind_agri          | 0.0945274|
+|comm_pubtransport | 0.0995025|
+|ind_manuf         | 0.1144279|
+|ncat_pjt_type     | 0.1144279|
+|aadt              | 0.1243781|
+|inde_ed_meds      | 0.1243781|
+|gdp               | 0.1243781|
+#+end_example
+
+#+begin_src R
+set.seed(9999)
+mydd = data.frame(y=fytrain, ixtrain[, pimp_vv])
+set.seed(1)
+pimp_rf_tune <- train(
+  y = fytrain, x =  ixtrain[, pimp_vv],
+  method = "ranger",
+  trControl = my_tr,
+  tuneGrid = expand.grid(
+  mtry = c(2,4,6,8,10),
+  splitrule = "gini",
+  min.node.size = c(5,10,15,20)),
+  weights = weights,
+  preProc = NULL,
+  importance = "impurity",
+  num.trees = 500)
+
+
+## to calulate importance p-value based on purmutation
+pimp_rf <- ranger(y~.,data = mydd,
+                       num.trees = 500, mtry = 8,
+  ## importance = "impurity_corrected",
+  importance = "permutation",
+  ## importance = "hold-out",
+  ## importance = "impurity",
+  write.forest = TRUE,
+  probability = TRUE,
+  min.node.size = 5,
+  class.weights = NULL, splitrule = "gini", classification = TRUE,
+  seed = 99
+)
+
+#+end_src
+
+#+RESULTS: ranger_full_training
+
+#+begin_src R :tangle cor_train_ranger_final.R
+saveRDS(ranger_ff, "cor_ranger_rural_ff.rds")
+#+end_src
+
+#+RESULTS:
 
 The below is to save urban prediction model. the predicted probablity will be used for cor prediction!
 #+begin_src R
@@ -1097,7 +1403,7 @@ y <- df$u_r
 #+end_src
 
 The urban classification based on =landuse_lv_2= is not exclusive, so it cannot be used for the COR prediction model.
-#+begin_src R :eval no :tangle cor-code-preproc.r
+#+begin_src R :eval no
 tt <- readr::read_csv("data/urban_index.csv")
 udex <- numeric(nrow(df))
 for (dd in 1:nrow(df)) {
@@ -1112,10 +1418,15 @@ for (dd in 1:nrow(df)) {
 Instead we the prediction probability of urbanization obtained from our earlier prediction model. The urbanization index training is done using RF with full training set. See [[id:1ca7e343-cebd-4315-82c7-336e1960bd5b][ranger]]
 #+begin_src R :tangle cor-code-preproc.r
 ranger_final <- readRDS("cor_ranger_pred_rural.rds")
-urban_ranger <- ranger_final$predictions[, 2]
+## ranger_final <- readRDS("cor_ranger_rural_ff.rds")
+## urban_ranger <- ranger_final$predictions[, 2]
+rrdd = model.matrix(~ 0 + ., data = dx)
+urban_ranger = predict(ranger_final, rrdd)$predictions[, 2]
+## source("cor_train_base_prepro.R")
 y <- 1 * (df$logy > 0)
 dx[, "ncat_Vendor_Name"] <- NULL
-dx <- cbind(dx, urban_ranger)
+## dx <- cbind(dx, urban_ranger)
+dx <- data.frame(dx, u_r = df$u_r)
 #+end_src
 
 #+RESULTS:
@@ -1146,7 +1457,7 @@ Now, we append the prediction probability into the original data set $\mathbf{x}
 We trained the COR prediction model using the appended data set (with feature engineering).
 The OOB accuracy is 77.9% at the optimal threshold (0.5-ish?). The variable importance is listed below:
 #+begin_src R :results drawer
-ranger_imp <- ranger_final$variable.importance
+ranger_imp <- pimp_rf$variable.importance
 rtemp <- data.frame(ranger_imp = ranger_imp)
 row.names(rtemp) <- names(ranger_imp)
 rrtemp <- rtemp %>%
@@ -1161,16 +1472,16 @@ rrtemp %>% knitr::kable()
 
 |                  | ranger_imp|
 |:-----------------|----------:|
-|orig_amounts      |  14.620791|
-|orig_days         |   9.289237|
-|comm_out_state    |   3.163966|
-|aadt              |   2.477838|
-|ind_agri          |   2.228688|
-|ind_other         |   2.159864|
-|pop_16yrover      |   2.143753|
-|inde_ed_meds      |   2.021736|
-|ncat_pjt_type     |   1.994667|
-|comm_pubtransport |   1.878972|
+|orig_amounts      |  0.0796520|
+|orig_days         |  0.0221467|
+|comm_out_state    |  0.0115002|
+|pop_16yrover      |  0.0093243|
+|ind_agri          |  0.0073639|
+|no_lane           |  0.0054459|
+|comm_pubtransport |  0.0042226|
+|MNG_DIST          |  0.0028667|
+|avg_temp          |  0.0015761|
+|ind_other         |  0.0013101|
 :end:
 
 Roughly speaking, the variable importance indicates the contribution of each covariate in improving the model's performance. The top 10 variables listed below could affect the COR event in difference ways. e.g. linear, hyperbolic, piecewise linear, etc.
@@ -1184,11 +1495,11 @@ Roughly speaking, the variable importance indicates the contribution of each cov
 #+end_quote
 
 #+begin_src R
-1 - ranger_final$prediction.error
+1 - pimp_rf$prediction.error
 #+end_src
 
 #+RESULTS:
-: [1] 0.7792794
+: [1] 0.8008818
 
 In the below, =urban_ranger= represents $\hat f(x)$.
 #+begin_src R :results code graphics file :file cor_ranger_vimp.png :width 700 :height 700
@@ -1224,7 +1535,7 @@ ot
 #+begin_src R
 mip <- rtemp %>%
   arrange(desc(ranger_imp)) %>%
-  slice(1:8)
+  slice(1:10)
 
 mdx <- which(colnames(dx) %in% row.names(mip))
 right <- data.frame(name = row.names(mip), vimp = mip[, 1])
@@ -1246,18 +1557,20 @@ The below is a matrix of ALE plots: covariates in x-axis, logit of prediction pr
 dfx <- as.data.frame(dx)
 
 ## Calculate and plot the ALE main and second-order interaction effects of x1, x2, x3
-par(mfrow = c(3, 3))
-ALE.1 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[1], K = 30, NA.plot = TRUE)
-ALE.2 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[2], K = 30, NA.plot = TRUE)
-ALE.3 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[3], K = 30, NA.plot = TRUE)
-ALE.4 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[4], K = 30, NA.plot = TRUE)
-ALE.5 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[5], K = 30, NA.plot = TRUE)
-ALE.6 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[6], K = 30, NA.plot = TRUE)
-ALE.7 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[7], K = 30, NA.plot = TRUE)
-ALE.8 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[8], K = 30, NA.plot = TRUE)
-ALE.12 <- ALEPlot(dfx, ranger_final, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20, NA.plot = TRUE)
-## ALE.23=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
-## ALE.31=ALEPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
+par(mfrow = c(5, 3))
+ALE.1 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[1], K = 15, NA.plot = TRUE)
+ALE.2 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[2], K = 15, NA.plot = TRUE)
+ALE.3 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[3], K = 15, NA.plot = TRUE)
+ALE.4 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[4], K = 15, NA.plot = TRUE)
+ALE.5 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[5], K = 15, NA.plot = TRUE)
+ALE.6 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[6], K = 15, NA.plot = TRUE)
+ALE.7 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[7], K = 15, NA.plot = TRUE)
+ALE.8 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[8], K = 15, NA.plot = TRUE)
+ALE.9 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[9], K = 15, NA.plot = TRUE)
+ALE.10 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[10], K = 15, NA.plot = TRUE)
+## ALE.12 <- ALEPlot(dfx, pimp_rf, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20, NA.plot = TRUE)
+## ALE.23=ALEPlot(dfx, pimp_rf, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20, NA.plot = TRUE)
+## ALE.31=ALEPlot(dfx, pimp_rf, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20, NA.plot = TRUE)
 #+end_src
 
 #+RESULTS:
@@ -1267,17 +1580,17 @@ The below is a matrix of PD plot.
 #+begin_src R :results code graphics file :file cor_pdplot.png :width 700 :height 700
 ## Calculate and plot the Asecond-order interaction effx2, x3
 par(mfrow = c(3, 3))
-PD.1 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[1], K = 30)
-PD.2 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[2], K = 30)
-PD.3 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[3], K = 30)
-PD.4 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[4], K = 30)
-PD.5 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[5], K = 30)
-PD.6 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[6], K = 30)
-PD.7 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[7], K = 30)
-PD.8 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = mdx[8], K = 30)
-PD.12 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20)
-## PD.23=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
-## PD.31=PDPlot(dfx, ranger_final, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
+PD.1 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[1], K = 30)
+PD.2 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[2], K = 30)
+PD.3 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[3], K = 30)
+PD.4 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[4], K = 30)
+PD.5 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[5], K = 30)
+PD.6 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[6], K = 30)
+PD.7 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[7], K = 30)
+PD.8 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = mdx[8], K = 30)
+PD.12 <- PDPlot(dfx, pimp_rf, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 20)
+## PD.23=PDPlot(dfx, pimp_rf, pred.fun=yhat, J=c(mdx[2],mdx[3]), K=20)
+## PD.31=PDPlot(dfx, pimp_rf, pred.fun=yhat, J=c(mdx[3],mdx[1]), K=20)
 #+end_src
 
 #+RESULTS:
@@ -1291,13 +1604,13 @@ PD.12 <- PDPlot(dfx, ranger_final, pred.fun = yhat, J = c(mdx[1], mdx[2]), K = 2
 
 #+begin_src R
 ff <- df %>%
-  mutate(pred = ranger_final$predictions[, 2]) %>%
+  mutate(pred = pimp_rf$predictions[, 2]) %>%
   filter((orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0])) | (orig_amounts <= min(ALE.1$x.values[ALE.1$f.values > 0]) & orig_days <= min(ALE.2$x.values[ALE.2$f.values > 0])))
 
 df$oram_hl <- 1 * (df$orig_amounts >= min(ALE.1$x.values[ALE.1$f.values > 0]))
 df$orda_hl <- 1 * (df$orig_days >= min(ALE.2$x.values[ALE.2$f.values > 0]))
 
-pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
+pred <- 1 * (pimp_rf$predictions[, 2] > 0.5)
 mis <- df[pred != y, ]
 hit <- df[pred == y, ]
 #+end_src
@@ -1316,7 +1629,7 @@ plot(mis$x, mis$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 plot(ff$x, ff$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 plot(hit$x, hit$y, cex = 0.5, xlim = c(xmin, xmax), ylim = c(ymin, ymax))
 
-pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
+pred <- 1 * (pimp_rf$predictions[, 2] > 0.5)
 sum(pred != y) / length(y)
 #+end_src
 
@@ -1389,7 +1702,7 @@ Questions to answer:
 #+RESULTS:
 
 #+begin_src R :results none
-pred <- 1 * (ranger_final$predictions[, 2] > 0.5)
+pred <- 1 * (pimp_rf$predictions[, 2] > 0.5)
 df$mis <- 1 * (pred != y)
 ## df %>% filter(y > min(y))
 

@@ -23,12 +23,12 @@ fytrain <- factor(ytrain)
 levels(fytrain) <- c("no_cor", "cor")
 
 ranger_grid <- expand.grid(
-  mtry = c(20),
+  mtry = c(5,10,15,20,25,30),
   splitrule = "gini",
-  min.node.size = c(10)
+  min.node.size = c(5,10,15,20)
 )
 
-set.seed(999999)
+set.seed(1)
 ranger_tune <- train(
   x = ixtrain, y = fytrain,
   method = "ranger",
@@ -37,12 +37,10 @@ ranger_tune <- train(
   weights = weights,
   preProc = NULL,
   importance = "impurity",
-  num.trees = 500
-)
+  num.trees = 500)
 
 temp <- ranger_tune$pred$co
 ranger_id <- ranger_tune$pred$rowIndex
 ranger_prob <- temp[order(ranger_id)]
 ranger_final <- ranger_tune$finalModel
 ranger_imp <- varImp(ranger_tune)$importance
-ranger_imp %>% arrange(-ranger_imp) %>% slice(1:15)
