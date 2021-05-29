@@ -625,212 +625,10 @@ ranger_final <- ranger_tune$finalModel
 ranger_imp <- varImp(ranger_tune)$importance
 #+end_src
 
-#+RESULTS:
-#+begin_example
-Fold1: mtry= 5, splitrule=gini, min.node.size= 5
-- Fold1: mtry= 5, splitrule=gini, min.node.size= 5
-Fold1: mtry=10, splitrule=gini, min.node.size= 5
-- Fold1: mtry=10, splitrule=gini, min.node.size= 5
-Fold1: mtry=15, splitrule=gini, min.node.size= 5
-- Fold1: mtry=15, splitrule=gini, min.node.size= 5
-Fold1: mtry=20, splitrule=gini, min.node.size= 5
-- Fold1: mtry=20, splitrule=gini, min.node.size= 5
-Fold1: mtry=25, splitrule=gini, min.node.size= 5
-- Fold1: mtry=25, splitrule=gini, min.node.size= 5
-Fold1: mtry=30, splitrule=gini, min.node.size= 5
-- Fold1: mtry=30, splitrule=gini, min.node.size= 5
-Fold1: mtry= 5, splitrule=gini, min.node.size=10
-- Fold1: mtry= 5, splitrule=gini, min.node.size=10
-Fold1: mtry=10, splitrule=gini, min.node.size=10
-- Fold1: mtry=10, splitrule=gini, min.node.size=10
-Fold1: mtry=15, splitrule=gini, min.node.size=10
-- Fold1: mtry=15, splitrule=gini, min.node.size=10
-Fold1: mtry=20, splitrule=gini, min.node.size=10
-- Fold1: mtry=20, splitrule=gini, min.node.size=10
-Fold1: mtry=25, splitrule=gini, min.node.size=10
-- Fold1: mtry=25, splitrule=gini, min.node.size=10
-Fold1: mtry=30, splitrule=gini, min.node.size=10
-- Fold1: mtry=30, splitrule=gini, min.node.size=10
-Fold1: mtry= 5, splitrule=gini, min.node.size=15
-- Fold1: mtry= 5, splitrule=gini, min.node.size=15
-Fold1: mtry=10, splitrule=gini, min.node.size=15
-- Fold1: mtry=10, splitrule=gini, min.node.size=15
-Fold1: mtry=15, splitrule=gini, min.node.size=15
-- Fold1: mtry=15, splitrule=gini, min.node.size=15
-Fold1: mtry=20, splitrule=gini, min.node.size=15
-- Fold1: mtry=20, splitrule=gini, min.node.size=15
-Fold1: mtry=25, splitrule=gini, min.node.size=15
-- Fold1: mtry=25, splitrule=gini, min.node.size=15
-Fold1: mtry=30, splitrule=gini, min.node.size=15
-- Fold1: mtry=30, splitrule=gini, min.node.size=15
-Fold1: mtry= 5, splitrule=gini, min.node.size=20
-- Fold1: mtry= 5, splitrule=gini, min.node.size=20
-Fold1: mtry=10, splitrule=gini, min.node.size=20
-- Fold1: mtry=10, splitrule=gini, min.node.size=20
-Fold1: mtry=15, splitrule=gini, min.node.size=20
-- Fold1: mtry=15, splitrule=gini, min.node.size=20
-Fold1: mtry=20, splitrule=gini, min.node.size=20
-- Fold1: mtry=20, splitrule=gini, min.node.size=20
-Fold1: mtry=25, splitrule=gini, min.node.size=20
-- Fold1: mtry=25, splitrule=gini, min.node.size=20
-Fold1: mtry=30, splitrule=gini, min.node.size=20
-- Fold1: mtry=30, splitrule=gini, min.node.size=20
-Fold2: mtry= 5, splitrule=gini, min.node.size= 5
-- Fold2: mtry= 5, splitrule=gini, min.node.size= 5
-Fold2: mtry=10, splitrule=gini, min.node.size= 5
-- Fold2: mtry=10, splitrule=gini, min.node.size= 5
-Fold2: mtry=15, splitrule=gini, min.node.size= 5
-- Fold2: mtry=15, splitrule=gini, min.node.size= 5
-Fold2: mtry=20, splitrule=gini, min.node.size= 5
-- Fold2: mtry=20, splitrule=gini, min.node.size= 5
-Fold2: mtry=25, splitrule=gini, min.node.size= 5
-- Fold2: mtry=25, splitrule=gini, min.node.size= 5
-Fold2: mtry=30, splitrule=gini, min.node.size= 5
-- Fold2: mtry=30, splitrule=gini, min.node.size= 5
-Fold2: mtry= 5, splitrule=gini, min.node.size=10
-- Fold2: mtry= 5, splitrule=gini, min.node.size=10
-Fold2: mtry=10, splitrule=gini, min.node.size=10
-- Fold2: mtry=10, splitrule=gini, min.node.size=10
-Fold2: mtry=15, splitrule=gini, min.node.size=10
-- Fold2: mtry=15, splitrule=gini, min.node.size=10
-Fold2: mtry=20, splitrule=gini, min.node.size=10
-- Fold2: mtry=20, splitrule=gini, min.node.size=10
-Fold2: mtry=25, splitrule=gini, min.node.size=10
-- Fold2: mtry=25, splitrule=gini, min.node.size=10
-Fold2: mtry=30, splitrule=gini, min.node.size=10
-- Fold2: mtry=30, splitrule=gini, min.node.size=10
-Fold2: mtry= 5, splitrule=gini, min.node.size=15
-- Fold2: mtry= 5, splitrule=gini, min.node.size=15
-Fold2: mtry=10, splitrule=gini, min.node.size=15
-- Fold2: mtry=10, splitrule=gini, min.node.size=15
-Fold2: mtry=15, splitrule=gini, min.node.size=15
-- Fold2: mtry=15, splitrule=gini, min.node.size=15
-Fold2: mtry=20, splitrule=gini, min.node.size=15
-- Fold2: mtry=20, splitrule=gini, min.node.size=15
-Fold2: mtry=25, splitrule=gini, min.node.size=15
-- Fold2: mtry=25, splitrule=gini, min.node.size=15
-Fold2: mtry=30, splitrule=gini, min.node.size=15
-- Fold2: mtry=30, splitrule=gini, min.node.size=15
-Fold2: mtry= 5, splitrule=gini, min.node.size=20
-- Fold2: mtry= 5, splitrule=gini, min.node.size=20
-Fold2: mtry=10, splitrule=gini, min.node.size=20
-- Fold2: mtry=10, splitrule=gini, min.node.size=20
-Fold2: mtry=15, splitrule=gini, min.node.size=20
-- Fold2: mtry=15, splitrule=gini, min.node.size=20
-Fold2: mtry=20, splitrule=gini, min.node.size=20
-- Fold2: mtry=20, splitrule=gini, min.node.size=20
-Fold2: mtry=25, splitrule=gini, min.node.size=20
-- Fold2: mtry=25, splitrule=gini, min.node.size=20
-Fold2: mtry=30, splitrule=gini, min.node.size=20
-- Fold2: mtry=30, splitrule=gini, min.node.size=20
-Fold3: mtry= 5, splitrule=gini, min.node.size= 5
-- Fold3: mtry= 5, splitrule=gini, min.node.size= 5
-Fold3: mtry=10, splitrule=gini, min.node.size= 5
-- Fold3: mtry=10, splitrule=gini, min.node.size= 5
-Fold3: mtry=15, splitrule=gini, min.node.size= 5
-- Fold3: mtry=15, splitrule=gini, min.node.size= 5
-Fold3: mtry=20, splitrule=gini, min.node.size= 5
-- Fold3: mtry=20, splitrule=gini, min.node.size= 5
-Fold3: mtry=25, splitrule=gini, min.node.size= 5
-- Fold3: mtry=25, splitrule=gini, min.node.size= 5
-Fold3: mtry=30, splitrule=gini, min.node.size= 5
-- Fold3: mtry=30, splitrule=gini, min.node.size= 5
-Fold3: mtry= 5, splitrule=gini, min.node.size=10
-- Fold3: mtry= 5, splitrule=gini, min.node.size=10
-Fold3: mtry=10, splitrule=gini, min.node.size=10
-- Fold3: mtry=10, splitrule=gini, min.node.size=10
-Fold3: mtry=15, splitrule=gini, min.node.size=10
-- Fold3: mtry=15, splitrule=gini, min.node.size=10
-Fold3: mtry=20, splitrule=gini, min.node.size=10
-- Fold3: mtry=20, splitrule=gini, min.node.size=10
-Fold3: mtry=25, splitrule=gini, min.node.size=10
-- Fold3: mtry=25, splitrule=gini, min.node.size=10
-Fold3: mtry=30, splitrule=gini, min.node.size=10
-- Fold3: mtry=30, splitrule=gini, min.node.size=10
-Fold3: mtry= 5, splitrule=gini, min.node.size=15
-- Fold3: mtry= 5, splitrule=gini, min.node.size=15
-Fold3: mtry=10, splitrule=gini, min.node.size=15
-- Fold3: mtry=10, splitrule=gini, min.node.size=15
-Fold3: mtry=15, splitrule=gini, min.node.size=15
-- Fold3: mtry=15, splitrule=gini, min.node.size=15
-Fold3: mtry=20, splitrule=gini, min.node.size=15
-- Fold3: mtry=20, splitrule=gini, min.node.size=15
-Fold3: mtry=25, splitrule=gini, min.node.size=15
-- Fold3: mtry=25, splitrule=gini, min.node.size=15
-Fold3: mtry=30, splitrule=gini, min.node.size=15
-- Fold3: mtry=30, splitrule=gini, min.node.size=15
-Fold3: mtry= 5, splitrule=gini, min.node.size=20
-- Fold3: mtry= 5, splitrule=gini, min.node.size=20
-Fold3: mtry=10, splitrule=gini, min.node.size=20
-- Fold3: mtry=10, splitrule=gini, min.node.size=20
-Fold3: mtry=15, splitrule=gini, min.node.size=20
-- Fold3: mtry=15, splitrule=gini, min.node.size=20
-Fold3: mtry=20, splitrule=gini, min.node.size=20
-- Fold3: mtry=20, splitrule=gini, min.node.size=20
-Fold3: mtry=25, splitrule=gini, min.node.size=20
-- Fold3: mtry=25, splitrule=gini, min.node.size=20
-Fold3: mtry=30, splitrule=gini, min.node.size=20
-- Fold3: mtry=30, splitrule=gini, min.node.size=20
-Fold4: mtry= 5, splitrule=gini, min.node.size= 5
-- Fold4: mtry= 5, splitrule=gini, min.node.size= 5
-Fold4: mtry=10, splitrule=gini, min.node.size= 5
-- Fold4: mtry=10, splitrule=gini, min.node.size= 5
-Fold4: mtry=15, splitrule=gini, min.node.size= 5
-- Fold4: mtry=15, splitrule=gini, min.node.size= 5
-Fold4: mtry=20, splitrule=gini, min.node.size= 5
-- Fold4: mtry=20, splitrule=gini, min.node.size= 5
-Fold4: mtry=25, splitrule=gini, min.node.size= 5
-- Fold4: mtry=25, splitrule=gini, min.node.size= 5
-Fold4: mtry=30, splitrule=gini, min.node.size= 5
-- Fold4: mtry=30, splitrule=gini, min.node.size= 5
-Fold4: mtry= 5, splitrule=gini, min.node.size=10
-- Fold4: mtry= 5, splitrule=gini, min.node.size=10
-Fold4: mtry=10, splitrule=gini, min.node.size=10
-- Fold4: mtry=10, splitrule=gini, min.node.size=10
-Fold4: mtry=15, splitrule=gini, min.node.size=10
-- Fold4: mtry=15, splitrule=gini, min.node.size=10
-Fold4: mtry=20, splitrule=gini, min.node.size=10
-- Fold4: mtry=20, splitrule=gini, min.node.size=10
-Fold4: mtry=25, splitrule=gini, min.node.size=10
-- Fold4: mtry=25, splitrule=gini, min.node.size=10
-Fold4: mtry=30, splitrule=gini, min.node.size=10
-- Fold4: mtry=30, splitrule=gini, min.node.size=10
-Fold4: mtry= 5, splitrule=gini, min.node.size=15
-- Fold4: mtry= 5, splitrule=gini, min.node.size=15
-Fold4: mtry=10, splitrule=gini, min.node.size=15
-- Fold4: mtry=10, splitrule=gini, min.node.size=15
-Fold4: mtry=15, splitrule=gini, min.node.size=15
-- Fold4: mtry=15, splitrule=gini, min.node.size=15
-Fold4: mtry=20, splitrule=gini, min.node.size=15
-- Fold4: mtry=20, splitrule=gini, min.node.size=15
-Fold4: mtry=25, splitrule=gini, min.node.size=15
-- Fold4: mtry=25, splitrule=gini, min.node.size=15
-Fold4: mtry=30, splitrule=gini, min.node.size=15
-- Fold4: mtry=30, splitrule=gini, min.node.size=15
-Fold4: mtry= 5, splitrule=gini, min.node.size=20
-- Fold4: mtry= 5, splitrule=gini, min.node.size=20
-Fold4: mtry=10, splitrule=gini, min.node.size=20
-- Fold4: mtry=10, splitrule=gini, min.node.size=20
-Fold4: mtry=15, splitrule=gini, min.node.size=20
-- Fold4: mtry=15, splitrule=gini, min.node.size=20
-Fold4: mtry=20, splitrule=gini, min.node.size=20
-- Fold4: mtry=20, splitrule=gini, min.node.size=20
-Fold4: mtry=25, splitrule=gini, min.node.size=20
-- Fold4: mtry=25, splitrule=gini, min.node.size=20
-Fold4: mtry=30, splitrule=gini, min.node.size=20
-- Fold4: mtry=30, splitrule=gini, min.node.size=20
-Aggregating results
-Selecting tuning parameters
-Fitting mtry = 25, splitrule = gini, min.node.size = 5 on full training set
-Warning message:
-In train.default(x = ixtrain, y = fytrain, method = "ranger", trControl = my_tr,  :
-  The metric "Accuracy" was not in the result set. logLoss will be used instead.
-#+end_example
-
 =ranger= gives the confusion matrix if =probability= is set to =FALSE=.
 
 #+name: ranger_full_training
-#+begin_src R :tangle cor_train_ranger_final.R
+#+begin_src R :tangle cor_train_pimp_rf.R
 set.seed(9999)
 mydd = data.frame(y=fytrain, ixtrain)
 
@@ -862,7 +660,7 @@ ranger_ho <- holdoutRF(y~.,data = mydd,
 )
 #+end_src
 
-#+begin_src R :tangle cor_train_ranger_final.R
+#+begin_src R :tangle cor_train_pimp_rf.R
 ranger_imp <- ranger_ff$variable.importance
 rtemp <- data.frame(ranger_imp = ranger_imp)
 row.names(rtemp) <- names(ranger_imp)
@@ -896,7 +694,7 @@ rrtemp %>% knitr::kable()
 |gdp               |   1.479755|
 #+end_example
 
-#+begin_src R :tangle cor_train_ranger_final.R
+#+begin_src R :tangle cor_train_pimp_rf.R
 set.seed(9999)
 im_pp = importance_pvalues(ranger_ff, method = "altmann", formula = y ~ ., data = mydd,
                                   num.permutations = 200)
@@ -928,7 +726,7 @@ pimp_vv = names(pimp)[pimp < 0.1]
 |gdp               | 0.1243781|
 #+end_example
 
-#+begin_src R
+#+begin_src R :tangle cor_train_pimp_rf.R
 set.seed(9999)
 mydd = data.frame(y=fytrain, ixtrain[, pimp_vv])
 set.seed(1)
@@ -963,6 +761,12 @@ pimp_rf <- ranger(y~.,data = mydd,
 #+end_src
 
 #+RESULTS: ranger_full_training
+
+#+begin_src R
+saveRDS(pimp_rf, "cor_ranger_pimp_rf.rds")
+#+end_src
+
+#+RESULTS:
 
 #+begin_src R :tangle cor_train_ranger_final.R
 saveRDS(ranger_ff, "cor_ranger_rural_ff.rds")
