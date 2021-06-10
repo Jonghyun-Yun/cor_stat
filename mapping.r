@@ -22,20 +22,21 @@ ditch_the_axes <- theme(
 
 gg_base <- ggplot(data = fl_df, mapping = aes(x = long, y = lat, group = group)) +
   coord_fixed(1.3) +
-  geom_polygon(color = "black", fill = "gray")
+  ## geom_polygon(color = "black", fill = "gray")
+  geom_polygon(color = "black", fill = "white")
 
 gg_base <- gg_base +
-  geom_polygon(data = fl_county, fill = NA, color = "white") +
+  geom_polygon(data = fl_county, fill = NA, color = "gray") +
   geom_polygon(color = "black", fill = NA)
 
 load("col.pal.RData")
 temp <- col.pal(10)
 col_pal <- c(temp[1:2])
 
-ov_map <- function(df, vname) {
+ov_map <- function(df, vname, colkey = cbPalette) {
   gg <- gg_base +
     geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var), size = 2, alpha = 0.5) +
-    scale_colour_manual(values = cbPalette) +
+    scale_colour_manual(values = colkey) +
     labs(color = paste0(vname, "\n")) +
     ## scale_fill_gradient2() +
     theme_bw() +
@@ -52,13 +53,14 @@ ov_map <- function(df, vname) {
   return(gg)
 }
 
-ov_cts_map <- function(df, vname) {
+ov_cts_map <- function(df, vname, colkey = cbPalette,  autopick = TRUE) {
+  if (autopick) colkey = colkey[c(1, 2, 3, 4, 6)]
   gg <- gg_base +
     geom_point(data = df, mapping = aes(x = x, y = y, group = factor(var), color = var), size = 2, alpha = 0.5) +
     ## scale_colour_manual(values=cbPalette) +
     labs(color = paste0(vname, "\n")) +
     ## scale_color_continuous(type = "viridis")+
-    scale_color_gradientn(colors = cbPalette[c(1, 2, 3, 4, 6)]) +
+    scale_color_gradientn(colors = colkey) +
     ## scale_fill_gradient2()+
     theme_bw() +
     ditch_the_axes +
