@@ -4,9 +4,16 @@
 
 * Overview
  Data intelligence tools for cost-overrun analysis of roadway construction projects (=dico=) is an R package to provide handy R functionality to build statistical models for an analysis of cost-overrun and to facilitate interpretation of results.
+
+* How to cite
+#+begin_quote
+  Yun, J., Ryu, K. R., Ham, S. (2021), Spatial analysis of socio-geographic factors affecting cost overrun occurrence in roadway projects leveraging machine learning and GIS. arXiv:xxxx.xxxxx
+#+end_quote
+
 * Installation
 #+begin_src R
-
+devtools::install_github("jonghyun-yun/dico")
 #+end_src
+
 * How to use
 Please find examples in ~cor-code.org~.
