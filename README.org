@@ -11,8 +11,8 @@
 #+end_quote
 
 * Installation
-#+begin_src R
-devtools::install_github("jonghyun-yun/dico")
+#+begin_src sh
+git clone https://github.com/Jonghyun-Yun/dico.git
 #+end_src
 
 * How to use
