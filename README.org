@@ -1,9 +1,9 @@
-#+title: Statistical data intelligence for cost-overrun in construction projects.
+#+title: Statistical data intelligence tools for cost-overrun analysis of roadway construction projects.
 #+author: Jonghyun Yun
 #+email: jonghyun.yun@gmail.com
 
 * Overview
- Statistical data intelligence for cost-overrun in construction projects (DICO) is an R package to provide handy R functionality to build statistical models for an analysis of cost-overrun and to facilitate interpretation of results.
+ Data intelligence tools for cost-overrun analysis of roadway construction projects (=dico=) is an R package to provide handy R functionality to build statistical models for an analysis of cost-overrun and to facilitate interpretation of results.
 * Installation
 #+begin_src R
 

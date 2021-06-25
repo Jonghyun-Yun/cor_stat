@@ -35,9 +35,9 @@ col_pal <- c(temp[1:2])
 
 ov_map <- function(df, vname, colkey = cbPalette) {
   gg <- gg_base +
-    geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var), size = 2, alpha = 0.5) +
+    geom_point(data = df, mapping = aes(x = x, y = y, group = var, colour = var), size = 4, alpha = 0.7) +
     scale_colour_manual(values = colkey) +
-    labs(color = paste0(vname, "\n")) +
+    labs(color = vname) +
     ## scale_fill_gradient2() +
     theme_bw() +
     ditch_the_axes +
@@ -48,19 +48,26 @@ ov_map <- function(df, vname, colkey = cbPalette) {
       panel.background = element_blank()
       ## panel.border = element_blank()
       ## panel.grid.major = element_blank()
-    )
+    ) +
+      theme(legend.key.size = unit(1, 'cm'), #change legend key size
+        legend.key.height = unit(1, 'cm'), #change legend key height
+        legend.key.width = unit(1, 'cm'), #change legend key width
+        legend.title = element_text(size=30), #change legend title font size
+        legend.text = element_text(size=20), #change legend text font size
+      ## legend.position = "bottom")
+      legend.position = c(0.3,0.5))
   print(gg)
   return(gg)
 }
 
-ov_cts_map <- function(df, vname, colkey = cbPalette,  autopick = TRUE) {
+ov_cts_map <- function(df, vname, colkey = cbPalette,  autopick = TRUE, viridis = FALSE) {
   if (autopick) colkey = colkey[c(1, 2, 3, 4, 6)]
   gg <- gg_base +
-    geom_point(data = df, mapping = aes(x = x, y = y, group = factor(var), color = var), size = 2, alpha = 0.5) +
+    geom_point(data = df, mapping = aes(x = x, y = y, group = factor(var), color = var), size = 4, alpha = 0.7) +
     ## scale_colour_manual(values=cbPalette) +
-    labs(color = paste0(vname, "\n")) +
-    ## scale_color_continuous(type = "viridis")+
-    scale_color_gradientn(colors = colkey) +
+    labs(color = vname) +
+    #scale_color_continuous(type = "viridis")+
+    #scale_color_gradientn(colors = colkey) +
     ## scale_fill_gradient2()+
     theme_bw() +
     ditch_the_axes +
@@ -71,7 +78,15 @@ ov_cts_map <- function(df, vname, colkey = cbPalette,  autopick = TRUE) {
       panel.background = element_blank()
       ## panel.border = element_blank()
       ## panel.grid.major = element_blank()
-    )
+    ) +
+      theme(legend.key.size = unit(1, 'cm'), #change legend key size
+        legend.key.height = unit(1, 'cm'), #change legend key height
+        legend.key.width = unit(1, 'cm'), #change legend key width
+        legend.title = element_text(size=30), #change legend title font size
+        legend.text = element_text(size=20), #change legend text font size
+        legend.position = c(0.3,0.5))
+  if (viridis) gg = gg + scale_color_continuous(type = "viridis")
+  else gg = gg + scale_color_gradientn(colors = colkey)
   print(gg)
   return(gg)
 }
